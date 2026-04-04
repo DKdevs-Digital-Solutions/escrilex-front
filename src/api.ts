@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000";
+const API_URL = "https://escrilex-back-production.up.railway.app";
 export function getToken() { return localStorage.getItem("token"); }
 export function setToken(t: string | null) { t ? localStorage.setItem("token", t) : localStorage.removeItem("token"); }
 export async function api(path: string, opts: RequestInit = {}) {
