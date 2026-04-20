@@ -14,6 +14,8 @@ import {
   Briefcase, FileText, Users, Layers, Search, Bell, LogOut,
   ChevronLeft, ChevronRight, Menu, ClipboardList, AlertTriangle,
 } from "lucide-react";
+import { useMe } from "../hooks/useMe";
+import Logo from "../assets/logo.png";
 
 type Page = "companies" | "company" | "users" | "sectors" | "templates" | "checklistRun" | "audit";
 
@@ -29,17 +31,19 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
   {
     label: "PRINCIPAL",
     items: [
-      { id: "companies", label: "Empresas",  icon: <Briefcase size={15} strokeWidth={1.8} />, roles: [] },
-      { id: "templates", label: "Templates", icon: <FileText   size={15} strokeWidth={1.8} />, roles: ["ADMIN", "GESTOR_EMPRESA"] },
+      { id: "companies", label: "Empresas", icon: <Briefcase size={15} strokeWidth={1.8} />, roles: [] },
+      { id: "templates", label: "Templates", icon: <FileText size={15} strokeWidth={1.8} />, roles: ["ADMIN", "GESTOR_EMPRESA"] },
     ],
   },
   {
     label: "ADMINISTRAÇÃO",
     items: [
-      { id: "users",   label: "Usuários",  icon: <Users   size={15} strokeWidth={1.8} />, roles: ["ADMIN"] },
-      { id: "sectors", label: "Setores",   icon: <Layers  size={15} strokeWidth={1.8} />, roles: ["ADMIN"] },
-      { id: "audit",   label: "Auditoria", icon: <Search  size={15} strokeWidth={1.8} />, roles: ["ADMIN"],
-        badge: { text: "LOG", color: "#2563eb" } },
+      { id: "users", label: "Usuários", icon: <Users size={15} strokeWidth={1.8} />, roles: ["ADMIN"] },
+      { id: "sectors", label: "Setores", icon: <Layers size={15} strokeWidth={1.8} />, roles: ["ADMIN"] },
+      {
+        id: "audit", label: "Auditoria", icon: <Search size={15} strokeWidth={1.8} />, roles: ["ADMIN"],
+        badge: { text: "LOG", color: "#2563eb" }
+      },
     ],
   },
 ];
@@ -111,73 +115,166 @@ function LogoutConfirm({ onConfirm, onCancel }: { onConfirm: () => void; onCance
 }
 
 export function App() {
-  const [me, setMe] = useState<any>(null);
+  // const [me, setMe] = useState<any>(null);
   const [page, setPage] = useState<Page>("companies");
   const [companyId, setCompanyId] = useState("");
   const [runId, setRunId] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
+  const { me, loading, reload } = useMe();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 999);
 
-  async function loadMe() {
-    if (!getToken()) return;
-    try { setMe(await api("/api/auth/me")); }
-    catch { setToken(null); setMe(null); }
-  }
-  useEffect(() => { loadMe(); }, []);
 
-  if (!me) return <Login onLogin={loadMe} />;
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth < 999);
+    }
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+
+  if (loading)
+  return (
+    <div
+      style={{
+        height: "100%",
+        minHeight: "60vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 18,
+        }}
+      >
+        {/* Spinner */}
+        <div
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: "50%",
+            border: "4px solid #e5e7eb",
+            borderTop: "4px solid #2563eb",
+            animation: "spin 0.9s linear infinite",
+          }}
+        />
+
+        {/* Texto */}
+        <div style={{ textAlign: "center" }}>
+          
+
+          <div
+            style={{
+              marginTop: 4,
+              fontSize: 13,
+              color: "#64748b",
+            }}
+          >
+            Aguarde enquanto buscamos os dados...
+          </div>
+        </div>
+      </div>
+
+      {/* animação */}
+      <style>
+        {`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}
+      </style>
+    </div>
+  );
+
+  if (!me) return <Login onLogin={reload} />;
 
   const roles: string[] = me.roles || [];
   const isAdmin = roles.includes("ADMIN");
   const canEditTemplates = isAdmin || roles.includes("GESTOR_EMPRESA");
 
   function hasAccess(r: string[]) { return r.length === 0 || r.some(x => roles.includes(x)); }
-  function navigate(p: Page) { setPage(p); setCompanyId(""); setRunId(""); setNotifOpen(false); }
+  function navigate(p: Page) { setPage(p); setCompanyId(""); setRunId(""); setNotifOpen(false); if (isMobile) setMobileMenuOpen(false); }
 
   const activeSection = (page === "company" || page === "checklistRun") ? "companies" : page;
-  const SW = collapsed ? 64 : 240;
+  const SW = isMobile ? 240 : (collapsed ? 64 : 240);
 
-  const C = {
-    sideBg:      "#111327",
-    sideBorder:  "rgba(255,255,255,0.06)",
-    activeColor: "#60a5fa",
-    activeBg:    "rgba(99,102,241,0.14)",
-    inactColor:  "#7c8399",
-    hoverBg:     "rgba(255,255,255,0.05)",
-    groupLabel:  "#3d4259",
-  };
 
-  const navItemStyle = (active: boolean): React.CSSProperties => ({
-    display: "flex", alignItems: "center",
-    gap: collapsed ? 0 : 10,
-    padding: collapsed ? "10px 0" : "9px 12px",
-    justifyContent: collapsed ? "center" : "flex-start",
-    borderRadius: 9, border: "none", cursor: "pointer",
-    width: "100%", textAlign: "left",
-    background: active ? C.activeBg : "transparent",
-    color: active ? C.activeColor : C.inactColor,
-    fontWeight: active ? 600 : 400, fontSize: 13.5,
-    fontFamily: "inherit",
-    transition: "background 0.13s, color 0.13s",
-    position: "relative",
-  });
 
-  const iconBoxStyle = (active: boolean): React.CSSProperties => ({
-    width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-    display: "flex", alignItems: "center", justifyContent: "center",
-    background: active ? "rgba(99,102,241,0.22)" : "rgba(255,255,255,0.05)",
-    color: active ? C.activeColor : C.inactColor,
-    transition: "background 0.13s, color 0.13s",
-  });
+const C = {
+  sideBg: "linear-gradient(180deg, #0f172a 0%, #111827 100%)",
+  sideBorder: "rgba(255,255,255,0.07)",
+  activeColor: "#dbeafe",
+  activeBg: "linear-gradient(90deg, rgba(37,99,235,0.22) 0%, rgba(59,130,246,0.10) 100%)",
+  inactColor: "#94a3b8",
+  hoverBg: "rgba(255,255,255,0.06)",
+  groupLabel: "#475569",
+  activePill: "#3b82f6",
+};
 
-  const topIconBtn: React.CSSProperties = {
-    width: 36, height: 36, borderRadius: 9, border: "none", cursor: "pointer",
-    display: "flex", alignItems: "center", justifyContent: "center",
-    background: "transparent", color: "#6b7280",
-    transition: "background 0.12s, color 0.12s",
-    position: "relative",
-  };
+const navItemStyle = (active: boolean): React.CSSProperties => ({
+  display: "flex",
+  alignItems: "center",
+  gap: collapsed ? 0 : 12,
+  padding: collapsed ? "10px 0" : "10px 12px",
+  justifyContent: collapsed ? "center" : "flex-start",
+  borderRadius: 12,
+  border: active ? "1px solid rgba(96,165,250,0.18)" : "1px solid transparent",
+  width: "100%",
+  textAlign: "left",
+  background: active ? C.activeBg : "transparent",
+  color: active ? C.activeColor : C.inactColor,
+  fontWeight: active ? 700 : 500,
+  fontSize: 13.5,
+  fontFamily: "inherit",
+  cursor: "pointer",
+  transition: "all 0.16s ease",
+  position: "relative",
+  boxShadow: active ? "0 8px 18px rgba(2,6,23,0.18)" : "none",
+  backdropFilter: active ? "blur(8px)" : undefined,
+});
+
+const iconBoxStyle = (active: boolean): React.CSSProperties => ({
+  width: 32,
+  height: 32,
+  borderRadius: 10,
+  flexShrink: 0,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: active ? "rgba(59,130,246,0.18)" : "rgba(255,255,255,0.05)",
+  color: active ? "#BB9F58" : C.inactColor,
+  border: active ? "1px solid rgba(96,165,250,0.20)" : "1px solid rgba(255,255,255,0.04)",
+  transition: "all 0.16s ease",
+});
+
+
+
+const topIconBtn: React.CSSProperties = {
+  width: 38,
+  height: 38,
+  borderRadius: 12,
+  border: "1px solid #e5e7eb",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: "#fff",
+  color: "#6b7280",
+  transition: "all 0.14s ease",
+  position: "relative",
+  boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
+};
 
   const initials = (me.name || me.email || "?")
     .split(" ").map((w: string) => w[0]).slice(0, 2).join("").toUpperCase();
@@ -185,7 +282,7 @@ export function App() {
   return (
     <ToastProvider>
       <ConfirmProvider>
-      <style>{`
+        <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
         *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
         body { font-family:'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background:#f1f4f9; }
@@ -200,233 +297,537 @@ export function App() {
         .sidebar-transition { transition:width 0.22s cubic-bezier(0.4,0,0.2,1); }
       `}</style>
 
-      {logoutConfirm && (
-        <LogoutConfirm
-          onConfirm={() => { setToken(null); setMe(null); setLogoutConfirm(false); }}
-          onCancel={() => setLogoutConfirm(false)}
-        />
-      )}
+        {logoutConfirm && (
+          <LogoutConfirm
+            onConfirm={() => { setToken(null); setLogoutConfirm(false); }}
+            onCancel={() => setLogoutConfirm(false)}
+          />
+        )}
 
-      <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
 
-        {/* ════ SIDEBAR ════ */}
-        <aside className="sidebar-transition" style={{
-          width: SW, flexShrink: 0, background: C.sideBg,
-          display: "flex", flexDirection: "column",
-          overflow: "hidden", zIndex: 200,
-          boxShadow: "4px 0 24px rgba(0,0,0,0.18)",
-        }}>
-          {/* Logo */}
-          <div style={{
-            height: 64, flexShrink: 0,
-            display: "flex", alignItems: "center",
-            padding: collapsed ? "0" : "0 14px 0 18px",
-            justifyContent: collapsed ? "center" : "space-between",
-            borderBottom: `1px solid ${C.sideBorder}`,
-          }}>
-            {collapsed ? (
-              <div
-                style={{
-                  width: 36, height: 36, borderRadius: 10, background: "#2563eb",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer",
-                }}
-                onClick={() => setCollapsed(false)}
-              >
-                <ClipboardList size={17} color="#fff" strokeWidth={2.5} />
-              </div>
-            ) : (
-              <>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{
-                    width: 34, height: 34, borderRadius: 10, background: "#2563eb",
-                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                  }}>
-                    <ClipboardList size={16} color="#fff" strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 800, fontSize: 14.5, color: "#fff", letterSpacing: "-0.02em", lineHeight: 1 }}>Gestão</div>
-                    <div style={{ fontSize: 10, color: "#4b5266", fontWeight: 700, letterSpacing: "0.07em", marginTop: 2 }}>PRO</div>
+
+        <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+
+          {isMobile && mobileMenuOpen && (
+            <div
+              onClick={() => setMobileMenuOpen(false)}
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0,0,0,0.4)",
+                zIndex: 998,
+              }}
+            />
+          )}
+
+          {/* ════ SIDEBAR ════ */}
+          <aside
+          className="sidebar-transition"
+          style={{
+            width: isMobile ? 240 : SW,
+            position: isMobile ? "fixed" : "relative",
+            left: isMobile ? (mobileMenuOpen ? 0 : -260) : 0,
+            top: 0,
+            height: "100vh",
+            background: "#012942",
+            zIndex: 999,
+            transition: "left 0.25s ease",
+            boxShadow: "inset -1px 0 0 rgba(255,255,255,0.04)",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+          }}
+        >
+
+
+            {/* Logo */}
+            <div
+              style={{
+                height: 68,
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                padding: collapsed ? "0" : "0 14px 0 18px",
+                justifyContent: collapsed ? "center" : "space-between",
+                borderBottom: `1px solid ${C.sideBorder}`,
+                background: "rgba(255,255,255,0.02)",
+                backdropFilter: "blur(10px)",
+              }}
+            >
+              {collapsed ? (
+                <div
+                  style={{
+                    width: 36, height: 36, borderRadius: 10, background: "#BB9F58",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => setCollapsed(false)}
+                >
+                  <Menu size={17} color="#fff" strokeWidth={2.5} />
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div
+                    style={{
+                      width: "100%",
+                      height: 55,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start", // 👈 AQUI
+                      flexShrink: 0,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <img
+                      src={Logo}
+                      alt="Logo"
+                      style={{
+                        height: "100%",   // 👈 melhor que width aqui
+                        objectFit: "contain",
+                        position: "relative",
+                        right: 8, // 👈 ajusta a posição horizontal
+                        top:4
+                      }}
+                    />
                   </div>
                 </div>
-                <button
-                  onClick={() => setCollapsed(true)}
-                  style={{ background: "none", border: "none", cursor: "pointer", color: C.groupLabel, display: "flex", padding: 5, borderRadius: 6, transition: "color 0.12s" }}
-                  onMouseOver={e => { e.currentTarget.style.color = "#8b92a9"; }}
-                  onMouseOut={e => { e.currentTarget.style.color = C.groupLabel; }}
-                >
-                  <ChevronLeft size={14} strokeWidth={2.5} />
-                </button>
+
+                
+                {!isMobile && (
+                  <>
+                  <button
+                    onClick={() => setCollapsed(true)}
+                    style={{
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid",
+                    cursor: "pointer",
+                    color: "#BB9F58",
+                    display: "flex",
+                    padding: 6,
+                    borderRadius: 10,
+                    transition: "all 0.12s ease",
+                  }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.color = "#BB9F58";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.color = "#BB9F58";
+                    }}
+                  >
+                    <ChevronLeft size={18} strokeWidth={2.5} />
+                  </button>
+                </>
+              )}
               </>
             )}
-          </div>
+            </div>
 
-          {/* Nav */}
-          <nav style={{ flex: 1, overflowY: "auto", padding: "10px 8px" }}>
-            {NAV_GROUPS.map((group, gi) => {
-              const visible = group.items.filter(item => hasAccess(item.roles));
-              if (!visible.length) return null;
-              return (
-                <div key={gi} style={{ marginBottom: 4 }}>
-                  {group.label && !collapsed && (
-                    <div style={{ fontSize: 10, fontWeight: 700, color: C.groupLabel, letterSpacing: "0.1em", padding: "10px 10px 6px" }}>
+            {/* Nav */}
+            <nav
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "10px 8px",
+                  minHeight: 0,
+                }}
+              >
+              {NAV_GROUPS.map((group, gi) => {
+                const visible = group.items.filter(item => hasAccess(item.roles));
+                if (!visible.length) return null;
+                return (
+                  <div key={gi} style={{ marginBottom: 4 }}>
+                    {group.label && !collapsed && (
+                    <div
+                      style={{
+                        fontSize: 10.5,
+                        fontWeight: 800,
+                        color: "#ccc",
+                        letterSpacing: "0.12em",
+                        padding: "14px 12px 8px",
+                        textTransform: "uppercase",
+                        margin:"5px 0px"
+                      }}
+                    >
                       {group.label}
                     </div>
                   )}
-                  {group.label && collapsed && <div style={{ height: 8 }} />}
-                  {visible.map(item => {
-                    const active = activeSection === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        className="nav-btn"
-                        onClick={() => navigate(item.id)}
-                        title={collapsed ? item.label : undefined}
-                        style={navItemStyle(active)}
-                      >
-                        {active && (
-                          <span style={{
-                            position: "absolute", left: 0, top: "20%", bottom: "20%",
-                            width: 3, borderRadius: "0 3px 3px 0", background: "#2563eb",
-                          }} />
+                    {group.label && collapsed && <div style={{ height: 8 }} />}
+                    {visible.map(item => {
+                      const active = activeSection === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          className="nav-btn"
+                          onClick={() => navigate(item.id)}
+                          title={collapsed ? item.label : undefined}
+                          style={navItemStyle(active)}
+                        >
+                          {active && (
+                          <span
+                            style={{
+                              position: "absolute",
+                              left: -1,
+                              top: "18%",
+                              bottom: "18%",
+                              width: 3,
+                              borderRadius: "0 999px 999px 0",
+                              background: "#BB9F58",
+                              boxShadow: "0 0 12px #ccc",
+                            }}
+                          />
                         )}
-                        <span className="nav-icon-box" style={iconBoxStyle(active)}>{item.icon}</span>
-                        {!collapsed && (
-                          <>
-                            <span style={{ flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.label}</span>
-                            {item.badge && (
-                              <span style={{
-                                fontSize: 9.5, fontWeight: 800, padding: "2px 6px", borderRadius: 4,
-                                background: item.badge.color, color: "#fff", letterSpacing: "0.04em", flexShrink: 0,
-                              }}>{item.badge.text}</span>
-                            )}
-                          </>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </nav>
+                          <span className="nav-icon-box" style={iconBoxStyle(active)}>{item.icon}</span>
+                          {!collapsed && (
+                            <>
+                              <span style={{ flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.label}</span>
+                              {item.badge && (
+                                <span style={{
+                                  fontSize: 9.5, fontWeight: 800, padding: "2px 6px", borderRadius: 4,
+                                  background: '#BB9F58', color: "#fff", letterSpacing: "0.04em", flexShrink: 0,
+                                }}>{item.badge.text}</span>
+                              )}
+                            </>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </nav>
 
-          {/* User */}
-          <div style={{
-            borderTop: `1px solid ${C.sideBorder}`,
-            padding: collapsed ? "12px 0" : "12px 10px",
-            display: "flex", alignItems: "center",
-            gap: collapsed ? 0 : 10,
-            justifyContent: collapsed ? "center" : "flex-start",
-          }}>
-            <div style={{
-              width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-              background: "#2563eb",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              color: "#fff", fontWeight: 700, fontSize: 12.5,
-            }}>
+            {/* User */}
+           <div
+            style={{
+              borderTop: `1px solid ${C.sideBorder}`,
+              padding: collapsed ? "12px 0" : "14px 12px",
+              display: "flex",
+              alignItems: "center",
+              gap: collapsed ? 0 : 12,
+              justifyContent: collapsed ? "center" : "flex-start",
+              flexShrink: 0,
+              background: "rgba(255,255,255,0.02)",
+            }}
+          >
+             <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                flexShrink: 0,
+                background: "#BB9F58",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#fff",
+                fontWeight: 800,
+                fontSize: 12.5,
+                boxShadow: "0 8px 18px rgba(37,99,235,0.28)",
+              }}
+            >
               {initials}
             </div>
-            {!collapsed && (
-              <>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 700, color: "#c7d0e8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {me.name || me.email}
-                  </div>
-                  <div style={{ fontSize: 11, color: "#4b5266", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    {roles[0] || ""}
-                  </div>
-                </div>
-                <button
-                  onClick={() => setLogoutConfirm(true)}
-                  title="Sair"
-                  style={{ background: "none", border: "none", cursor: "pointer", color: "#4b5266", display: "flex", padding: 5, borderRadius: 7, transition: "color 0.12s, background 0.12s", flexShrink: 0 }}
-                  onMouseOver={e => { e.currentTarget.style.color = "#f87171"; e.currentTarget.style.background = "rgba(248,113,113,0.1)"; }}
-                  onMouseOut={e => { e.currentTarget.style.color = "#4b5266"; e.currentTarget.style.background = "transparent"; }}
-                >
-                  <LogOut size={15} strokeWidth={1.8} />
-                </button>
-              </>
-            )}
-          </div>
-        </aside>
-
-        {/* ════ MAIN ════ */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          {/* Topbar */}
-          <header style={{
-            height: 64, background: "#fff", borderBottom: "1px solid #e5e7eb",
-            display: "flex", alignItems: "center", padding: "0 24px",
-            flexShrink: 0, zIndex: 100,
-          }}>
-            {collapsed && (
-              <button className="topbar-btn" onClick={() => setCollapsed(false)}
-                style={{ ...topIconBtn, marginRight: 8 }}>
-                <Menu size={17} />
-              </button>
-            )}
-            {/* Breadcrumb */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13.5, flex: 1 }}>
-              {(page === "company" || page === "checklistRun") && (
+              {!collapsed && (
                 <>
-                  <button onClick={() => navigate("companies")}
-                    style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", fontSize: 13.5, padding: 0, transition: "color 0.12s" }}
-                    onMouseOver={e => { e.currentTarget.style.color = "#374151"; }}
-                    onMouseOut={e => { e.currentTarget.style.color = "#9ca3af"; }}>
-                    Empresas
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 12.5,
+                        fontWeight: 700,
+                        color: "#e2e8f0",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {me.name || me.email}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: "#64748b",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {roles[0] || ""}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setLogoutConfirm(true)}
+                    title="Sair"
+                    style={{ background: "none", border: "1px solid", cursor: "pointer", color: "#4b5266", display: "flex", padding: 5, borderRadius: 7, transition: "color 0.12s, background 0.12s", flexShrink: 0 }}
+                    onMouseOver={e => { e.currentTarget.style.color = "#f87171"; e.currentTarget.style.background = "rgba(248,113,113,0.1)"; }}
+                    onMouseOut={e => { e.currentTarget.style.color = "#4b5266"; e.currentTarget.style.background = "transparent"; }}
+                  >
+                    <LogOut size={17} strokeWidth={1.8} />
                   </button>
-                  <ChevronRight size={13} color="#d1d5db" strokeWidth={2.5} />
                 </>
               )}
-              {page === "checklistRun" && companyId && (
-                <>
-                  <button onClick={() => { setPage("company"); setRunId(""); }}
-                    style={{ background: "none", border: "none", cursor: "pointer", color: "#9ca3af", fontSize: 13.5, padding: 0 }}>
-                    Detalhe
-                  </button>
-                  <ChevronRight size={13} color="#d1d5db" strokeWidth={2.5} />
-                </>
-              )}
-              <span style={{ fontWeight: 700, color: "#111827", fontSize: 14 }}>{PAGE_TITLES[page]}</span>
             </div>
-            {/* Bell */}
-            <div style={{ position: "relative" }}>
-              <button className="topbar-btn" style={topIconBtn} title="Notificações"
-                onClick={() => setNotifOpen(o => !o)}>
-                <Bell size={17} strokeWidth={1.8} />
-                <span style={{ position: "absolute", top: 7, right: 7, width: 7, height: 7, borderRadius: "50%", background: "#ef4444", border: "2px solid #fff" }} />
-              </button>
-              {notifOpen && (
-                <div className="dropdown">
-                  <div style={{ padding: "14px 18px", borderBottom: "1px solid #f3f4f6", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontWeight: 700, fontSize: 13.5, color: "#111827" }}>Notificações</span>
-                    <span style={{ fontSize: 11, color: "#9ca3af", background: "#f3f4f6", padding: "2px 8px", borderRadius: 99, fontWeight: 600 }}>0</span>
-                  </div>
-                  <div style={{ padding: "16px 18px", fontSize: 13, color: "#9ca3af", textAlign: "center" }}>Nenhuma notificação nova.</div>
-                </div>
-              )}
-            </div>
-          </header>
+          </aside>
 
-          {/* Content */}
-          <main style={{ flex: 1, overflow: "auto", padding: 28 }}
-            onClick={() => setNotifOpen(false)}>
-            {page === "companies" && <Companies onOpenCompany={id => { setCompanyId(id); setPage("company"); }} />}
-            {page === "company" && companyId && (
-              <CompanyDetail companyId={companyId} isAdmin={isAdmin} userRoles={roles}
-                onBack={() => { setPage("companies"); setCompanyId(""); }}
-                onOpenRun={rid => { setRunId(rid); setPage("checklistRun"); }} />
-            )}
-            {page === "checklistRun" && runId && (
-              <ChecklistRun runId={runId} onBack={() => { setRunId(""); setPage(companyId ? "company" : "companies"); }} />
-            )}
-            {page === "templates"   && canEditTemplates && <Templates />}
-            {page === "users"       && isAdmin && <AdminUsers />}
-            {page === "sectors"     && isAdmin && <AdminSectors />}
-            {page === "audit"       && isAdmin && <Audit />}
-          </main>
-        </div>
+          {/* ════ MAIN ════ */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            {/* Topbar */}
+            <header
+  style={{
+    height: 70,
+    background: "rgba(255,255,255,0.85)",
+    borderBottom: "1px solid #eef2f7",
+    backdropFilter: "blur(12px)",
+    boxShadow: "0 8px 24px rgba(15,23,42,0.04)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "0 24px",
+    flexShrink: 0,
+    zIndex: 100,
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 14,
+      minWidth: 0,
+      flex: 1,
+    }}
+  >
+    {isMobile && (
+      <button
+        onClick={() => setMobileMenuOpen(true)}
+        style={{
+          ...topIconBtn,
+          marginRight: 2,
+          width: 38,
+          height: 38,
+          borderRadius: 12,
+          border: "1px solid #e5e7eb",
+          background: "#fff",
+          boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
+        }}
+      >
+        <Menu size={18} />
+      </button>
+    )}
+
+    <div style={{ minWidth: 0 }}>
+      {/* breadcrumb */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          fontSize: 12.5,
+          color: "#94a3b8",
+          marginBottom: 3,
+          flexWrap: "wrap",
+        }}
+      >
+        {(page === "company" || page === "checklistRun") && (
+          <>
+            <button
+              onClick={() => navigate("companies")}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#94a3b8",
+                fontSize: 12.5,
+                fontWeight: 600,
+                padding: 0,
+                transition: "color 0.12s ease",
+                fontFamily: "inherit",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.color = "#374151";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.color = "#94a3b8";
+              }}
+            >
+              Empresas
+            </button>
+            <ChevronRight size={13} color="#d1d5db" strokeWidth={2.5} />
+          </>
+        )}
+
+        {page === "checklistRun" && companyId && (
+          <>
+            <button
+              onClick={() => {
+                setPage("company");
+                setRunId("");
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#94a3b8",
+                fontSize: 12.5,
+                fontWeight: 600,
+                padding: 0,
+                transition: "color 0.12s ease",
+                fontFamily: "inherit",
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.color = "#374151";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.color = "#94a3b8";
+              }}
+            >
+              Detalhe
+            </button>
+            <ChevronRight size={13} color="#d1d5db" strokeWidth={2.5} />
+          </>
+        )}
+
+        <span
+          style={{
+            color: "#64748b",
+            fontWeight: 700,
+          }}
+        >
+          {PAGE_TITLES[page]}
+        </span>
       </div>
-    </ConfirmProvider>
+
+      
+    </div>
+  </div>
+
+  {/* ações da direita */}
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+        marginLeft: 16,
+    }}
+  >
+    <div style={{ position: "relative" }}>
+      <button
+        className="topbar-btn"
+        style={{
+          ...topIconBtn,
+          width: 40,
+          height: 40,
+          borderRadius: 12,
+          border: "1px solid #e5e7eb",
+          background: "#fff",
+          boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
+          position: "relative",
+        }}
+        title="Notificações"
+        onClick={() => setNotifOpen((o) => !o)}
+      >
+        <Bell size={17} strokeWidth={1.9} />
+        <span
+          style={{
+            position: "absolute",
+            top: 9,
+            right: 9,
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: "#ef4444",
+            border: "2px solid #fff",
+            boxShadow: "0 0 0 1px rgba(239,68,68,0.15)",
+          }}
+        />
+      </button>
+
+      {notifOpen && (
+        <div
+          className="dropdown"
+          style={{
+            position: "absolute",
+            top: "calc(100% + 10px)",
+            right: 0,
+            width: 300,
+            background: "#fff",
+            border: "1px solid #e5e7eb",
+            borderRadius: 16,
+            boxShadow: "0 18px 40px rgba(15,23,42,0.12)",
+            overflow: "hidden",
+            zIndex: 200,
+          }}
+        >
+          <div
+            style={{
+              padding: "14px 18px",
+              borderBottom: "1px solid #f1f5f9",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: "linear-gradient(180deg, #ffffff 0%, #fafcff 100%)",
+            }}
+          >
+            <span
+              style={{
+                fontWeight: 800,
+                fontSize: 13.5,
+                color: "#111827",
+              }}
+            >
+              Notificações
+            </span>
+
+            <span
+              style={{
+                fontSize: 11,
+                color: "#64748b",
+                background: "#f3f4f6",
+                padding: "3px 8px",
+                borderRadius: 999,
+                fontWeight: 700,
+              }}
+            >
+              0
+            </span>
+          </div>
+
+          <div
+            style={{
+              padding: "20px 18px",
+              fontSize: 13,
+              color: "#94a3b8",
+              textAlign: "center",
+              lineHeight: 1.5,
+            }}
+          >
+            Nenhuma notificação nova.
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+</header>
+
+            {/* Content */}
+            <main style={{ flex: 1, overflow: "auto", padding: 28 }}
+              onClick={() => setNotifOpen(false)}>
+              {page === "companies" && <Companies onOpenCompany={id => { setCompanyId(id); setPage("company"); }} />}
+              {page === "company" && companyId && (
+                <CompanyDetail companyId={companyId} isAdmin={isAdmin} userRoles={roles}
+                  onBack={() => { setPage("companies"); setCompanyId(""); }}
+                  onOpenRun={rid => { setRunId(rid); setPage("checklistRun"); }} />
+              )}
+              {page === "checklistRun" && runId && (
+                <ChecklistRun runId={runId} onBack={() => { setRunId(""); setPage(companyId ? "company" : "companies"); }} />
+              )}
+              {page === "templates" && canEditTemplates && <Templates />}
+              {page === "users" && isAdmin && <AdminUsers />}
+              {page === "sectors" && isAdmin && <AdminSectors />}
+              {page === "audit" && isAdmin && <Audit />}
+            </main>
+          </div>
+        </div>
+      </ConfirmProvider>
     </ToastProvider>
   );
 }

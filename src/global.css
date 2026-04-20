@@ -1,0 +1,23 @@
+.input-error {
+  border-color: #ef4444 !important;
+  background: #fef2f2;
+}
+
+.input-error-text {
+  color: #ef4444;
+  font-size: 12px;
+}
+.company-row:hover {
+  background: #e9e9e9 !important;
+}
+
+.company-row {
+  transition: all 0.18s ease;
+  background: #fff;
+  cursor: pointer;
+}
+
+.company-row:hover {
+  background: #e7e7e7 !important;
+  border-radius: 0px !important;
+}

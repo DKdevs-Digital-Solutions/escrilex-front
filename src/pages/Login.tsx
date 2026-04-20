@@ -1,26 +1,32 @@
 import React, { useState } from "react";
-import { api, setToken } from "../api";
 import { LogIn, Eye, EyeOff, Loader2 } from "lucide-react";
+import { LoginForm } from "../components/formAuth";
+import { useAuth } from "../hooks/useAuth";
 
 export function Login({ onLogin }: { onLogin: () => void }) {
-  const [email, setEmail]       = useState("admin@local.com");
-  const [password, setPassword] = useState("admin123");
-  const [error, setError]       = useState<string | null>(null);
-  const [loading, setLoading]   = useState(false);
-  const [showPw, setShowPw]     = useState(false);
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-    try {
-      const r = await api("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
-      setToken(r.token);
-      onLogin();
-    } catch (err: any) {
-      setError(err.message || "Credenciais inválidas");
-    } finally {
-      setLoading(false);
+
+  const { 
+    email, 
+    setEmail, 
+    password, 
+    setPassword, 
+    showPw, 
+    setShowPw, 
+    login, 
+    loading, 
+    emailError,
+    passwordError,
+    error 
+  } = useAuth();
+
+  
+
+  async function handleLogin() {
+    const ok = await login();
+
+    if (ok) {
+      onLogin(); 
     }
   }
 
@@ -220,55 +226,19 @@ export function Login({ onLogin }: { onLogin: () => void }) {
         </div>
 
         {/* ── RIGHT ── */}
-        <div className="lr">
-          <div className="lr-wrap">
-            <h2 className="lr-h2">Bem-vindo de volta</h2>
-            <p className="lr-sub">Entre com suas credenciais para continuar</p>
-
-            <form onSubmit={submit}>
-              <div className="lr-field">
-                <label className="lr-label">E-mail</label>
-                <input className="lr-input" type="email" value={email}
-                  onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" autoComplete="email" />
-              </div>
-              <div className="lr-field">
-                <label className="lr-label">Senha</label>
-                <div className="lr-pw">
-                  <input className="lr-input" type={showPw ? "text" : "password"}
-                    value={password} onChange={e => setPassword(e.target.value)}
-                    placeholder="••••••••" autoComplete="current-password"
-                    style={{ paddingRight: 38 }} />
-                  <button type="button" className="lr-pw-btn" onClick={() => setShowPw(p => !p)}>
-                    {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </button>
-                </div>
-              </div>
-
-              {error && (
-                <div className="lr-err">
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef4444", flexShrink: 0 }} />
-                  {error}
-                </div>
-              )}
-
-              <button type="submit" disabled={loading} className="lr-btn">
-                {loading
-                  ? <><Loader2 size={15} className="spin" /> Entrando...</>
-                  : <><LogIn size={15} strokeWidth={2.5} /> Entrar</>}
-              </button>
-            </form>
-
-            <div className="lr-div">ACESSO DEMO</div>
-            <div className="lr-demo">
-              {[["E-MAIL","admin@local.com"],["SENHA","admin123"]].map(([l,v]) => (
-                <div key={l}>
-                  <div className="lr-demo-lbl">{l}</div>
-                  <div className="lr-demo-val">{v}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <LoginForm
+          email={email}
+          setEmail={setEmail}
+          password={password}
+          setPassword={setPassword}
+          showPw={showPw}
+          setShowPw={setShowPw}
+          onSubmit={handleLogin}
+          loading={loading}
+          error={error}
+          emailError={emailError}
+          passwordError={passwordError}
+        />
 
       </div>
     </>

@@ -133,7 +133,7 @@ export function IconBtn({ icon, title, onClick, variant = "secondary" }: {
     <button
       title={title} onClick={onClick}
       style={{
-        width: 32, height: 32, borderRadius: 8, border: `1.5px solid ${base.border}`,
+        width: 40, height: 47, borderRadius: 8, border: `1.5px solid ${base.border}`,
         background: base.bg, color: base.color, cursor: "pointer",
         display: "inline-flex", alignItems: "center", justifyContent: "center",
         transition: "background 0.12s, border-color 0.12s", fontFamily: "inherit",
@@ -229,15 +229,42 @@ export function Card({ children, style }: { children: React.ReactNode; style?: C
 }
 
 // ── SectionCard ───────────────────────────────────────────────────────────────
-export function SectionCard({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
+export function SectionCard({
+  title,
+  action,
+  children,
+  style,
+  headerStyle,
+}: {
+  title: React.ReactNode;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+  headerStyle?: React.CSSProperties;
+}) {
   return (
-    <Card style={{ marginBottom: 20 }}>
-      <div style={{
-        padding: "14px 20px", borderBottom: "1px solid #f1f5f9",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        background: "#fafbfc",
-      }}>
-        <span style={{ fontWeight: 700, fontSize: 13.5, color: clr.text, letterSpacing: "-0.01em" }}>{title}</span>
+    <Card style={{ marginBottom: 20, ...style }}>
+      <div
+        style={{
+          padding: "25px 25px",
+          borderBottom: "1px solid #f1f5f9",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          background: "#fafbfc",
+          ...headerStyle,
+        }}
+      >
+        <span
+          style={{
+            fontWeight: 700,
+            fontSize: 13.5,
+            color: clr.text,
+            letterSpacing: "-0.01em",
+          }}
+        >
+          {title}
+        </span>
         {action}
       </div>
       {children}
@@ -246,6 +273,8 @@ export function SectionCard({ title, action, children }: { title: string; action
 }
 
 // ── Table ─────────────────────────────────────────────────────────────────────
+type TableProps = React.TableHTMLAttributes<HTMLTableElement>;
+
 export function Table({ children }: { children: React.ReactNode }) {
   return <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>{children}</table></div>;
 }
@@ -352,21 +381,41 @@ export function Tabs<T extends string>({ active, onChange, tabs }: {
   tabs: { id: T; label: string; count?: number }[];
 }) {
   return (
-    <div style={{
-      display: "flex", gap: 2, marginBottom: 24, overflowX: "auto",
-      background: "#f1f5f9", borderRadius: 10, padding: "4px",
-      width: "fit-content", maxWidth: "100%",
-    }}>
+    <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 14,
+      background: "#fff",
+      borderRadius: 10,
+      padding: "5px",
+      width: "100%",
+      top:"7px",
+      position:"relative",
+    }}
+  >
       {tabs.map(t => {
         const isActive = t.id === active;
         return (
           <button key={t.id} onClick={() => onChange(t.id)}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 7,
-              padding: "8px 16px", fontSize: 13.5, fontWeight: isActive ? 700 : 500,
-              borderRadius: 7, border: "none", cursor: "pointer", fontFamily: "inherit",
-              whiteSpace: "nowrap", transition: "all 0.15s",
-              background: isActive ? "#fff" : "transparent",
+          style={{
+              flex: 1, // 👈 ESSENCIAL
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 7,
+              padding: "12px 12px",
+              top:"10px",
+              fontSize: 13.5,
+              fontWeight: isActive ? 700 : 500,
+              borderRadius: 12,
+              border: "solid 1px #e2e8f0",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              transition: "all 0.15s",
+              background: isActive ? "#e2e8f0" : "transparent",
               color: isActive ? clr.primary : "#64748b",
               boxShadow: isActive ? "0 1px 4px rgba(15,23,42,0.10)" : "none",
             }}
@@ -377,7 +426,7 @@ export function Tabs<T extends string>({ active, onChange, tabs }: {
             {t.count !== undefined && (
               <span style={{
                 fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 99,
-                background: isActive ? "#dbeafe" : "#e2e8f0",
+                background: isActive ? "#ccc" : "#e2e8f0",
                 color: isActive ? clr.primary : "#94a3b8",
               }}>{t.count}</span>
             )}
