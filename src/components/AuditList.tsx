@@ -407,7 +407,7 @@ export function AuditList({ items }: AuditListProps) {
           onClick={() => setCardFilter("user_actions")}
         />
 
-       <StatCard
+       {/* <StatCard
         label="Não identificados"
         value={unidentifiedCount}
         helper="registros sem mapeamento"
@@ -417,7 +417,7 @@ export function AuditList({ items }: AuditListProps) {
         icon={<Activity size={18} strokeWidth={2.2} />}
         active={cardFilter === "unidentified"}
         onClick={() => setCardFilter("unidentified")}
-        />
+        /> */}
       </div>
 
       <Card

@@ -103,25 +103,6 @@ export function Audit() {
           }}
         >
           <div>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "6px 10px",
-                borderRadius: 999,
-                background: "#eff6ff",
-                color: "#1d4ed8",
-                fontSize: 12,
-                fontWeight: 800,
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                border: "1px solid #bfdbfe",
-                marginBottom: 12,
-              }}
-            >
-              Monitoramento
-            </div>
 
             <h1
               style={{
@@ -188,6 +169,7 @@ export function Audit() {
                     color: "#0f172a",
                     letterSpacing: "-0.04em",
                     lineHeight: 1,
+                    
                   }}
                 >
                   {items.length}

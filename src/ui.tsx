@@ -310,21 +310,46 @@ export function Empty({ message }: { message: string }) {
 // ── PageHeader ────────────────────────────────────────────────────────────────
 export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
-      <div>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: clr.text, letterSpacing: "-0.04em" }}>{title}</h1>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: 14,
+        marginBottom: 24,
+        flexWrap: "wrap",
+      }}
+    >
+      <div style={{ minWidth: 0, flex: "1 1 260px" }}>
+        <h1 style={{ margin: 0, fontSize: "clamp(18px, 4vw, 22px)", fontWeight: 800, color: clr.text, letterSpacing: "-0.04em" }}>
+          {title}
+        </h1>
         {subtitle && <p style={{ margin: "5px 0 0", fontSize: 13, color: "#94a3b8" }}>{subtitle}</p>}
       </div>
-      {action && <div>{action}</div>}
+
+      {action && (
+        <div style={{ flex: "0 1 auto", width: "fit-content" }}>
+          {action}
+        </div>
+      )}
     </div>
   );
 }
 
 // ── FormGrid ──────────────────────────────────────────────────────────────────
 export function FormGrid({ children, cols = 2 }: { children: React.ReactNode; cols?: number }) {
-  return <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 14 }}>{children}</div>;
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: `repeat(auto-fit, minmax(240px, 1fr))`,
+        gap: 14,
+      }}
+    >
+      {children}
+    </div>
+  );
 }
-
 // ── Divider ───────────────────────────────────────────────────────────────────
 export function Divider({ label }: { label?: string }) {
   if (label) {
@@ -342,9 +367,41 @@ export function Divider({ label }: { label?: string }) {
 // ── InfoRow ───────────────────────────────────────────────────────────────────
 export function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", gap: 16, padding: "10px 0", borderBottom: "1px solid #f1f5f9", alignItems: "baseline" }}>
-      <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.07em", minWidth: 140, flexShrink: 0 }}>{label}</span>
-      <span style={{ fontSize: 13.5, color: clr.text }}>{value || <span style={{ color: "#cbd5e1" }}>—</span>}</span>
+    <div
+      style={{
+        display: "flex",
+        gap: 8,
+        padding: "10px 0",
+        borderBottom: "1px solid #f1f5f9",
+        alignItems: "flex-start",
+        flexWrap: "wrap",
+      }}
+    >
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          color: "#94a3b8",
+          textTransform: "uppercase",
+          letterSpacing: "0.07em",
+          minWidth: 120,
+          flex: "0 0 120px",
+        }}
+      >
+        {label}
+      </span>
+
+      <span
+        style={{
+          fontSize: 13.5,
+          color: clr.text,
+          flex: "1 1 180px",
+          minWidth: 0,
+          wordBreak: "break-word",
+        }}
+      >
+        {value || <span style={{ color: "#cbd5e1" }}>—</span>}
+      </span>
     </div>
   );
 }
@@ -359,7 +416,7 @@ export function Toggle({ checked, onChange, disabled, label }: {
         onClick={() => !disabled && onChange(!checked)}
         style={{
           width: 40, height: 22, borderRadius: 11,
-          background: checked ? clr.primary : "#e2e8f0",
+          background: checked ? "#16a34a" : "#dc2626",
           position: "relative", transition: "background 0.2s", flexShrink: 0,
         }}
       >
@@ -376,59 +433,70 @@ export function Toggle({ checked, onChange, disabled, label }: {
 }
 
 // ── Tabs ──────────────────────────────────────────────────────────────────────
+
 export function Tabs<T extends string>({ active, onChange, tabs }: {
-  active: T; onChange: (t: T) => void;
+  active: T;
+  onChange: (t: T) => void;
   tabs: { id: T; label: string; count?: number }[];
 }) {
   return (
     <div
-    style={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      gap: 10,
-      marginBottom: 14,
-      background: "#fff",
-      borderRadius: 10,
-      padding: "5px",
-      width: "100%",
-      top:"7px",
-      position:"relative",
-    }}
-  >
+      style={{
+        display: "flex",
+        gap: 8,
+        marginBottom: 14,
+        background: "#fff",
+        borderRadius: 10,
+        padding: 5,
+        width: "100%",
+        position: "relative",
+        top: 7,
+        overflowX: "auto",
+        WebkitOverflowScrolling: "touch",
+      }}
+    >
       {tabs.map(t => {
         const isActive = t.id === active;
+
         return (
-          <button key={t.id} onClick={() => onChange(t.id)}
-          style={{
-              flex: 1, // 👈 ESSENCIAL
+          <button
+            key={t.id}
+            onClick={() => onChange(t.id)}
+            style={{
+              flex: "1 0 140px",
+              minWidth: 120,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               gap: 7,
-              padding: "12px 12px",
-              top:"10px",
-              fontSize: 13.5,
+              padding: "11px 12px",
+              fontSize: 13,
               fontWeight: isActive ? 700 : 500,
               borderRadius: 12,
-              border: "solid 1px #e2e8f0",
+              border: "solid 1px #ccc",
               cursor: "pointer",
               fontFamily: "inherit",
               transition: "all 0.15s",
-              background: isActive ? "#e2e8f0" : "transparent",
-              color: isActive ? clr.primary : "#64748b",
-              boxShadow: isActive ? "0 1px 4px rgba(15,23,42,0.10)" : "none",
+              background: isActive ? "#BB9F58" : "transparent",
+              color: isActive ? "#fff" : "#64748b",
+              whiteSpace: "nowrap",
             }}
-            onMouseOver={e => { if (!isActive) { e.currentTarget.style.background = "rgba(255,255,255,0.6)"; e.currentTarget.style.color = "#374151"; } }}
-            onMouseOut={e => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748b"; } }}
           >
             {t.label}
+
             {t.count !== undefined && (
-              <span style={{
-                fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 99,
-                background: isActive ? "#ccc" : "#e2e8f0",
-                color: isActive ? clr.primary : "#94a3b8",
-              }}>{t.count}</span>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  padding: "1px 7px",
+                  borderRadius: 99,
+                  background: isActive ? "#ccc" : "#e2e8f0",
+                  color: isActive ? clr.primary : "#94a3b8",
+                }}
+              >
+                {t.count}
+              </span>
             )}
           </button>
         );

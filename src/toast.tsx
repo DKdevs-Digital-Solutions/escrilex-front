@@ -15,22 +15,22 @@ const CONFIG: Record<ToastType, {
   success: {
     bg: "#f0fdf4", border: "#bbf7d0", iconColor: "#16a34a",
     titleColor: "#15803d", msgColor: "#4ade80",
-    icon: <CheckCircle2 size={16} strokeWidth={2} />,
+    icon: <CheckCircle2 size={18} strokeWidth={2.4} />,
   },
   error: {
     bg: "#fef2f2", border: "#fecaca", iconColor: "#dc2626",
     titleColor: "#b91c1c", msgColor: "#f87171",
-    icon: <XCircle size={16} strokeWidth={2} />,
+    icon: <XCircle size={18} strokeWidth={2.4} />,
   },
   warning: {
     bg: "#fffbeb", border: "#fde68a", iconColor: "#d97706",
     titleColor: "#b45309", msgColor: "#fcd34d",
-    icon: <AlertTriangle size={16} strokeWidth={2} />,
+    icon: <AlertTriangle size={18} strokeWidth={2.4} />,
   },
   info: {
     bg: "#f0f9ff", border: "#bae6fd", iconColor: "#0284c7",
     titleColor: "#0369a1", msgColor: "#7dd3fc",
-    icon: <Info size={16} strokeWidth={2} />,
+    icon: <Info size={18} strokeWidth={2.4} />,
   },
 };
 
@@ -44,36 +44,88 @@ function ToastItem({ t, onRemove }: { t: Toast; onRemove: () => void }) {
 
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
+
     const timer = setTimeout(() => {
       setVisible(false);
-      setTimeout(onRemove, 300);
-    }, 4500);
+      setTimeout(onRemove, 280);
+    }, 4200);
+
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <div
-      onClick={() => { setVisible(false); setTimeout(onRemove, 300); }}
-      style={{
-        display: "flex", alignItems: "flex-start", gap: 11, padding: "12px 16px",
-        background: c.bg, border: `1px solid ${c.border}`, borderRadius: 11,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)", minWidth: 270, maxWidth: 380,
-        cursor: "pointer",
-        transform: visible ? "translateX(0)" : "translateX(110%)",
-        opacity: visible ? 1 : 0,
-        transition: "transform 0.3s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease",
+      onClick={() => {
+        setVisible(false);
+        setTimeout(onRemove, 280);
       }}
-    >
-      <span style={{ color: c.iconColor, marginTop: 1, flexShrink: 0 }}>{c.icon}</span>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: c.titleColor, marginBottom: 2 }}>
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+
+        width: "calc(100vw - 40px)", // 👈 chave
+        maxWidth: 420,
+
+        padding: "14px 16px",
+        borderRadius: 16,
+
+        background: "rgba(255,255,255,0.92)",
+        backdropFilter: "blur(14px)",
+
+        border: "1px solid rgba(226,232,240,0.9)",
+        borderLeft: `4px solid ${c.iconColor}`,
+
+        boxShadow:
+          "0 18px 45px rgba(15,23,42,0.16), 0 4px 12px rgba(15,23,42,0.08)",
+
+        cursor: "pointer",
+      }}
+          >
+      <span
+        style={{
+          width: 34,
+          height: 34,
+          borderRadius: 12,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: c.bg,
+          color: c.iconColor,
+          flexShrink: 0,
+        }}
+      >
+        {c.icon}
+      </span>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 800,
+            color: "#0f172a",
+            marginBottom: 2,
+            letterSpacing: "-0.01em",
+          }}
+        >
           {LABELS[t.type]}
         </div>
-        <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.4 }}>{t.message}</div>
+
+        <div
+          style={{
+            fontSize: 13,
+            color: "#475569",
+            lineHeight: 1.45,
+            wordBreak: "break-word",
+          }}
+        >
+          {t.message}
+        </div>
       </div>
     </div>
   );
 }
+
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -86,10 +138,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toast }}>
       {children}
-      <div style={{
-        position: "fixed", bottom: 22, right: 22,
-        display: "flex", flexDirection: "column", gap: 8, zIndex: 9999,
-      }}>
+      <div
+        style={{
+          position: "fixed",
+          top: 20,
+          right: 20,
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+          zIndex: 999999,
+        }}
+      >
         {toasts.map(t => (
           <ToastItem
             key={t.id} t={t}

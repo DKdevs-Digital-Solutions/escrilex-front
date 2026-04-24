@@ -88,7 +88,7 @@ export function ChecklistRunMeta({ run }: { run: any }) {
       }}
     >
       <MetaItem
-        icon={<FileText size={16} />}
+        icon={<FileText size={18} color="green" />}
         label="Template"
         value={
           run.template?.name
@@ -98,7 +98,7 @@ export function ChecklistRunMeta({ run }: { run: any }) {
       />
 
       <MetaItem
-        icon={<CalendarClock size={16} />}
+        icon={<CalendarClock size={18} color="blue"/>}
         label="Criado em"
         value={
           run.createdAt
@@ -108,7 +108,7 @@ export function ChecklistRunMeta({ run }: { run: any }) {
       />
 
       <MetaItem
-        icon={<TimerReset size={16} />}
+        icon={<TimerReset size={18} color="orange"/>}
         label="Âncora"
         value={
           run.anchorAt

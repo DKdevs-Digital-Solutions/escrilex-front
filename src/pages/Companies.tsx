@@ -149,25 +149,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
           }}
         >
           <div>
-            <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "6px 12px", // Aumentei levemente o padding lateral para equilíbrio
-              borderRadius: 999,
-              background: "rgba(187, 159, 88, 0.1)", // Um fundo bem clarinho do dourado
-              color: "#BB9F58",                      // A cor principal no texto
-              fontSize: 12,
-              fontWeight: 800,
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-              border: "2px solid #ccc", // Borda suave
-              marginBottom: 12,
-            }}
-          >
-            Cadastro
-          </div>
+           
 
             <h1
               style={{

@@ -251,7 +251,7 @@ const btnPrimary: React.CSSProperties = {
   padding: "9px 16px",
   borderRadius: 10,
   border: "none",
-  background: "#BB9F58", // Dourado para o destaque principal
+  background: "#012942", // Dourado para o destaque principal
   color: "#fff",
   fontWeight: 700,
   cursor: "pointer",
@@ -261,7 +261,7 @@ const btnPrimary: React.CSSProperties = {
 const btnSecondary: React.CSSProperties = {
   padding: "9px 16px",
   borderRadius: 10,
-  border: "1.5px solid #012942", // Borda no azul marinho
+  border: "2px solid #ccc", // Borda no azul marinho
   background: "transparent",
   color: "#012942",             // Texto no azul marinho
   fontWeight: 600,

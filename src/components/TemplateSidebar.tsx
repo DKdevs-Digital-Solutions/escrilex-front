@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Badge, Loading, Empty } from "../ui";
 import { Plus, LayoutTemplate } from "lucide-react";
 
@@ -21,22 +21,15 @@ function ActionBtn({
             fontSize: 13.5,
             fontWeight: 700,
             borderRadius: 12,
-            border: "1px solid #1d4ed8",
-            background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+            border: "1px solid",
+            background: "#BB9F58",
             color: "#fff",
             cursor: "pointer",
             fontFamily: "inherit",
             transition: "all 0.16s ease",
-            boxShadow: "0 8px 20px rgba(37,99,235,0.22)",
             width: "100%",
-        }}
-        onMouseOver={(e) => {
-            e.currentTarget.style.transform = "translateY(-1px)";
-        }}
-        onMouseOut={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-        }}
-        >
+            
+        }}>
         {children}
         </button>
   );
@@ -57,10 +50,21 @@ export function TemplateSidebar({
   onSelect,
   onCreate,
 }: Props) {
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 999);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 999);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+
+
   return (
     <div
       style={{
-        width: 300,
+        width: isMobile ? "100%" : 300,
         flexShrink: 0,
       }}
     >
@@ -126,7 +130,7 @@ export function TemplateSidebar({
                 flexShrink: 0,
               }}
             >
-              <LayoutTemplate size={18} strokeWidth={2.2} />
+              <LayoutTemplate size={18} strokeWidth={2.2} style={{color:"#BB9F58"}} />
             </div>
           </div>
 

@@ -51,24 +51,8 @@ export function CompanyPartnersTab({
         </div>
 
         <button
+          className="btnAdd"
           onClick={onAdd}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "15px 20px",
-            fontSize: 13,
-            fontWeight: 700,
-            borderRadius: 12,
-            border: "none",
-            background: "#2563eb",
-            color: "#fff",
-            cursor: "pointer",
-            fontFamily: "inherit",
-            boxShadow: "0 8px 18px rgba(37,99,235,0.20)",
-            bottom:10,
-            position: "relative",
-          }}
         >
           <UserPlus size={14} strokeWidth={2.5} />
           Adicionar sócio
@@ -104,7 +88,7 @@ export function CompanyPartnersTab({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
             gap: 16,
           }}
         >
@@ -117,6 +101,7 @@ export function CompanyPartnersTab({
                   display: "flex",
                   alignItems: "center",
                   gap: 12,
+                  
                 }}
               >
                 <div
@@ -171,6 +156,7 @@ export function CompanyPartnersTab({
                   display: "grid",
                   gridTemplateColumns: "1fr 1fr",
                   gap: "12px 20px",
+                  
                 }}
               >
                 {[

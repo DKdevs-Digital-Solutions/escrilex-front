@@ -89,27 +89,6 @@ export function CompanyDetailHeader({ company, onBack }: Props) {
             <div style={{ minWidth: 0, flex: 1 }}>
               <div
                 style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "6px 10px",
-                  borderRadius: 999,
-                  background: "#eff6ff",
-                  color: "#1d4ed8",
-                  fontSize: 12,
-                  fontWeight: 800,
-                  letterSpacing: "0.04em",
-                  textTransform: "uppercase",
-                  border: "1px solid #bfdbfe",
-                  marginBottom: 10,
-                }}
-              >
-                <Building2 size={14} strokeWidth={2.3} />
-                Detalhes da empresa
-              </div>
-
-              <div
-                style={{
                   display: "flex",
                   alignItems: "baseline",
                   gap: 10,

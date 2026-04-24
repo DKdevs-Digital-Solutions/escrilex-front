@@ -55,12 +55,12 @@ function DataField({
             padding: "10px 11px",
             fontSize: 13,
             borderRadius: 10,
-            border: "1.5px solid #2563eb",
+            border: "1.5px solid #BB9F58",
             outline: "none",
             fontFamily: "inherit",
             background: "#fff",
             color: "#0f172a",
-            boxShadow: "0 0 0 3px rgba(37,99,235,0.10)",
+            boxShadow: "0 0 0 3px rgba(201, 206, 215, 0.1)",
             width: "100%",
             boxSizing: "border-box",
           }}
@@ -97,6 +97,7 @@ function SectionBlock({
 }) {
   return (
     <div
+      className="section-user-dados"
       style={{
         padding: "22px 24px",
         borderBottom: noBorder ? "none" : "1px solid #f1f5f9",
@@ -136,7 +137,7 @@ function SectionBlock({
                   alignItems: "center",
                   justifyContent: "center",
                   background: "#eff6ff",
-                  color: "#2563eb",
+                  color: "#BB9F58",
                   border: "1px solid #dbeafe",
                   flexShrink: 0,
                 }}
@@ -211,6 +212,7 @@ export function CompanyDataTab({
       }}
     >
       <div
+        className="section-user-dados"
         style={{
           padding: "24px 24px",
           borderBottom: "1px solid #eef2f7",
@@ -224,26 +226,7 @@ export function CompanyDataTab({
         }}
       >
         <div style={{ minWidth: 0 }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "6px 10px",
-              borderRadius: 999,
-              background: "#eff6ff",
-              color: "#1d4ed8",
-              fontSize: 12,
-              fontWeight: 800,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              border: "1px solid #bfdbfe",
-              marginBottom: 10,
-            }}
-          >
-            <Building2 size={14} strokeWidth={2.3} />
-            Dados da empresa
-          </div>
+          
 
           <div
             style={{
@@ -269,11 +252,12 @@ export function CompanyDataTab({
 
         {canEdit &&
           (editing ? (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button onClick={() => setEditing(false)} style={secondaryBtn}>
+            <div className="actions" style={{ display: "flex", gap: 8, flexWrap: "wrap",  justifyContent: "flex-end" }}>
+              <button className="btn"  onClick={() => setEditing(false)} style={secondaryBtn}>
                 Cancelar
               </button>
               <button
+              className="btn" 
                 onClick={onSaveEdit}
                 disabled={savingEdit}
                 style={{
@@ -286,7 +270,7 @@ export function CompanyDataTab({
               </button>
             </div>
           ) : (
-            <button onClick={onStartEdit} style={secondaryBtn}>
+            <button className="btn" onClick={onStartEdit} style={secondaryBtn}>
               <Pencil size={12} strokeWidth={2} />
               Editar
             </button>
@@ -294,6 +278,7 @@ export function CompanyDataTab({
       </div>
 
       <SectionBlock
+       
         title="Identificação"
         subtitle="Informações principais de cadastro e estrutura da empresa."
         icon={<Building2 size={13} strokeWidth={2.3} />}
@@ -504,7 +489,7 @@ const secondaryBtn: React.CSSProperties = {
   fontSize: 12.5,
   fontWeight: 700,
   borderRadius: 10,
-  border: "1px solid #e2e8f0",
+  border: "2px solid #ccc",
   background: "#fff",
   color: "#374151",
   cursor: "pointer",
@@ -520,9 +505,8 @@ const primaryBtn: React.CSSProperties = {
   fontWeight: 700,
   borderRadius: 10,
   border: "none",
-  background: "#2563eb",
+  background: "#012942",
   color: "#fff",
   cursor: "pointer",
   fontFamily: "inherit",
-  boxShadow: "0 10px 24px rgba(37,99,235,0.18)",
 };

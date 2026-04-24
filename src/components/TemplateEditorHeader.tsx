@@ -14,18 +14,15 @@ function HeaderBtn({
   const styles =
     variant === "primary"
       ? {
-          bg: "#2563eb",
+          bg: "#BB9F58",
           color: "#fff",
-          border: "#2563eb",
-          hoverBg: "#1d4ed8",
-          shadow: "0 8px 18px rgba(37,99,235,0.20)",
+          border: "#ccc",
         }
       : {
           bg: "#fff",
           color: "#334155",
           border: "#e2e8f0",
           hoverBg: "#f8fafc",
-          shadow: "0 2px 8px rgba(15,23,42,0.04)",
         };
 
   return (
@@ -41,17 +38,15 @@ function HeaderBtn({
         fontSize: 13,
         fontWeight: 700,
         borderRadius: 12,
-        border: `1px solid ${styles.border}`,
+        border: variant === 'primary' ? '1px solid' : '2px solid #ccc',
         background: styles.bg,
         color: styles.color,
         cursor: "pointer",
         fontFamily: "inherit",
         transition: "all 0.16s ease",
-        boxShadow: styles.shadow,
         whiteSpace: "nowrap",
       }}
       onMouseOver={(e) => {
-        e.currentTarget.style.background = styles.hoverBg;
         e.currentTarget.style.transform = "translateY(-1px)";
       }}
       onMouseOut={(e) => {
@@ -108,26 +103,7 @@ export function TemplateEditorHeader({
         >
           {/* lado esquerdo */}
           <div style={{ minWidth: 260 }}>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "6px 10px",
-                borderRadius: 999,
-                background: "#eff6ff",
-                color: "#1d4ed8",
-                fontSize: 12,
-                fontWeight: 800,
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                border: "1px solid #bfdbfe",
-                marginBottom: 12,
-              }}
-            >
-              <FileText size={14} strokeWidth={2.3} />
-              Template em edição
-            </div>
+         
 
             <h2
               style={{

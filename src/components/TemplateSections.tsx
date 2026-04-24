@@ -47,13 +47,12 @@ function PrimaryMiniBtn({
         fontSize: 12.5,
         fontWeight: 700,
         borderRadius: 10,
-        border: "1px solid #2563eb",
-        background: "#2563eb",
+        border: "1px solid",
+        background: "#012942",
         color: "#fff",
         cursor: "pointer",
         fontFamily: "inherit",
         transition: "all 0.16s ease",
-        boxShadow: "0 6px 14px rgba(37,99,235,0.18)",
       }}
       
     >
@@ -92,7 +91,7 @@ export function TemplateSections({
                   width: 34,
                   height: 34,
                   borderRadius: 10,
-                  background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                  background: "#012942",
                   color: "#fff",
                   display: "flex",
                   alignItems: "center",
@@ -101,7 +100,7 @@ export function TemplateSections({
                   flexShrink: 0,
                 }}
               >
-                <FolderTree size={15} strokeWidth={2.2} />
+                <FolderTree size={15} strokeWidth={2.2} style={{color:"#fff"}} />
               </div>
 
               <div>
@@ -129,7 +128,7 @@ export function TemplateSections({
             </div>
           }
           action={
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", justifyContent:"flex-end" }}>
               <div
                 style={{
                   display: "inline-flex",
@@ -278,10 +277,10 @@ export function TemplateSections({
                           checked={!!it.isRequired}
                           onChange={(v) => onUpdateItem(it.id, { isRequired: v })}
                         />
-                        <Badge
+                        {/* <Badge
                           label={it.isRequired ? "Obrigatório" : "Opcional"}
                           variant={it.isRequired ? "green" : "gray"}
-                        />
+                        /> */}
                       </div>
                     </Td>
 

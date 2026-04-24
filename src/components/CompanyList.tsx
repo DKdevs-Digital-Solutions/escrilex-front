@@ -185,17 +185,35 @@ export function CompanyList({ items, loading, onOpenCompany }: Props) {
         {/* Badge de Contagem */}
         <div
           style={{
-            padding: "8px 12px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "5px 10px",
             borderRadius: 999,
-            background: "rgba(187, 159, 88, 0.1)", // Fundo sutil dourado
-            color: "#BB9F58",                      // Texto dourado
-            fontSize: 12.5,
-            fontWeight: 700,
-            border: "2px solid #ccc",
+            background: "#f8fafc",
+            color: "#475569",
+            fontSize: 12,
+            fontWeight: 500,
+            border: "1px solid #e2e8f0",
             whiteSpace: "nowrap",
           }}
         >
-          {items.length} {items.length === 1 ? "empresa" : "empresas"}
+          <span
+            style={{
+              fontWeight: 700,
+              color: "#0f172a",
+              background: "#e2e8f0",
+              padding: "2px 6px",
+              borderRadius: 999,
+              lineHeight: 1,
+            }}
+          >
+            {items.length}
+          </span>
+
+          <span style={{ opacity: 0.85 }}>
+            {items.length === 1 ? "empresa" : "empresas"}
+          </span>
         </div>
         </div>
       </div>

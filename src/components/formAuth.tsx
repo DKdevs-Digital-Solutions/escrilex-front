@@ -1,4 +1,5 @@
-import { Eye, EyeOff, Loader2, LogIn } from "lucide-react";
+import React from "react";
+import { Eye, EyeOff, Loader2, LogIn, Mail, LockKeyhole, ShieldCheck } from "lucide-react";
 
 type Props = {
   email: string;
@@ -10,8 +11,8 @@ type Props = {
   onSubmit: () => void;
   loading: boolean;
   error: string | null;
-  emailError:string | null
-  passwordError:string | null
+  emailError: string | null;
+  passwordError: string | null;
 };
 
 export function LoginForm({
@@ -25,10 +26,8 @@ export function LoginForm({
   loading,
   error,
   emailError,
-  passwordError
+  passwordError,
 }: Props) {
-
-  
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     onSubmit();
@@ -37,71 +36,81 @@ export function LoginForm({
   return (
     <div className="lr">
       <div className="lr-wrap">
-        <h2 className="lr-h2">Bem-vindo de volta</h2>
-        <p className="lr-sub">Entre com suas credenciais para continuar</p>
+        
+
+        <div className="login-head">
+          <span className="login-kicker">
+            <ShieldCheck className="login-kicker-icon" />
+            Acesso seguro
+          </span>
+          <h2 className="lr-h2">Bem-vindo de volta</h2>
+          <p className="lr-sub">Entre com suas credenciais para acessar o painel.</p>
+        </div>
 
         <form onSubmit={handleSubmit}>
           <div className="lr-field">
             <label className="lr-label">E-mail</label>
-            <input
-            className={`lr-input ${emailError ? "input-error" : ""}`}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            />
+
+            <div className={`input-shell ${emailError ? "input-shell-error" : ""}`}>
+              <Mail size={17} className="input-icon" />
+              <input
+                className="lr-input input-with-icon"
+                type="email"
+                value={email}
+                placeholder="seuemail@empresa.com"
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+              />
+            </div>
 
             {emailError && <span className="input-error-text">{emailError}</span>}
           </div>
 
-            <div className="lr-field">
+          <div className="lr-field">
             <label className="lr-label">Senha</label>
 
-            <div className="lr-pw">
+            <div className={`input-shell ${passwordError ? "input-shell-error" : ""}`}>
+              <LockKeyhole size={17} className="input-icon" />
+
               <input
-                className={`lr-input ${passwordError ? "input-error" : ""}`}
+                className="lr-input input-with-icon"
                 type={showPw ? "text" : "password"}
                 value={password}
+                placeholder="Digite sua senha"
                 onChange={(e) => setPassword(e.target.value)}
-                style={{ paddingRight: 38 }}
+                autoComplete="current-password"
               />
 
               <button
                 type="button"
                 className="lr-pw-btn"
                 onClick={() => setShowPw(!showPw)}
+                aria-label={showPw ? "Ocultar senha" : "Mostrar senha"}
               >
-                {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
+                {showPw ? <EyeOff size={17} /> : <Eye size={17} />}
               </button>
             </div>
 
-            {/* 👇 AGORA FORA */}
-            {passwordError && (
-              <span className="input-error-text">{passwordError}</span>
-            )}
+            {passwordError && <span className="input-error-text">{passwordError}</span>}
           </div>
 
           {error && (
             <div className="lr-err">
-              <div
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "#ef4444",
-                }}
-              />
-              {error}
+              <span className="error-dot" />
+              <span>{error}</span>
             </div>
           )}
 
           <button type="submit" disabled={loading} className="lr-btn">
             {loading ? (
               <>
-                <Loader2 size={15} className="spin" /> Entrando...
+                <Loader2 size={16} className="spin" />
+                Entrando...
               </>
             ) : (
               <>
-                <LogIn size={15} /> Entrar
+                Entrar no sistema
+                <LogIn size={16} />
               </>
             )}
           </button>

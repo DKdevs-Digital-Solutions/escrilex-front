@@ -232,26 +232,7 @@ export function AdminUsers() {
           }}
         >
           <div>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "6px 10px",
-                borderRadius: 999,
-                background: "#eff6ff",
-                color: "#1d4ed8",
-                fontSize: 12,
-                fontWeight: 800,
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                border: "1px solid #bfdbfe",
-                marginBottom: 12,
-              }}
-            >
-              Administração
-            </div>
-
+            
             <h1
               style={{
                 margin: 0,
@@ -290,24 +271,19 @@ export function AdminUsers() {
               fontSize: 14,
               fontWeight: 800,
               borderRadius: 14,
-              border: "1px solid #1d4ed8",
-              background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+              border: "1px solid ",
+              background: "#BB9F58",
               color: "#fff",
               cursor: "pointer",
               fontFamily: "inherit",
               transition: "all 0.18s ease",
-              boxShadow: "0 10px 24px rgba(37,99,235,0.28)",
             }}
             onMouseOver={(e) => {
               e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.boxShadow =
-                "0 14px 28px rgba(37,99,235,0.35)";
               e.currentTarget.style.filter = "brightness(1.03)";
             }}
             onMouseOut={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 10px 24px rgba(37,99,235,0.28)";
               e.currentTarget.style.filter = "brightness(1)";
             }}
           >
@@ -552,7 +528,7 @@ const secondaryBtn: React.CSSProperties = {
   fontSize: 13.5,
   fontWeight: 600,
   borderRadius: 9,
-  border: "1.5px solid #e2e8f0",
+  border: "2px solid #ccc",
   background: "#fff",
   color: "#475569",
   cursor: "pointer",
@@ -565,7 +541,7 @@ const primaryBtn: React.CSSProperties = {
   fontWeight: 700,
   borderRadius: 9,
   border: "none",
-  background: "#2563eb",
+  background: "#012942",
   color: "#fff",
   cursor: "pointer",
   fontFamily: "inherit",

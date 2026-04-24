@@ -152,9 +152,10 @@ export function CompanyHistoryTab({
             padding: "10px 0 18px 0",
         }}
       action={
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", width: "100%", justifyContent: "flex-end", padding: "5px 0 18px 0" }}>
           {(["ENTRADA", "SAIDA"] as ChecklistType[]).map((t) => (
             <button
+            className="btn"
               key={t}
               onClick={() => {
                 setHistoricoType(t);
@@ -187,24 +188,7 @@ export function CompanyHistoryTab({
             }}
           >
             <div style={{ minWidth: 0}}>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "6px 10px",
-                  borderRadius: 999,
-                  background: UI.primarySoft,
-                  color: UI.primary,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  border: `1px solid ${UI.border}`,
-                  marginBottom: 10,
-                }}
-              >
-                <History size={14} />
-                Histórico operacional
-              </div>
+              
 
               <div
                 style={{
@@ -248,7 +232,7 @@ export function CompanyHistoryTab({
           }}
         >
           <KpiCard
-            icon={<History size={18} />}
+            icon={<History size={18} color="#22c55e" />}
             label="Execuções"
             value={historicoRuns.length}
             hint={`Total de runs de ${getTypeLabel(historicoType).toLowerCase()}`}
@@ -256,7 +240,7 @@ export function CompanyHistoryTab({
           />
 
           <KpiCard
-            icon={<TimerReset size={18} />}
+            icon={<TimerReset size={18} color="#6d28d9" />}
             label="Com âncora"
             value={withAnchorCount}
             hint="Runs com referência definida"
@@ -264,7 +248,7 @@ export function CompanyHistoryTab({
           />
 
           <KpiCard
-            icon={<CalendarClock size={18} />}
+            icon={<CalendarClock size={18} color="orange" />}
             label="Mais recente"
             value={
               latestRun?.createdAt

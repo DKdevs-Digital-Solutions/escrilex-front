@@ -51,6 +51,9 @@ export function useAuth() {
     try {
       const data = await authRepository.login(email, password);
       localStorage.setItem("token", data.token);
+      setTimeout(() => {
+        setLoading(false);
+      }, 500); // simula um carregamento mais suave
       return true;
     } catch (err: any) {
       setError(err.response?.data?.message || "Erro ao logar");

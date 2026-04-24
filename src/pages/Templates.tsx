@@ -37,6 +37,14 @@ export function Templates() {
   const [newItemRuleParam, setNewItemRuleParam] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 999);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 999);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   const {
     templates,
     selectedTemplate,
@@ -251,7 +259,16 @@ export function Templates() {
   };
 
   return (
-    <div style={{ display: "flex", gap: 22, alignItems: "flex-start" }}>
+    <div
+        className="template-section"
+        style={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          gap: isMobile ? 14 : 22,
+          alignItems: "flex-start",
+          width: "100%",
+        }}
+      >
       <TemplateSidebar
         templates={templates}
         loading={loading}
@@ -260,7 +277,13 @@ export function Templates() {
         onCreate={() => setCreateOpen(true)}
       />
 
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            width: "100%",
+          }}
+        >
         {!selectedId && (
           <div
             style={{
@@ -413,8 +436,14 @@ export function Templates() {
         }
       >
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ display: "flex", gap: 10 }}>
-            <div style={{ width: 100 }}>
+          <div
+              style={{
+                display: "flex",
+                flexDirection: isMobile ? "column" : "row",
+                gap: 10,
+              }}
+            >
+            <div style={{ width: isMobile ? "100%" : 100 }}>
               <Input
                 label="Código"
                 placeholder="Ex: A1"
@@ -457,7 +486,7 @@ export function Templates() {
               </Select>
             </div>
 
-            <div style={{ width: 120 }}>
+            <div style={{ width: isMobile ? "100%" : 120 }}>
               <Input
                 label={newItemRuleType === "OFFSET_DAYS" ? "Dias" : "Dia do mês"}
                 type="number"
@@ -479,29 +508,27 @@ export function Templates() {
   );
 }
 
-const secondaryBtn: React.CSSProperties = {
-  padding: "8px 16px",
-  fontSize: 13.5,
-  fontWeight: 600,
-  borderRadius: 10,
-  border: "1px solid #e2e8f0",
-  background: "#fff",
-  color: "#475569",
-  cursor: "pointer",
-  fontFamily: "inherit",
-};
 
 const primaryBtn: React.CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   gap: 6,
-  padding: "8px 16px",
-  fontSize: 13.5,
-  fontWeight: 700,
+  padding: "9px 16px",
   borderRadius: 10,
   border: "none",
-  background: "#2563eb",
+  background: "#012942", // Dourado para o destaque principal
   color: "#fff",
+  fontWeight: 700,
   cursor: "pointer",
-  fontFamily: "inherit",
+  boxShadow: "0 4px 12px rgba(187, 159, 88, 0.25)",
+};
+
+const secondaryBtn: React.CSSProperties = {
+  padding: "9px 16px",
+  borderRadius: 10,
+  border: "2px solid #ccc", // Borda no azul marinho
+  background: "transparent",
+  color: "#012942",             // Texto no azul marinho
+  fontWeight: 600,
+  cursor: "pointer",
 };

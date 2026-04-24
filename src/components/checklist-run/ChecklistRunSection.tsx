@@ -43,12 +43,12 @@ export function ChecklistRunSection({
               alignItems: "center",
               justifyContent: "center",
               background: "#eff6ff",
-              color: "#2563eb",
+              color: "#BB9F58",
               border: "1px solid #dbeafe",
               flexShrink: 0,
             }}
           >
-            <ClipboardList size={16} />
+            <ClipboardList size={16} />console
           </div>
 
           <div style={{ minWidth: 0 }}>
@@ -163,7 +163,7 @@ export function ChecklistRunSection({
                           {it.description}
                         </div>
 
-                        <div
+                        {/* <div
                           style={{
                             display: "flex",
                             gap: 6,
@@ -172,7 +172,7 @@ export function ChecklistRunSection({
                           }}
                         >
                           {it.isRequired && <Badge label="Obrigatório" variant="blue" />}
-                        </div>
+                        </div> */}
                       </div>
                     </Td>
 
@@ -239,7 +239,7 @@ export function ChecklistRunSection({
                       <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                         <StatusPicker
                           value={currentStatus}
-                          disabled={!it.itemRunId || saving === it.itemRunId}
+                          disabled={true}
                           onChange={(status) => onSetStatus(it.itemRunId, status)}
                         />
 
@@ -259,6 +259,7 @@ export function ChecklistRunSection({
 
                     <Td>
                       <input
+                      
                         style={{
                           width: "100%",
                           padding: "9px 11px",
@@ -274,7 +275,7 @@ export function ChecklistRunSection({
                         }}
                         placeholder="Adicionar observação..."
                         defaultValue={it.observation ?? ""}
-                        disabled={!it.itemRunId || saving === it.itemRunId}
+                        disabled={true}
                         onFocus={(e) => {
                           e.currentTarget.style.borderColor = "#2563eb";
                           e.currentTarget.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.10)";

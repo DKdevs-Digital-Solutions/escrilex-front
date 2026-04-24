@@ -122,13 +122,13 @@ function softButtonStyle(active = false): React.CSSProperties {
     fontSize: 13,
     fontWeight: active ? 700 : 600,
     borderRadius: 10,
-    border: `1px solid ${active ? UI.primary : UI.border}`,
-    background: active ? UI.primary : UI.surface,
+    border: `1px solid #ccc`,
+    background: active ? "#012942" : UI.surface,
     color: active ? "#fff" : UI.textSoft,
     cursor: "pointer",
     transition: "all 0.18s ease",
     fontFamily: "inherit",
-    boxShadow: active ? "0 8px 20px rgba(37,99,235,0.18)" : "none",
+     boxShadow: active ? "0 8px 20px rgba(37,99,235,0.18)" : "none",
   };
 }
 
@@ -160,7 +160,7 @@ function primaryButtonStyle(disabled?: boolean): React.CSSProperties {
     fontWeight: 700,
     borderRadius: 10,
     border: "none",
-    background: UI.primary,
+    background: "#012942",
     color: "#fff",
     cursor: disabled ? "not-allowed" : "pointer",
     transition: "all 0.18s ease",
@@ -184,34 +184,48 @@ function SummaryCard({
   label,
   value,
   hint,
+  variant = "blue", // Nova prop para definir a cor
 }: {
   icon: React.ReactNode;
   label: string;
   value: React.ReactNode;
   hint?: string;
+  variant?: "blue" | "green" | "purple" | "orange";
 }) {
+  // Configuração de cores por variante
+  const colors = {
+    blue: { bg: "#eff6ff", text: "#1d4ed8", border: "#dbeafe" },
+    purple: { bg: "#f5f3ff", text: "#6d28d9", border: "#ede9fe" },
+    green: { bg: "#f0fdf4", text: "#15803d", border: "#dcfce7" },
+    orange: { bg: "#fff7ed", text: "#c2410c", border: "#ffedd5" },
+  };
+
+  const style = colors[variant];
+
   return (
     <div
       style={{
         ...cardShellStyle(),
-        padding: 16,
+        padding: "18px 16px", // Um pouco mais de respiro
         minHeight: 100,
         display: "flex",
         alignItems: "flex-start",
-        gap: 12,
+        gap: 14,
+        border: "1px solid #f1f5f9", // Borda externa sutil
+        boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
       }}
     >
       <div
         style={{
-          width: 40,
-          height: 40,
-          borderRadius: 12,
+          width: 42,
+          height: 42,
+          borderRadius: 10,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: UI.primarySoft,
-          color: UI.primary,
-          border: "1px solid #dbeafe",
+          background: style.bg,
+          color: style.text,
+          border: `1px solid ${style.border}`,
           flexShrink: 0,
         }}
       >
@@ -221,26 +235,30 @@ function SummaryCard({
       <div style={{ minWidth: 0 }}>
         <div
           style={{
-            fontSize: 11,
-            fontWeight: 700,
+            fontSize: 10.5,
+            fontWeight: 800,
             color: UI.textMuted,
             textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            marginBottom: 6,
+            letterSpacing: "0.05em",
+            marginBottom: 4,
           }}
         >
           {label}
         </div>
-        <div style={{ fontSize: 22, fontWeight: 800, color: UI.text, lineHeight: 1.1 }}>
+        <div style={{ fontSize: 20, fontWeight: 800, color: UI.text, lineHeight: 1.2 }}>
           {value}
         </div>
         {hint && (
-          <div style={{ fontSize: 12.5, color: UI.textMuted, marginTop: 6 }}>{hint}</div>
+          <div style={{ fontSize: 12, color: "#64748b", marginTop: 4, fontWeight: 500 }}>
+            {hint}
+          </div>
         )}
       </div>
     </div>
   );
 }
+
+
 
 function TopPanel({
   title,
@@ -270,24 +288,7 @@ function TopPanel({
         }}
       >
         <div>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "6px 10px",
-              borderRadius: 999,
-              border: "1px solid #dbeafe",
-              background: "#f8fbff",
-              color: UI.primary,
-              fontWeight: 700,
-              fontSize: 12,
-              marginBottom: 10,
-            }}
-          >
-            <Sparkles size={13} />
-            Visão geral
-          </div>
+          
 
           <div style={{ fontSize: 21, fontWeight: 800, color: UI.text }}>{title}</div>
           {subtitle && (
@@ -891,8 +892,7 @@ export function CompanyDetail({
           }
         />
 
-        <div
-          style={{
+       <div style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "stretch",
@@ -900,10 +900,10 @@ export function CompanyDetail({
             marginBottom: 18,
             width: "100%",
             flexWrap: "wrap",
-          }}
-        >
+        }}>
           <div style={{ flex: 1, minWidth: 220 }}>
             <SummaryCard
+              variant="blue" // Foco institucional
               icon={<Building2 size={18} />}
               label="Empresa"
               value={company.nomeFantasia || company.razaoSocial || "—"}
@@ -913,6 +913,7 @@ export function CompanyDetail({
 
           <div style={{ flex: 1, minWidth: 220 }}>
             <SummaryCard
+              variant="purple" // Foco em pessoas
               icon={<Users size={18} />}
               label="Sócios"
               value={socios.length}
@@ -922,15 +923,17 @@ export function CompanyDetail({
 
           <div style={{ flex: 1, minWidth: 220 }}>
             <SummaryCard
+              variant="green" // Foco em conclusão/sucesso
               icon={<ClipboardCheck size={18} />}
               label="Checklist"
               value={`${pct}%`}
-              hint={`${doneItems}/${totalItems} itens concluídos`}
+              hint={`${doneItems}/${totalItems} concluídos`}
             />
           </div>
 
           <div style={{ flex: 1, minWidth: 220 }}>
             <SummaryCard
+              variant="orange" // Foco em atenção/setores
               icon={<History size={18} />}
               label="Responsáveis"
               value={sectors.length}
@@ -968,7 +971,7 @@ export function CompanyDetail({
         )}
 
         {activeTab === "socios" && (
-          <div style={{ ...cardShellStyle(), padding: 14 }}>
+          <div className="socios-section" style={{ ...cardShellStyle(), padding: 14 }}>
             <CompanyPartnersTab
               socios={socios}
               onAdd={() => {
@@ -1067,6 +1070,7 @@ export function CompanyDetail({
         footer={
           <>
             <button
+              className="btn"
               onClick={() => {
                 setSocioModal(false);
                 setEditSocio(null);
@@ -1077,6 +1081,7 @@ export function CompanyDetail({
             </button>
 
             <button
+              className="btn"
               onClick={handleSaveSocio}
               disabled={!socioForm.nomeCompleto.trim() || savingSocio}
               style={primaryButtonStyle(!socioForm.nomeCompleto.trim() || savingSocio)}

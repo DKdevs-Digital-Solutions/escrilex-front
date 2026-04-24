@@ -31,12 +31,20 @@ export function ChecklistRunHeader({
   const progressBg = pct === 100 ? "#f0fdf4" : "#eff6ff";
   const progressBorder = pct === 100 ? "#bbf7d0" : "#bfdbfe";
 
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 999);
+
+  React.useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth <= 999);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   return (
     <div
       style={{
         marginBottom: 22,
-        padding: "22px 24px",
-        borderRadius: 22,
+        padding: isMobile ? "18px 14px" : "22px 24px",
+        borderRadius: isMobile ? 18 : 22,
         border: "1px solid #e2e8f0",
         background: "linear-gradient(135deg, #ffffff 0%, #f8fbff 55%, #eef6ff 100%)",
         boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
@@ -58,7 +66,8 @@ export function ChecklistRunHeader({
             alignItems: "flex-start",
             gap: 14,
             flex: 1,
-            minWidth: 280,
+            minWidth: 0,
+            width: "100%",  
           }}
         >
           <button
@@ -92,26 +101,7 @@ export function ChecklistRunHeader({
           </button>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "6px 10px",
-                borderRadius: 999,
-                background: "#eff6ff",
-                color: "#1d4ed8",
-                fontSize: 12,
-                fontWeight: 800,
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-                border: "1px solid #bfdbfe",
-                marginBottom: 10,
-              }}
-            >
-              <ClipboardCheck size={14} strokeWidth={2.3} />
-              Execução do checklist
-            </div>
+            
 
             <div
               style={{
@@ -124,7 +114,7 @@ export function ChecklistRunHeader({
               <h1
                 style={{
                   margin: 0,
-                  fontSize: 28,
+                  fontSize: isMobile ? 22 : 28,
                   fontWeight: 900,
                   color: "#0f172a",
                   letterSpacing: "-0.04em",
@@ -187,6 +177,8 @@ export function ChecklistRunHeader({
                       background: "#fff",
                       border: "1px solid #e2e8f0",
                       fontWeight: 700,
+                      wordBreak: "break-word",
+                      maxWidth: "100%",
                     }}
                   >
                     {run.company.cnpj}
@@ -210,13 +202,15 @@ export function ChecklistRunHeader({
         </div>
 
         <div
-          style={{
-            minWidth: 180,
+         style={{
+            width: isMobile ? "100%" : "auto",
+            minWidth: isMobile ? 0 : 180,
+            boxSizing: "border-box",
             padding: "14px 16px",
             borderRadius: 16,
             background: progressBg,
             border: `1px solid ${progressBorder}`,
-            textAlign: "right",
+            textAlign: isMobile ? "left" : "right",
           }}
         >
           <div

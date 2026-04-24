@@ -69,6 +69,11 @@ type SectorVisual = {
 function getSectorVisual(sectorName?: string): SectorVisual {
   const name = (sectorName || "").toLowerCase().trim();
 
+
+  function getInitial(name: string) {
+    return name?.trim()?.charAt(0)?.toUpperCase() || "?";
+  }
+
   const presets: { match: string[]; visual: SectorVisual }[] = [
     {
       match: ["financeiro", "finanças", "fiscal"],
@@ -189,15 +194,35 @@ function getSectorVisual(sectorName?: string): SectorVisual {
     },
   ];
 
-  const found = presets.find((p) => p.match.some((term) => name.includes(term)));
-  if (found) return found.visual;
+  const found = presets.find((p) =>
+  p.match.some((term) => name.toLowerCase().includes(term))
+);
 
-  return {
-    icon: <Building2 size={18} />,
-    bg: "#eff6ff",
-    color: "#2563eb",
-    border: "#bfdbfe",
-  };
+const visual = found?.visual || {
+  bg: "#eff6ff",
+  color: "#2563eb",
+  border: "#bfdbfe",
+};
+
+return {
+  ...visual,
+  icon: (
+    <div
+      style={{
+        width: 18,
+        height: 18,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 16,
+        fontWeight: 800,
+        color: visual.color,
+      }}
+    >
+      {getInitial(name)}
+    </div>
+  ),
+};
 }
 
 function getInitials(name?: string) {
@@ -227,13 +252,13 @@ function RowCard({
   return (
     <div
     style={{
-        display: "grid",
-        gridTemplateColumns: "minmax(220px, 1.1fr) minmax(240px, 1fr) minmax(220px, 1fr)",
-        gap: 14,
-        alignItems: "center",
-        padding: 16,
-        borderBottom: `1px solid ${UI.borderSoft}`,
-        background: `linear-gradient(90deg, ${sectorVisual.bg} 0%, #ffffff 22%)`,
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+      gap: 14,
+      alignItems: "stretch",
+      padding: 16,
+      borderBottom: `1px solid ${UI.borderSoft}`,
+      background: `linear-gradient(90deg, ${sectorVisual.bg} 0%, #ffffff 22%)`,
     }}
     >
       <div style={{ minWidth: 0 }}>
@@ -310,7 +335,8 @@ function RowCard({
           onChange={(e) => onChange(e.target.value)}
           style={{
             width: "100%",
-            minWidth: 180,
+            minWidth: 0,
+            boxSizing: "border-box",
             padding: "11px 12px",
             fontSize: 13,
             border: `1px solid ${UI.border}`,
@@ -457,7 +483,7 @@ export function CompanyResponsiblesTab({
             padding: "10px 0 18px 0",
         }}
       action={
-        <button onClick={onSave} disabled={savingResp} style={primaryButtonStyle(savingResp)}>
+        <button onClick={onSave} disabled={savingResp} className="btnAdd">
           <Save size={14} strokeWidth={2} />
           {savingResp ? "Salvando..." : "Salvar responsáveis"}
         </button>
@@ -475,7 +501,7 @@ export function CompanyResponsiblesTab({
             border: `1px solid ${UI.border}`,
             background: "linear-gradient(180deg, #ffffff 0%, #fbfdff 100%)",
             boxShadow: "none",
-            padding: 18,
+            padding: 10,
           }}
         >
           <div
@@ -487,25 +513,8 @@ export function CompanyResponsiblesTab({
               flexWrap: "wrap",
             }}
           >
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "6px 10px",
-                  borderRadius: 999,
-                  background: UI.primarySoft,
-                  color: UI.primary,
-                  fontSize: 12,
-                  fontWeight: 800,
-                  border: `1px solid ${UI.border}`,
-                  marginBottom: 10,
-                }}
-              >
-                <ShieldCheck size={14} />
-                Organização por setor
-              </div>
+            <div style={{ minWidth: 0, position:"relative", top:"9px", padding:"10px" }}>
+          
 
               <div
                 style={{
@@ -617,6 +626,7 @@ export function CompanyResponsiblesTab({
           {sectors.length ? (
             <>
               <div
+                className="title-section"
                 style={{
                   display: "grid",
                   gridTemplateColumns:

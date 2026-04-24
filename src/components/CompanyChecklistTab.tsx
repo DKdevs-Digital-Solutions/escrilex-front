@@ -253,7 +253,7 @@ function ChecklistRow({
               flexWrap: "wrap",
             }}
           >
-            {item.isRequired && <Badge label="Obrigatório" variant="blue" />}
+            {/* {item.isRequired && <Badge label="Obrigatório" variant="blue" />} */}
             {item.dueDate && (
               <Badge
                 label={`Prazo ${fmtDate(item.dueDate)}`}
@@ -363,24 +363,7 @@ export function CompanyChecklistTab({
           }}
         >
           <div style={{ minWidth: 0 }}>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "6px 10px",
-                borderRadius: 999,
-                background: UI.primarySoft,
-                color: UI.primary,
-                fontSize: 12,
-                fontWeight: 800,
-                border: `1px solid ${UI.border}`,
-                marginBottom: 10,
-              }}
-            >
-              <ClipboardCheck size={14} />
-              Gestão de checklist
-            </div>
+            
 
             <div
               style={{
@@ -409,6 +392,7 @@ export function CompanyChecklistTab({
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {(["ENTRADA", "SAIDA"] as ChecklistType[]).map((t) => (
               <button
+                className="btn"
                 key={t}
                 onClick={() => setChecklistType(t)}
                 style={softButtonStyle(checklistType === t)}
@@ -420,6 +404,7 @@ export function CompanyChecklistTab({
 
             {!loadingChecklist && run?.id && (
               <button
+                className="btn"
                 onClick={() => onOpenRun(run.id)}
                 title="Abrir em tela cheia"
                 style={ghostButtonStyle()}
@@ -448,21 +433,21 @@ export function CompanyChecklistTab({
           }}
         >
           <KpiCard
-            icon={<ListChecks size={18} />}
+            icon={<ListChecks size={18} color="#22c55e" />}
             label="Itens concluídos"
             value={`${doneItems}/${totalItems}`}
             hint="Total executado"
             UI={UI}
           />
           <KpiCard
-            icon={<CheckCircle2 size={18} />}
+            icon={<CheckCircle2 size={18} color="#d45ddf" />}
             label="Progresso"
             value={`${pct}%`}
             hint="Percentual atual"
             UI={UI}
           />
           <KpiCard
-            icon={<TimerReset size={18} />}
+            icon={<TimerReset size={18} color="orange" />}
             label="Âncora"
             value={
               run

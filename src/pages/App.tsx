@@ -299,7 +299,7 @@ const topIconBtn: React.CSSProperties = {
 
         {logoutConfirm && (
           <LogoutConfirm
-            onConfirm={() => { setToken(null); setLogoutConfirm(false); }}
+            onConfirm={() => { setToken(null); setLogoutConfirm(false); setTimeout(() => window.location.reload(), 300); }}
             onCancel={() => setLogoutConfirm(false)}
           />
         )}
@@ -614,6 +614,7 @@ const topIconBtn: React.CSSProperties = {
       </button>
     )}
 
+{!isMobile && (
     <div style={{ minWidth: 0 }}>
       {/* breadcrumb */}
       <div
@@ -694,11 +695,15 @@ const topIconBtn: React.CSSProperties = {
         >
           {PAGE_TITLES[page]}
         </span>
+       
       </div>
 
       
     </div>
+)}
+
   </div>
+  
 
   {/* ações da direita */}
   <div
@@ -809,7 +814,7 @@ const topIconBtn: React.CSSProperties = {
 </header>
 
             {/* Content */}
-            <main style={{ flex: 1, overflow: "auto", padding: 28 }}
+            <main style={{ flex: 1, overflow: "auto", padding: isMobile ? 15 : 28 }}
               onClick={() => setNotifOpen(false)}>
               {page === "companies" && <Companies onOpenCompany={id => { setCompanyId(id); setPage("company"); }} />}
               {page === "company" && companyId && (

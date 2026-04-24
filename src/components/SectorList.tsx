@@ -125,22 +125,7 @@ export function SectorList({
     const inactivePercent = totalCount ? (inactiveCount / totalCount) * 100 : 0;
 
 
-    const sectorIcons = [
-  Building2,
-  Cpu,
-  Wallet,
- Briefcase,
-  Shield,
-  Users,
-  Wrench,
-  Headphones,
-  FileText,
-  FolderKanban,
-  ChartColumn,
-  Settings,
-  Boxes,
-  BadgeHelp,
-];
+
 
 const sectorGradients = [
   ["#2563eb", "#1d4ed8"], // azul
@@ -164,21 +149,28 @@ function hashString(str: string) {
   return Math.abs(hash);
 }
 
-function getSectorVisual(name: string) {
-  const hash = hashString(name.trim().toLowerCase());
 
-  const Icon = sectorIcons[hash % sectorIcons.length];
+function getSectorVisual(name: string) {
+  const cleanName = name.trim();
+  // Pega a primeira letra e deixa em maiúsculo
+  const initial = cleanName.charAt(0).toUpperCase();
+  
+  const hash = hashString(cleanName.toLowerCase());
+
+  // Mantemos o cálculo do hash para as cores, para que cada letra 
+  // tenha um gradiente consistente baseado no nome do setor
   const [c1, c2] = sectorGradients[hash % sectorGradients.length];
 
   return {
-    Icon,
+    initial, // Retornamos a letra em vez do Icon
     gradient: `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`,
     shadow: `0 8px 18px ${hexToRgba(c1, 0.32)}`,
-    softBg: hexToRgba(c1, 0.10),
+    softBg: hexToRgba(c1, 0.1),
     softBorder: hexToRgba(c1, 0.22),
     accent: c1,
   };
 }
+
 
 function hexToRgba(hex: string, alpha: number) {
   const clean = hex.replace("#", "");
@@ -349,7 +341,6 @@ const filteredItems = items.filter((item) => {
               <tbody>
                {filteredItems.map((s) => {
                     const visual = getSectorVisual(s.name);
-                    const Icon = visual.Icon;
 
                     return (
                         <tr key={s.id}
@@ -392,9 +383,10 @@ const filteredItems = items.filter((item) => {
                             justifyContent: "center",
                             boxShadow: visual.shadow,
                             flexShrink: 0,
+                            fontWeight:900
                         }}
                         >
-                        <Icon size={18} strokeWidth={2.2} />
+                        {visual.initial}
                         </div>
 
                         <div>

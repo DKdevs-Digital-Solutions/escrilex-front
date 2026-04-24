@@ -473,7 +473,7 @@ export function UserList({
                             height: 42,
                             borderRadius: 14,
                             background: u.active
-                              ? "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)"
+                              ? "#BB9F58"
                               : "linear-gradient(135deg, #94a3b8 0%, #64748b 100%)",
                             color: "#fff",
                             display: "flex",
