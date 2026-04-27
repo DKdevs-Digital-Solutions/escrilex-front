@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { LogIn, Eye, EyeOff, Loader2 } from "lucide-react";
-import { LoginForm } from "../components/formAuth";
+import { LoginForm } from "../components/FormAuth";
 import { useAuth } from "../hooks/useAuth";
 import Logo from "../assets/logo.png";
 import { Zap, ShieldCheck, Activity } from "lucide-react";

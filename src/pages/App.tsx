@@ -13,11 +13,15 @@ import { ConfirmProvider } from "../confirm";
 import {
   Briefcase, FileText, Users, Layers, Search, Bell, LogOut,
   ChevronLeft, ChevronRight, Menu, ClipboardList, AlertTriangle,
+  Mail,
+  Activity,
 } from "lucide-react";
 import { useMe } from "../hooks/useMe";
 import Logo from "../assets/logo.png";
+import EmailNotificationsPage from "./Emailpage";
+import { DashboardPage } from "./Dashboard";
 
-type Page = "companies" | "company" | "users" | "sectors" | "templates" | "checklistRun" | "audit";
+type Page = "companies" | "company" | "users" | "sectors" | "templates" | "checklistRun" | "audit" | "emailSettings" | "dashboard";
 
 interface NavItem {
   id: Page;
@@ -31,6 +35,13 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
   {
     label: "PRINCIPAL",
     items: [
+       {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: <Activity size={15} strokeWidth={1.8} />,
+      roles: ["ADMIN","GESTOR_EMPRESA"],
+      badge: { text: "LIVE", color: "#10b981" },
+    },
       { id: "companies", label: "Empresas", icon: <Briefcase size={15} strokeWidth={1.8} />, roles: [] },
       { id: "templates", label: "Templates", icon: <FileText size={15} strokeWidth={1.8} />, roles: ["ADMIN", "GESTOR_EMPRESA"] },
     ],
@@ -44,14 +55,28 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
         id: "audit", label: "Auditoria", icon: <Search size={15} strokeWidth={1.8} />, roles: ["ADMIN"],
         badge: { text: "LOG", color: "#2563eb" }
       },
+       {
+        id: "emailSettings",
+        label: "E-mail",
+        icon: <Mail size={15} strokeWidth={1.8} />,
+        roles: ["ADMIN","GESTOR_EMPRESA"],
+        badge: { text: "SMTP", color: "#10b981" }
+      },
+     
     ],
   },
 ];
 
 const PAGE_TITLES: Record<Page, string> = {
-  companies: "Empresas", company: "Detalhe da Empresa",
-  users: "Usuários", sectors: "Setores",
-  templates: "Templates", checklistRun: "Checklist", audit: "Auditoria",
+  dashboard: "Dashboard",
+  companies: "Empresas", 
+  company: "Detalhe da Empresa",
+  users: "Usuários", 
+  sectors: "Setores",
+  templates: "Templates", 
+  checklistRun: "Checklist", 
+  audit: "Auditoria",
+  emailSettings: "Notificações por E-mail",
 };
 
 // ── Confirm logout modal ──────────────────────────────────────────────────────
@@ -116,7 +141,7 @@ function LogoutConfirm({ onConfirm, onCancel }: { onConfirm: () => void; onCance
 
 export function App() {
   // const [me, setMe] = useState<any>(null);
-  const [page, setPage] = useState<Page>("companies");
+  const [page, setPage] = useState<Page>("dashboard");
   const [companyId, setCompanyId] = useState("");
   const [runId, setRunId] = useState("");
   const [collapsed, setCollapsed] = useState(false);
@@ -825,10 +850,12 @@ const topIconBtn: React.CSSProperties = {
               {page === "checklistRun" && runId && (
                 <ChecklistRun runId={runId} onBack={() => { setRunId(""); setPage(companyId ? "company" : "companies"); }} />
               )}
+              {page === "dashboard" && isAdmin && <DashboardPage />}
               {page === "templates" && canEditTemplates && <Templates />}
               {page === "users" && isAdmin && <AdminUsers />}
               {page === "sectors" && isAdmin && <AdminSectors />}
               {page === "audit" && isAdmin && <Audit />}
+              {page === "emailSettings" && isAdmin && <EmailNotificationsPage />}
             </main>
           </div>
         </div>
