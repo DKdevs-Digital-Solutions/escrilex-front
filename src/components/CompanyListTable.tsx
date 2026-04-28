@@ -1,11 +1,12 @@
 import React from "react";
 import { Table, Thead, Th, Td, Badge, Empty } from "../ui";
-import { Eye, Building2, Hash, FolderTree } from "lucide-react";
+import { Eye, Building2, Hash, FolderTree, PowerOff, Power } from "lucide-react";
 import { Avatar } from "./Avatar";
 
 type Props = {
   items: any[];
   onOpenCompany: (id: string) => void;
+  onToggleActive: (id: string, active: boolean) => void;
 };
 
 const thStyle: React.CSSProperties = {
@@ -25,7 +26,7 @@ const tdBaseStyle: React.CSSProperties = {
   background: "transparent",
 };
 
-export function CompanyListTable({ items, onOpenCompany }: Props) {
+export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props) {
   if (!items.length) {
     return <Empty message="Nenhuma empresa encontrada." />;
   }
@@ -217,7 +218,7 @@ export function CompanyListTable({ items, onOpenCompany }: Props) {
             </Td>
 
             {/* Ação */}
-            <Td
+           <Td
               align="right"
               style={{
                 ...tdBaseStyle,
@@ -226,41 +227,72 @@ export function CompanyListTable({ items, onOpenCompany }: Props) {
                 borderBottomRightRadius: 16,
               }}
             >
-              <button
-                title="Abrir empresa"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenCompany(c.id);
-                }}
+              <div
                 style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 12,
-                  border: "1px solid #e2e8f0",
-                  background: "#fff",
-                  color: "#64748b",
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "all 0.18s ease",
-                  boxShadow: "0 4px 10px rgba(15,23,42,0.05)",
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.background = "#eef2ff";
-                  e.currentTarget.style.borderColor = "#c7d2fe";
-                  e.currentTarget.style.color = "#4f46e5";
-                  e.currentTarget.style.transform = "translateY(-1px)";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.background = "#fff";
-                  e.currentTarget.style.borderColor = "#e2e8f0";
-                  e.currentTarget.style.color = "#64748b";
-                  e.currentTarget.style.transform = "translateY(0)";
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 8,
                 }}
               >
-                <Eye size={18} strokeWidth={2.2} />
-              </button>
+                {/* 👁 Ver empresa */}
+                <button
+                  title="Abrir empresa"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenCompany(c.id);
+                  }}
+                  style={actionBtnStyle("#4f46e5")}
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget;
+                    el.style.background = "rgba(79,70,229,0.12)";
+                    el.style.borderColor = "#c7d2fe";
+                    el.style.transform = "translateY(-1px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget;
+                    el.style.background = "#fff";
+                    el.style.borderColor = "#e2e8f0";
+                    el.style.transform = "translateY(0)";
+                  }}
+                >
+                  <Eye size={17} strokeWidth={2.2} />
+                </button>
+
+                {/* 🔄 Ativar / Desativar */}
+                <button
+                  title={c.active ? "Desativar empresa" : "Ativar empresa"}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleActive(c.id, !c.active);
+                  }}
+                  style={actionBtnStyle(c.active ? "#ef4444" : "#16a34a")}
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget;
+
+                    if (c.active) {
+                      el.style.background = "rgba(239,68,68,0.12)";
+                      el.style.borderColor = "#fecaca";
+                    } else {
+                      el.style.background = "rgba(34,197,94,0.12)";
+                      el.style.borderColor = "#bbf7d0";
+                    }
+
+                    el.style.transform = "translateY(-1px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget;
+                    el.style.background = "#fff";
+                    el.style.borderColor = "#e2e8f0";
+                    el.style.transform = "translateY(0)";
+                  }}
+                >
+                  {c.active ? (
+                    <PowerOff size={17} strokeWidth={2.2} />
+                  ) : (
+                    <Power size={17} strokeWidth={2.2} />
+                  )}
+                </button>
+              </div>
             </Td>
           </tr>
         ))}
@@ -268,4 +300,21 @@ export function CompanyListTable({ items, onOpenCompany }: Props) {
       </Table>
     </div>
   );
+}
+
+function actionBtnStyle(color: string): React.CSSProperties {
+  return {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    border: "1px solid #e2e8f0",
+    background: "#fff",
+    color,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.18s ease",
+    boxShadow: "0 4px 10px rgba(15,23,42,0.05)",
+  };
 }

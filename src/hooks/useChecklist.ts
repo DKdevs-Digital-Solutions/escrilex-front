@@ -33,10 +33,6 @@ export function useChecklist(companyId: string) {
     return checklistRepository.updateItem(id, payload);
   }
 
-  async function createItem(payload: any) {
-    return checklistRepository.createItem(payload);
-  }
-
   return {
     runs,
     run,
@@ -46,7 +42,6 @@ export function useChecklist(companyId: string) {
     getRun,
     startRun,
     updateItem,
-    createItem,
     setLoadingChecklist
   };
 }

@@ -22,9 +22,4 @@ export const checklistRepository = {
     const { data } = await api.patch(`/api/checklists/item/${id}`, payload);
     return data;
   },
-
-  createItem: async (payload: any) => {
-    const { data } = await api.post(`/api/checklists/item`, payload);
-    return data;
-  },
 };

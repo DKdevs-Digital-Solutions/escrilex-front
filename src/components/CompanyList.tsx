@@ -5,9 +5,12 @@ type Props = {
   items: any[];
   loading: boolean;
   onOpenCompany: (id: string) => void;
+  onToggleActive: (id: string, active: boolean) => void;
 };
 
-export function CompanyList({ items, loading, onOpenCompany }: Props) {
+export function CompanyList({ items, loading, onOpenCompany, onToggleActive }: Props) {
+
+  
   if (loading) {
     return (
       <div
@@ -220,7 +223,7 @@ export function CompanyList({ items, loading, onOpenCompany }: Props) {
 
       {/* tabela */}
       <div style={{ padding: 10 }}>
-        <CompanyListTable items={items} onOpenCompany={onOpenCompany} />
+        <CompanyListTable items={items} onOpenCompany={onOpenCompany} onToggleActive={onToggleActive}/>
       </div>
     </div>
   );

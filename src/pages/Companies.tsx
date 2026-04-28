@@ -68,20 +68,22 @@ const PAGE_SIZE = 20;
 
 export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => void }) {
   const { toast } = useToast();
-  const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<CompanyForm>(EMPTY_FORM);
   const [loadingCnpj, setLoadingCnpj] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [filterSituacao, setFilterSituacao] = useState("");
   const [filterGrupo, setFilterGrupo] = useState("");
   const [page, setPage] = useState(1);
 
-  const { items, loading, create, buscarCnpj } = useCompanies();
+  const { items, loading, create, buscarCnpj, load, modalOpen,setModalOpen, saving } = useCompanies();
 
   useEffect(() => {
     setPage(1);
   }, [search, filterSituacao, filterGrupo]);
+
+    useEffect(() => {
+    load();
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
@@ -124,6 +126,21 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
     transition: "all 0.16s ease",
     height: 50,
   };
+
+  async function handleToggleActive(id: string, active: boolean) {
+  try {
+    await companyRepository.update(id, { active });
+
+    toast(
+      active ? "Empresa ativada com sucesso" : "Empresa desativada",
+      "success"
+    );
+
+    await load(); // recarrega lista
+  } catch (e: any) {
+    toast(e.message || "Erro ao atualizar status", "error");
+  }
+}
 
   return (
     <div>
@@ -321,7 +338,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
                 right: 10,
                 top: "50%",
                 height: 50,
-                transform: "translateY(-50%)",
+                transform: "translateY(-15%)",
                 background: "none",
                 border: "none",
                 cursor: "pointer",
@@ -334,64 +351,87 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
           )}
         </div>
 
-        <select
+        <PremiumSelect
+          label="Situação"
           value={filterSituacao}
-          onChange={(e) => setFilterSituacao(e.target.value)}
-          style={{ ...iStyle, minWidth: 170 }}
-        >
-          <option value="">Situação (todas)</option>
-          <option value="ATIVA">Ativa</option>
-          <option value="SAIDA">Saída</option>
-          <option value="SUSPENSA">Suspensa</option>
-          <option value="ENCERRADA">Encerrada</option>
-        </select>
+          onChange={setFilterSituacao}
+          options={[
+            { value: "", label: "Todas" },
+            { value: "ATIVA", label: "Ativa" },
+            { value: "SAIDA", label: "Saída" },
+            { value: "SUSPENSA", label: "Suspensa" },
+            { value: "ENCERRADA", label: "Encerrada" },
+          ]}
+        />
 
         {grupos.length > 0 && (
-          <select
+          <PremiumSelect
+            label="Grupo"
             value={filterGrupo}
-            onChange={(e) => setFilterGrupo(e.target.value)}
-            style={{ ...iStyle, minWidth: 170 }}
-          >
-            <option value="">Grupo (todos)</option>
-            {grupos.map((g) => (
-              <option key={g} value={g}>
-                {g}
-              </option>
-            ))}
-          </select>
+            onChange={setFilterGrupo}
+            options={[
+              { value: "", label: "Todos" },
+              ...grupos.map((g) => ({ value: g, label: g })),
+            ]}
+          />
         )}
 
         {hasFilters && (
           <button
+            type="button"
             onClick={() => {
               setSearch("");
               setFilterSituacao("");
               setFilterGrupo("");
             }}
             style={{
+              height: 52,
+              padding: "0 18px",
               display: "inline-flex",
               alignItems: "center",
-              gap: 6,
-              padding: "10px 14px",
-              fontSize: 14,
-              fontWeight: 700,
-              height: 50,
-              borderRadius: 12,
-              border: "1px solid #e2e8f0",
-              background: "#fff",
-              color: "#64748b",
+              gap: 8,
+              borderRadius: 14,
+              border: "1px solid rgba(239,68,68,0.25)",
+              background:
+                "linear-gradient(135deg, rgba(239,68,68,0.08), rgba(248,113,113,0.08))",
+              color: "#ef4444",
+              fontSize: 13.5,
+              fontWeight: 800,
               cursor: "pointer",
               fontFamily: "inherit",
-              transition: "all 0.16s ease",
+              transition: "all 0.18s ease",
+              boxShadow: "0 6px 18px rgba(239,68,68,0.08)",
+              backdropFilter: "blur(6px)",
             }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = "#f8fafc";
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background =
+                "linear-gradient(135deg, rgba(239,68,68,0.16), rgba(248,113,113,0.16))";
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow =
+                "0 10px 24px rgba(239,68,68,0.18)";
             }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = "#fff";
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background =
+                "linear-gradient(135deg, rgba(239,68,68,0.08), rgba(248,113,113,0.08))";
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow =
+                "0 6px 18px rgba(239,68,68,0.08)";
             }}
           >
-            <X size={13} />
+            <div
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 999,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "rgba(239,68,68,0.12)",
+              }}
+            >
+              <X size={14} />
+            </div>
+
             Limpar filtros
           </button>
         )}
@@ -418,6 +458,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
               items={paginated}
               loading={loading}
               onOpenCompany={onOpenCompany}
+              onToggleActive={handleToggleActive}
             />
 
            
@@ -522,6 +563,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
         loadingCnpj={loadingCnpj}
         onSubmit={create}
         onBuscarCnpj={buscarCnpj}
+        toast={toast}
       />
     </div>
   );
@@ -558,4 +600,209 @@ function pageNumberBtn(active: boolean): React.CSSProperties {
     fontFamily: "inherit",
     transition: "all 0.16s ease",
   };
+}
+
+
+import { ChevronDown } from "lucide-react";
+import { companyRepository } from "../repository/company.repository";
+
+type SelectTheme = {
+  border: string;
+  bg: string;
+  icon: string;
+  text: string;
+  soft: string;
+  shadow: string;
+  iconShadow: string;
+};
+
+const statusTheme: Record<string, SelectTheme> = {
+  ATIVA: {
+    border: "rgba(34,197,94,0.42)",
+    bg: "linear-gradient(135deg, rgba(34,197,94,0.13), rgba(255,255,255,0.96))",
+    icon: "linear-gradient(135deg, #16a34a, #86efac)",
+    text: "#15803d",
+    soft: "rgba(34,197,94,0.14)",
+    shadow: "0 10px 26px rgba(34,197,94,0.14)",
+    iconShadow: "0 6px 16px rgba(34,197,94,0.26)",
+  },
+  SAIDA: {
+    border: "rgba(234,179,8,0.45)",
+    bg: "linear-gradient(135deg, rgba(234,179,8,0.14), rgba(255,255,255,0.96))",
+    icon: "linear-gradient(135deg, #ca8a04, #fde68a)",
+    text: "#a16207",
+    soft: "rgba(234,179,8,0.15)",
+    shadow: "0 10px 26px rgba(234,179,8,0.14)",
+    iconShadow: "0 6px 16px rgba(234,179,8,0.26)",
+  },
+  SUSPENSA: {
+    border: "rgba(234,179,8,0.45)",
+    bg: "linear-gradient(135deg, rgba(234,179,8,0.14), rgba(255,255,255,0.96))",
+    icon: "linear-gradient(135deg, #ca8a04, #fde68a)",
+    text: "#a16207",
+    soft: "rgba(234,179,8,0.15)",
+    shadow: "0 10px 26px rgba(234,179,8,0.14)",
+    iconShadow: "0 6px 16px rgba(234,179,8,0.26)",
+  },
+  ENCERRADA: {
+    border: "rgba(249,45,22,0.42)",
+    bg: "linear-gradient(135deg, rgba(249,45,22,0.13), rgba(255,255,255,0.96))",
+    icon: "linear-gradient(135deg, #f93c16, rgba(249,45,22,0.42))",
+    text: "#c2410c",
+    soft: "rgba(249,56,22,0.14)",
+    shadow: "0 10px 26px rgba(249,45,22,0.14)",
+    iconShadow: "0 6px 16px rgba(249,64,22,0.26)",
+  },
+};
+
+const defaultTheme: SelectTheme = {
+  border: "rgba(187,159,88,0.45)",
+  bg: "linear-gradient(135deg, rgba(187,159,88,0.12), rgba(255,255,255,0.96))",
+  icon: "linear-gradient(135deg, #BB9F58, #f5da8b)",
+  text: "#967b35",
+  soft: "rgba(187,159,88,0.14)",
+  shadow: "0 10px 26px rgba(187,159,88,0.14)",
+  iconShadow: "0 6px 16px rgba(187,159,88,0.26)",
+};
+
+function getGroupTheme(name: string): SelectTheme {
+  const colors = [
+    ["#2563eb", "#93c5fd"],
+    ["#7c3aed", "#c4b5fd"],
+    ["#059669", "#6ee7b7"],
+    ["#db2777", "#f9a8d4"],
+    ["#0891b2", "#67e8f9"],
+    ["#4f46e5", "#a5b4fc"],
+  ];
+
+  let hash = 0;
+
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const [primary, softColor] = colors[Math.abs(hash) % colors.length];
+
+  return {
+    border: `${primary}55`,
+    bg: `linear-gradient(135deg, ${primary}20, rgba(255,255,255,0.96))`,
+    icon: `linear-gradient(135deg, ${primary}, ${softColor})`,
+    text: primary,
+    soft: `${primary}18`,
+    shadow: `0 10px 26px ${primary}22`,
+    iconShadow: `0 6px 16px ${primary}40`,
+  };
+}
+
+function PremiumSelect({
+  label,
+  value,
+  onChange,
+  options,
+  variant = "status",
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  variant?: "status" | "group";
+}) {
+  const selectedLabel =
+    options.find((opt) => opt.value === value)?.label || options[0]?.label || "";
+
+  const theme =
+    !value
+      ? defaultTheme
+      : variant === "status"
+      ? statusTheme[value] ?? defaultTheme
+      : getGroupTheme(value);
+
+  return (
+    <div style={{ position: "relative", minWidth: 215, height: 56 }}>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          width: "100%",
+          height: "100%",
+          padding: "20px 46px 7px 48px",
+          borderRadius: 18,
+          border: `1px solid ${theme.border}`,
+          background: theme.bg,
+          fontSize: 14,
+          fontWeight: 850,
+          color: "#0f172a",
+          outline: "none",
+          fontFamily: "inherit",
+          appearance: "none",
+          boxShadow: theme.shadow,
+          transition: "all 0.18s ease",
+          cursor: "pointer",
+        }}
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value} style={{ color: "#0f172a" }}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+
+      <div
+        style={{
+          position: "absolute",
+          left: 14,
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: 26,
+          height: 26,
+          borderRadius: 10,
+          display: "grid",
+          placeItems: "center",
+          background: theme.icon,
+          color: "#fff",
+          boxShadow: theme.iconShadow,
+          pointerEvents: "none",
+        }}
+      >
+        <span style={{ fontSize: 11, fontWeight: 900 }}>
+          {selectedLabel?.slice(0, 2).toUpperCase() || "•"}
+        </span>
+      </div>
+
+      <span
+        style={{
+          position: "absolute",
+          left: 48,
+          top: 8,
+          fontSize: 10,
+          fontWeight: 900,
+          color: theme.text,
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          pointerEvents: "none",
+        }}
+      >
+        {label}
+      </span>
+
+      <div
+        style={{
+          position: "absolute",
+          right: 12,
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: 30,
+          height: 30,
+          borderRadius: 999,
+          display: "grid",
+          placeItems: "center",
+          background: theme.soft,
+          color: theme.text,
+          pointerEvents: "none",
+        }}
+      >
+        <ChevronDown size={16} strokeWidth={2.4} />
+      </div>
+    </div>
+  );
 }

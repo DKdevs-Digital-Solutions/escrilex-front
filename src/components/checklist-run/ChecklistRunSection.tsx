@@ -48,7 +48,7 @@ export function ChecklistRunSection({
               flexShrink: 0,
             }}
           >
-            <ClipboardList size={16} />console
+            <ClipboardList size={16} />
           </div>
 
           <div style={{ minWidth: 0 }}>

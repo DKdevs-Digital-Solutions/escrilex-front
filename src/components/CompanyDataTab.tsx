@@ -60,11 +60,96 @@ function DataField({
             fontFamily: "inherit",
             background: "#fff",
             color: "#0f172a",
+            width: "100%",
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            fontSize: highlight ? 14.5 : 13.5,
+            color: "#0f172a",
+            fontWeight: highlight ? 800 : 600,
+            lineHeight: 1.35,
+            wordBreak: "break-word",
+          }}
+        >
+          {value ?? <span style={{ color: "#cbd5e1" }}>—</span>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+function DataSelectField({
+  label,
+  value,
+  editing,
+  editValue,
+  onEditChange,
+  options,
+  highlight = false,
+}: {
+  label: string;
+  value?: React.ReactNode;
+  editing?: boolean;
+  editValue?: string;
+  onEditChange?: (v: string) => void;
+  options: { value: string; label: string }[];
+  highlight?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 6,
+        padding: "14px 16px",
+        borderRadius: 14,
+        border: highlight ? "1px solid #dbeafe" : "1px solid #edf2f7",
+        background: highlight ? "#f8fbff" : "#fff",
+        minHeight: 78,
+        justifyContent: "center",
+        transition: "all 0.15s ease",
+      }}
+    >
+      <span
+        style={{
+          fontSize: 10.5,
+          fontWeight: 800,
+          color: "#94a3b8",
+          textTransform: "uppercase",
+          letterSpacing: "0.07em",
+        }}
+      >
+        {label}
+      </span>
+
+      {editing && onEditChange !== undefined ? (
+        <select
+          value={editValue ?? ""}
+          onChange={(e) => onEditChange(e.target.value)}
+          style={{
+            height: 40,
+            padding: "0 11px",
+            fontSize: 13,
+            borderRadius: 10,
+            border: "1.5px solid #BB9F58",
+            outline: "none",
+            fontFamily: "inherit",
+            background: "#fff",
+            color: "#0f172a",
             boxShadow: "0 0 0 3px rgba(201, 206, 215, 0.1)",
             width: "100%",
             boxSizing: "border-box",
           }}
-        />
+        >
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
       ) : (
         <div
           style={{
@@ -206,7 +291,7 @@ export function CompanyDataTab({
         borderRadius: 18,
         border: "1px solid #e5e7eb",
         background: "linear-gradient(180deg, #ffffff 0%, #fcfdff 100%)",
-        boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
+        boxShadow: "none",
         overflow: "hidden",
         padding: 0,
       }}
@@ -369,14 +454,22 @@ export function CompanyDataTab({
           editValue={editForm.motivoEntrada}
           onEditChange={ef("motivoEntrada")}
         />
-        <DataField
+
+        <DataSelectField
           label="Situação"
-          value={company.situacao}
+          value={company?.situacao || "—"}
           editing={editing}
           editValue={editForm.situacao}
           onEditChange={ef("situacao")}
-          highlight
+          options={[
+            { value: "", label: "Selecione..." },
+            { value: "ATIVA", label: "Ativa" },
+            { value: "SAIDA", label: "Saída" },
+            { value: "SUSPENSA", label: "Suspensa" },
+            { value: "ENCERRADA", label: "Encerrada" },
+          ]}
         />
+        
         <DataField
           label="Data da Situação"
           value={fmtDate(company.dataSituacao)}

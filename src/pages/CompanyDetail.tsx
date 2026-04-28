@@ -260,47 +260,6 @@ function SummaryCard({
 
 
 
-function TopPanel({
-  title,
-  subtitle,
-  right,
-}: {
-  title: string;
-  subtitle?: string;
-  right?: React.ReactNode;
-}) {
-  return (
-    <div
-      style={{
-        ...cardShellStyle(),
-        padding: 18,
-        marginBottom: 18,
-        background: "linear-gradient(180deg, #ffffff 0%, #fbfdff 100%)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: 14,
-          flexWrap: "wrap",
-        }}
-      >
-        <div>
-          
-
-          <div style={{ fontSize: 21, fontWeight: 800, color: UI.text }}>{title}</div>
-          {subtitle && (
-            <div style={{ marginTop: 6, color: UI.textSoft, fontSize: 13.5 }}>{subtitle}</div>
-          )}
-        </div>
-
-        {right}
-      </div>
-    </div>
-  );
-}
 
 function StatusPicker({
   value,
@@ -486,7 +445,7 @@ export function CompanyDetail({
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
   const [savingEdit, setSavingEdit] = useState(false);
-
+  const [checklistTemplate, setChecklistTemplate] = useState<any>(null);
   const [socioModal, setSocioModal] = useState(false);
   const [editSocio, setEditSocio] = useState<any>(null);
   const [socioForm, setSocioForm] = useState({
@@ -514,7 +473,6 @@ export function CompanyDetail({
   } = useCompanyDetail(companyId);
 
   const {
-    createItem,
     updateItem,
     getRun,
     loadRuns,
@@ -532,55 +490,62 @@ export function CompanyDetail({
     return r;
   }
 
-  async function refreshForType(nextType: ChecklistType) {
-    setLoadingChecklist(true);
+async function refreshForType(nextType: ChecklistType) {
+  setLoadingChecklist(true);
 
-    try {
-      const [rlist, defT] = await Promise.all([
-        loadRuns(nextType),
-        loadDefaultTemplate(nextType),
-      ]);
+  try {
+    const [rlist, defT] = await Promise.all([
+      loadRuns(nextType),
+      loadDefaultTemplate(nextType),
+    ]);
 
-      const latest = rlist?.[0];
-      if (!latest?.id) return;
+    const latest = rlist?.[0];
 
-      const r = await getRun(latest.id);
-
-      if (r?.template?.sections?.length) {
-        setDraftObs(extractObs(r.template.sections));
-        return;
-      }
-
+    if (!latest?.id) {
       if (defT?.sections?.length) {
-        const itemRunMap: Record<string, any> = {};
-
-        r.itemRuns?.forEach((ir: any) => {
-          itemRunMap[ir.templateItemId] = ir;
-        });
-
-        const mergedSections = defT.sections.map((s: any) => ({
+        const sections = defT.sections.map((s: any) => ({
           ...s,
-          items: s.items.map((it: any) => {
-            const ir = itemRunMap[it.id];
-            return ir
-              ? {
-                  ...it,
-                  templateItemId: it.id,
-                  itemRunId: ir.id,
-                  status: ir.status,
-                  observation: ir.observation,
-                }
-              : { ...it, templateItemId: it.id };
-          }),
+          items: s.items.map((it: any) => ({
+            ...it,
+            templateItemId: it.id,
+            itemRunId: null,
+            status: null,
+            observation: "",
+          })),
         }));
 
-        r.template = { ...defT, sections: mergedSections };
-        setDraftObs(extractObs(mergedSections));
+        setChecklistTemplate({
+          ...defT,
+          type: nextType,
+          sections,
+        });
+
+        setDraftObs(extractObs(sections));
+      } else {
+        setChecklistTemplate(null);
       }
-    } finally {
-      setLoadingChecklist(false);
+
+      return;
     }
+
+    const r = await getRun(latest.id);
+
+    if (r?.template?.sections?.length) {
+      setChecklistTemplate({
+        ...r.template,
+        type: nextType,
+      });
+
+      setDraftObs(extractObs(r.template.sections));
+      return;
+    }
+
+    setChecklistTemplate(null);
+  } finally {
+    setLoadingChecklist(false);
   }
+}
+
 
   useEffect(() => {
     if (activeTab === "checklist") refreshForType(checklistType);
@@ -601,70 +566,95 @@ export function CompanyDetail({
     setResponsibleLocal(sectorId, userId);
   }
 
-  async function ensureRunExists() {
-    if (run?.id) {
-      const fresh = await getRun(run.id);
-      const map: Record<string, string> = {};
 
-      for (const s of fresh?.template?.sections ?? []) {
-        for (const it of s.items) {
-          if (it.itemRunId) {
-            map[it.templateItemId ?? it.id] = it.itemRunId;
-          }
+  async function ensureRunExists(type: ChecklistType) {
+  const rlist = await loadRuns(type);
+  const latest = rlist?.[0];
+
+  if (latest?.id) {
+    const fresh = await getRun(latest.id);
+
+    const map: Record<string, string> = {};
+
+    for (const s of fresh?.template?.sections ?? []) {
+      for (const it of s.items ?? []) {
+        if (it.itemRunId) {
+          map[it.templateItemId ?? it.id] = it.itemRunId;
         }
       }
-
-      return { runId: run.id, itemRunMap: map };
     }
 
-    const r = await startRun({
-      companyId,
-      type: checklistType,
-    });
-
-    await loadRuns(checklistType);
-    await getRun(r.runId);
-
-    return { runId: r.runId, itemRunMap: r.itemRunMap || {} };
+    return {
+      runId: latest.id,
+      itemRunMap: map,
+    };
   }
 
-  async function setStatus(
-    templateItemId: string,
-    itemRunId: string | undefined,
-    status: ItemStatusFull
-  ) {
-    setSavingItem(templateItemId);
+  const created = await startRun({
+    companyId,
+    type,
+  });
 
-    try {
-      let id = itemRunId;
-      let currentRunId = run?.id;
+  const fresh = await getRun(created.runId);
 
-      if (!id) {
-        const ensured = await ensureRunExists();
-        currentRunId = ensured?.runId;
-        id = ensured?.itemRunMap?.[templateItemId];
+  const map: Record<string, string> = {};
+
+  for (const s of fresh?.template?.sections ?? []) {
+    for (const it of s.items ?? []) {
+      if (it.itemRunId) {
+        map[it.templateItemId ?? it.id] = it.itemRunId;
       }
-
-      if (!id) {
-        const created = await createItem({
-          runId: currentRunId,
-          templateItemId,
-          status,
-        });
-
-        id = created?.id;
-      }
-
-      if (!id) return;
-
-      await updateItem(id, { status });
-      await refreshForType(checklistType);
-    } catch (e: any) {
-      toast(e.message || "Erro", "error");
-    } finally {
-      setSavingItem("");
     }
   }
+
+  return {
+    runId: created.runId,
+    itemRunMap: map,
+  };
+}
+
+
+
+async function setStatus(
+  templateItemId: string,
+  itemRunId: string | undefined,
+  status: ItemStatusFull
+) {
+  setSavingItem(templateItemId);
+
+  try {
+    let id = itemRunId;
+
+    if (!id) {
+      const ensured = await ensureRunExists(checklistType);
+
+      console.log("ensureRunExists", {
+        checklistType,
+        templateItemId,
+        ensured,
+      });
+
+      id = ensured?.itemRunMap?.[templateItemId];
+
+      if (!id) {
+        toast("Não foi possível iniciar o checklist de saída.", "error");
+        return;
+      }
+    }
+
+    await updateItem(id, { status });
+
+    toast("Status atualizado", "success");
+
+    await refreshForType(checklistType);
+  } catch (e: any) {
+    toast(e.message || "Erro ao atualizar status", "error");
+  } finally {
+    setSavingItem("");
+  }
+}
+
+
 
   async function saveObservation(templateItemId: string, itemRunId?: string) {
     if (!itemRunId) {
@@ -846,52 +836,7 @@ export function CompanyDetail({
       <CompanyDetailHeader company={company} onBack={onBack} />
 
       <div style={{ marginTop: 16 }}>
-        <TopPanel
-          title={company.nomeFantasia || company.razaoSocial || "Empresa"}
-          subtitle="Uma visão mais clara, elegante e organizada dos dados, responsáveis e checklists."
-          right={
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "10px 14px",
-                  borderRadius: 12,
-                  border: `1px solid ${UI.border}`,
-                  background: UI.surface,
-                  color: UI.textSoft,
-                  fontSize: 13,
-                  fontWeight: 600,
-                }}
-              >
-                <Building2 size={15} />
-                {company.cod || "Sem código"}
-              </div>
-
-              {company.situacao && (
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "10px 14px",
-                    borderRadius: 12,
-                    border: "1px solid #dcfce7",
-                    background: "#f0fdf4",
-                    color: "#166534",
-                    fontSize: 13,
-                    fontWeight: 700,
-                  }}
-                >
-                  <ShieldCheck size={15} />
-                  {company.situacao}
-                </div>
-              )}
-            </div>
-          }
-        />
-
+        
        <div style={{
             display: "flex",
             justifyContent: "space-between",
@@ -1041,6 +986,7 @@ export function CompanyDetail({
           ghostButtonStyle={ghostButtonStyle}
           cardShellStyle={cardShellStyle}
           UI={UI}
+          checklistTemplate={checklistTemplate}
         />
       )}
 

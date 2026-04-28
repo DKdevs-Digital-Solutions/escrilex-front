@@ -7,7 +7,7 @@ type ItemStatusFull = "PENDENTE" | "CONCLUIDO" | "EM_ANDAMENTO" | "NA";
 
 type Props = {
   checklistType: ChecklistType;
-  setChecklistType: (type: ChecklistType) => void;
+  setChecklistType: (type: ChecklistType) => void | Promise<void>;
   loadingChecklist: boolean;
   run?: any;
   onOpenRun: (runId: string) => void;
@@ -46,6 +46,7 @@ type Props = {
     radiusSm: number;
     bg: string;
   };
+  checklistTemplate: any;
 };
 
 function KpiCard({
@@ -253,7 +254,7 @@ function ChecklistRow({
               flexWrap: "wrap",
             }}
           >
-            {/* {item.isRequired && <Badge label="Obrigatório" variant="blue" />} */}
+            {item.isRequired && <Badge label="Obrigatório" variant="red" />}
             {item.dueDate && (
               <Badge
                 label={`Prazo ${fmtDate(item.dueDate)}`}
@@ -263,6 +264,7 @@ function ChecklistRow({
           </div>
         </div>
       </Td>
+
 
       <Td>
         <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -343,6 +345,7 @@ export function CompanyChecklistTab({
   ghostButtonStyle,
   cardShellStyle,
   UI,
+  checklistTemplate
 }: Props) {
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -389,36 +392,114 @@ export function CompanyChecklistTab({
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {(["ENTRADA", "SAIDA"] as ChecklistType[]).map((t) => (
-              <button
-                className="btn"
-                key={t}
-                onClick={() => setChecklistType(t)}
-                style={softButtonStyle(checklistType === t)}
-              >
-                <ClipboardCheck size={14} strokeWidth={2} />
-                {t === "ENTRADA" ? "Checklist de entrada" : "Checklist de saída"}
-              </button>
-            ))}
+          <div
+  style={{
+    display: "flex",
+    gap: 10,
+    flexWrap: "wrap",
+    alignItems: "center",
+  }}
+>
+  {/* SEGMENTED CONTROL */}
+  <div
+    style={{
+      display: "flex",
+      padding: 6,
+      borderRadius: 16,
+      background: "rgba(255,255,255,0.85)",
+      border: "1px solid #e2e8f0",
+      boxShadow: "0 8px 22px rgba(15,23,42,0.06)",
+      gap: 6,
+    }}
+  >
+    {(["ENTRADA", "SAIDA"] as ChecklistType[]).map((t) => {
+      const active = checklistType === t;
 
-            {!loadingChecklist && run?.id && (
-              <button
-                className="btn"
-                onClick={() => onOpenRun(run.id)}
-                title="Abrir em tela cheia"
-                style={ghostButtonStyle()}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.background = "#f8fafc";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.background = "#fff";
-                }}
-              >
-                <Maximize2 size={14} strokeWidth={2} />
-                Tela cheia
-              </button>
-            )}
+      return (
+        <button
+          key={t}
+          onClick={() => setChecklistType(t)}
+          style={{
+            height: 40,
+            padding: "0 14px",
+            borderRadius: 12,
+            border: "none",
+            background: active
+              ? t === "ENTRADA"
+                ? "linear-gradient(135deg, rgb(70, 186, 89), rgb(43, 153, 120))"
+                : "linear-gradient(135deg, rgb(98, 115, 198), #2563eb)"
+              : "transparent",
+            color: active ? "#fff" : "#475569",
+            fontSize: 13,
+            fontWeight: 800,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            fontFamily: "inherit",
+            transition: "all 0.18s ease",
+            boxShadow: active
+              ? t === "ENTRADA"
+                ? "0 8px 18px rgba(37,99,235,0.25)"
+                : "0 8px 18px rgba(71,85,105,0.25)"
+              : "none",
+          }}
+          onMouseEnter={(e) => {
+            if (active) return;
+            e.currentTarget.style.background = "#f1f5f9";
+          }}
+          onMouseLeave={(e) => {
+            if (active) return;
+            e.currentTarget.style.background = "transparent";
+          }}
+        >
+          <ClipboardCheck size={14} strokeWidth={2.4} />
+          {t === "ENTRADA"
+            ? "Checklist de entrada"
+            : "Checklist de saída"}
+        </button>
+      );
+        })}
+      </div>
+
+      {/* BOTÃO SECUNDÁRIO */}
+      {!loadingChecklist && run?.id && (
+        <button
+          onClick={() => onOpenRun(run.id)}
+          title="Abrir em tela cheia"
+          style={{
+            height: 55,
+            padding: "0 14px",
+            borderRadius: 12,
+            border: "1px solid #e2e8f0",
+            background: "#fff",
+            color: "#475569",
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            transition: "all 0.18s ease",
+            boxShadow: "0 4px 12px rgba(15,23,42,0.05)",
+          }}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget;
+            el.style.background = "#f8fafc";
+            el.style.transform = "translateY(-1px)";
+            el.style.boxShadow = "0 8px 20px rgba(15,23,42,0.10)";
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget;
+            el.style.background = "#fff";
+            el.style.transform = "translateY(0)";
+            el.style.boxShadow = "0 4px 12px rgba(15,23,42,0.05)";
+          }}
+        >
+          <Maximize2 size={14} strokeWidth={2.4} />
+          Tela cheia
+        </button>
+      )}
           </div>
         </div>
       </div>
@@ -552,11 +633,11 @@ export function CompanyChecklistTab({
 
       {loadingChecklist ? (
         <Loading message="Carregando checklist..." />
-      ) : !sections.length ? (
+      ) : checklistTemplate?.sections?.length === 0 ? (
         <Empty message="Nenhum template/checklist encontrado." />
       ) : (
         <div style={{ display: "grid", gap: 16 }}>
-          {sections.map((section: any) => (
+          {checklistTemplate?.sections?.map((section: any) => (
             <div
               key={section.id}
               style={{
@@ -584,22 +665,22 @@ export function CompanyChecklistTab({
                       </tr>
                     </Thead>
                     <tbody>
-                      {section.items?.map((item: any) => (
-                        <ChecklistRow
-                          key={item.templateItemId ?? item.id ?? item.itemId}
-                          item={item}
-                          savingItem={savingItem}
-                          draftObs={draftObs}
-                          setDraftObs={setDraftObs}
-                          setStatus={setStatus}
-                          saveObservation={saveObservation}
-                          fmtDate={fmtDate}
-                          isOverdue={isOverdue}
-                          StatusPicker={StatusPicker}
-                          UI={UI}
-                        />
-                      ))}
-                    </tbody>
+                    {section.items?.map((item: any) => (
+                      <ChecklistRow
+                        key={item.templateItemId ?? item.id ?? item.itemId}
+                        item={item}
+                        savingItem={savingItem}
+                        draftObs={draftObs}
+                        setDraftObs={setDraftObs}
+                        setStatus={setStatus}
+                        saveObservation={saveObservation}
+                        fmtDate={fmtDate}
+                        isOverdue={isOverdue}
+                        StatusPicker={StatusPicker}
+                        UI={UI}
+                      />
+                    ))}
+                  </tbody>
                   </Table>
 
                   {!section.items?.length && <Empty message="Nenhum item nesta seção." />}

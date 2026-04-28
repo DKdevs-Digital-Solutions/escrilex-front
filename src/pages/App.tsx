@@ -40,7 +40,6 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
       label: "Dashboard",
       icon: <Activity size={15} strokeWidth={1.8} />,
       roles: ["ADMIN","GESTOR_EMPRESA"],
-      badge: { text: "LIVE", color: "#10b981" },
     },
       { id: "companies", label: "Empresas", icon: <Briefcase size={15} strokeWidth={1.8} />, roles: [] },
       { id: "templates", label: "Templates", icon: <FileText size={15} strokeWidth={1.8} />, roles: ["ADMIN", "GESTOR_EMPRESA"] },
@@ -60,7 +59,6 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
         label: "E-mail",
         icon: <Mail size={15} strokeWidth={1.8} />,
         roles: ["ADMIN","GESTOR_EMPRESA"],
-        badge: { text: "SMTP", color: "#10b981" }
       },
      
     ],
@@ -76,7 +74,7 @@ const PAGE_TITLES: Record<Page, string> = {
   templates: "Templates", 
   checklistRun: "Checklist", 
   audit: "Auditoria",
-  emailSettings: "Notificações por E-mail",
+  emailSettings: "Email",
 };
 
 // ── Confirm logout modal ──────────────────────────────────────────────────────
@@ -167,59 +165,166 @@ export function App() {
   if (loading)
   return (
     <div
+  style={{
+    height: "100vh",
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background:
+      "radial-gradient(circle at 20% 0%, rgba(37,99,235,.10), transparent 55%), #f8fafc",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 22,
+      padding: "30px 34px",
+      borderRadius: 22,
+      background: "#fff",
+      border: "1px solid #e2e8f0",
+      boxShadow:
+        "0 25px 60px rgba(15,23,42,.10), inset 0 1px 0 rgba(255,255,255,.6)",
+      animation: "fadeIn 0.5s ease",
+    }}
+  >
+    {/* Spinner + pulse */}
+    <div
       style={{
-        height: "100%",
-        minHeight: "60vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        position: "relative",
+        width: 56,
+        height: 56,
       }}
     >
+      {/* outer pulse */}
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 18,
+          position: "absolute",
+          inset: -10,
+          borderRadius: "50%",
+          background: "rgba(37,99,235,.10)",
+          animation: "pulse 1.8s infinite ease-in-out",
+        }}
+      />
+
+      {/* base circle */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: "50%",
+          border: "4px solid #e2e8f0",
+        }}
+      />
+
+      {/* spinner */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: "50%",
+          border: "4px solid transparent",
+          borderTop: "4px solid #2563eb",
+          borderRight: "4px solid #7dd3fc",
+          animation: "spin 0.8s linear infinite",
+        }}
+      />
+    </div>
+
+    {/* Texto */}
+    <div style={{ textAlign: "center" }}>
+      <strong
+        style={{
+          display: "block",
+          fontSize: 15,
+          color: "#0f172a",
+          fontWeight: 900,
+          letterSpacing: 0.2,
         }}
       >
-        {/* Spinner */}
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: "50%",
-            border: "4px solid #e5e7eb",
-            borderTop: "4px solid #2563eb",
-            animation: "spin 0.9s linear infinite",
-          }}
-        />
+        Carregando dados
+      </strong>
 
-        {/* Texto */}
-        <div style={{ textAlign: "center" }}>
-          
-
-          <div
-            style={{
-              marginTop: 4,
-              fontSize: 13,
-              color: "#64748b",
-            }}
-          >
-            Aguarde enquanto buscamos os dados...
-          </div>
-        </div>
+      <div
+        style={{
+          marginTop: 6,
+          fontSize: 13,
+          color: "#64748b",
+        }}
+      >
+        Aguarde enquanto buscamos as informações...
       </div>
 
-      {/* animação */}
-      <style>
-        {`
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-        `}
-      </style>
+      {/* dots animados */}
+      <div
+        style={{
+          marginTop: 10,
+          display: "flex",
+          justifyContent: "center",
+          gap: 6,
+        }}
+      >
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: "#2563eb",
+              opacity: 0.4,
+              animation: `dotPulse 1.4s ${i * 0.2}s infinite`,
+            }}
+          />
+        ))}
+      </div>
     </div>
+  </div>
+
+  {/* animações */}
+  <style>
+    {`
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px) scale(0.97);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          transform: scale(0.9);
+          opacity: 0.4;
+        }
+        50% {
+          transform: scale(1.1);
+          opacity: 0.15;
+        }
+      }
+
+      @keyframes dotPulse {
+        0%, 100% {
+          transform: translateY(0);
+          opacity: 0.3;
+        }
+        50% {
+          transform: translateY(-4px);
+          opacity: 1;
+        }
+      }
+    `}
+  </style>
+</div>
   );
 
   if (!me) return <Login onLogin={reload} />;

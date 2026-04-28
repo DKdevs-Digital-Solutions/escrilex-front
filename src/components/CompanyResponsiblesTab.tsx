@@ -468,234 +468,257 @@ export function CompanyResponsiblesTab({
 }: Props) {
   const assignedCount = sectors.filter((s) => responsibleMap.get(s.id)).length;
 
-  return (
-    <SectionCard
-      title=""
+ return (
+  <div
+    style={{
+      display: "grid",
+      gap: 14,
+    }}
+  >
+    <div
       style={{
-            background: "transparent",
-            border: "none",
-            boxShadow: "none",
-            marginBottom: 0,
-        }}
-        headerStyle={{
-            background: "transparent",
-            borderBottom: "none",
-            padding: "10px 0 18px 0",
-        }}
-      action={
-        <button onClick={onSave} disabled={savingResp} className="btnAdd">
-          <Save size={14} strokeWidth={2} />
-          {savingResp ? "Salvando..." : "Salvar responsáveis"}
-        </button>
-      }
+        borderRadius: 15,
+        border: `1px solid ${UI.border}`,
+        background: "linear-gradient(180deg, #ffffff 0%, #fbfdff 100%)",
+        boxShadow: "rgba(15, 23, 42, 0.06) 0px 10px 30px",
+        padding: 18,
+      }}
     >
       <div
         style={{
-          display: "grid",
-          gap: 14,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 18,
+          flexWrap: "wrap",
         }}
       >
-        <div
-          style={{
-            borderRadius: 20,
-            border: `1px solid ${UI.border}`,
-            background: "linear-gradient(180deg, #ffffff 0%, #fbfdff 100%)",
-            boxShadow: "none",
-            padding: 10,
-          }}
-        >
+        <div style={{ minWidth: 260, flex: "1 1 520px" }}>
           <div
             style={{
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "space-between",
-              gap: 16,
-              flexWrap: "wrap",
+              fontSize: 21,
+              fontWeight: 900,
+              color: UI.text,
+              lineHeight: 1.1,
             }}
           >
-            <div style={{ minWidth: 0, position:"relative", top:"9px", padding:"10px" }}>
-          
+            Defina os responsáveis de cada área
+          </div>
 
-              <div
-                style={{
-                  fontSize: 21,
-                  fontWeight: 900,
-                  color: UI.text,
-                  lineHeight: 1.1,
-                }}
-              >
-                Defina os responsáveis de cada área
-              </div>
-
-              <div
-                style={{
-                  marginTop: 6,
-                  fontSize: 13.5,
-                  color: UI.textSoft,
-                  maxWidth: 720,
-                }}
-              >
-                Associe cada setor ao colaborador correto para manter a operação organizada,
-                clara e fácil de acompanhar.
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                gap: 12,
-                flexWrap: "wrap",
-              }}
-            >
-              <div
-                style={{
-                  minWidth: 140,
-                  padding: "14px 16px",
-                  borderRadius: 14,
-                  background: "#fff",
-                  border: `1px solid ${UI.border}`,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 800,
-                    color: UI.textMuted,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.07em",
-                    marginBottom: 6,
-                  }}
-                >
-                  Setores
-                </div>
-                <div
-                  style={{
-                    fontSize: 24,
-                    fontWeight: 900,
-                    color: UI.text,
-                  }}
-                >
-                  {sectors.length}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  minWidth: 140,
-                  padding: "14px 16px",
-                  borderRadius: 14,
-                  background: "#fff",
-                  border: `1px solid ${UI.border}`,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 800,
-                    color: UI.textMuted,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.07em",
-                    marginBottom: 6,
-                  }}
-                >
-                  Vinculados
-                </div>
-                <div
-                  style={{
-                    fontSize: 24,
-                    fontWeight: 900,
-                    color: UI.primary,
-                  }}
-                >
-                  {assignedCount}
-                </div>
-              </div>
-            </div>
+          <div
+            style={{
+              marginTop: 6,
+              fontSize: 13.5,
+              color: UI.textSoft,
+              maxWidth: 720,
+            }}
+          >
+            Associe cada setor ao colaborador correto para manter a operação organizada,
+            clara e fácil de acompanhar.
           </div>
         </div>
 
-        <div
+        <button
+          onClick={onSave}
+          disabled={savingResp}
           style={{
-            borderRadius: 20,
-            border: `1px solid ${UI.border}`,
-            background: UI.surface,
-            boxShadow: UI.shadowSm,
-            overflow: "hidden",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            height: 44,
+            padding: "0 18px",
+            borderRadius: 12,
+            border: "none",
+            background: "#012942",
+            color: "#fff",
+            fontSize: 13.5,
+            fontWeight: 800,
+            cursor: savingResp ? "not-allowed" : "pointer",
+            transition: "all 0.18s ease",
+            boxShadow: "0 8px 20px rgba(37,99,235,0.25)",
           }}
         >
-          {sectors.length ? (
-            <>
-              <div
-                className="title-section"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns:
-                    "minmax(220px, 1.1fr) minmax(240px, 1fr) minmax(220px, 1fr)",
-                  gap: 14,
-                  padding: "20px 16px",
-                  borderBottom: `1px solid ${UI.border}`,
-                  background: "#fafcff",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 800,
-                    color: UI.textMuted,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  Setor
-                </div>
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 800,
-                    color: UI.textMuted,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  Responsável
-                </div>
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 800,
-                    color: UI.textMuted,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  Contato
-                </div>
-              </div>
+          <Save size={15} strokeWidth={2.5} />
+          {savingResp ? "Salvando..." : "Salvar responsáveis"}
+        </button>
+      </div>
 
-              {sectors.map((s) => {
-                const userId = responsibleMap.get(s.id) || "";
-                const user = userId ? users.find((u) => u.id === userId) || null : null;
+      <div
+        style={{
+          display: "flex",
+          gap: 12,
+          flexWrap: "wrap",
+          marginTop: 18,
+        }}
+      >
 
-                return (
-                  <RowCard
-                    key={s.id}
-                    sectorName={s.name}
-                    selectedUserId={userId}
-                    selectedUser={user}
-                    users={users}
-                    onChange={(nextUserId) => onChangeResponsible(s.id, nextUserId)}
-                    UI={UI}
-                  />
-                );
-              })}
-            </>
-          ) : (
-            <div style={{ padding: 18 }}>
-              <Empty message="Nenhum setor cadastrado." />
-            </div>
-          )}
+<div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+  <StatCard
+    label="Setores"
+    value={sectors.length}
+    color="#2563eb"
+    icon={<Building2 size={18} />}
+  />
+
+  <StatCard
+    label="Vinculados"
+    value={assignedCount}
+    color="#16a34a"
+    icon={<ShieldCheck size={18} />}
+  />
+</div>
+       
+      </div>
+    </div>
+
+    <div
+      style={{
+        borderRadius: 15,
+        border: `1px solid ${UI.border}`,
+        background: UI.surface,
+        boxShadow: "rgba(15, 23, 42, 0.06) 0px 10px 30px",
+        overflow: "hidden",
+      }}
+    >
+      {sectors.length ? (
+        <>
+          <div
+            className="title-section"
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "minmax(220px, 1.1fr) minmax(240px, 1fr) minmax(220px, 1fr)",
+              gap: 14,
+              padding: "20px 16px",
+              borderBottom: `1px solid ${UI.border}`,
+              background: "#fafcff",
+            }}
+          >
+            <div style={headerCellStyle(UI)}>Setor</div>
+            <div style={headerCellStyle(UI)}>Responsável</div>
+            <div style={headerCellStyle(UI)}>Contato</div>
+          </div>
+
+          {sectors.map((s) => {
+            const userId = responsibleMap.get(s.id) || "";
+            const user = userId
+              ? users.find((u) => u.id === userId) || null
+              : null;
+
+            return (
+              <RowCard
+                key={s.id}
+                sectorName={s.name}
+                selectedUserId={userId}
+                selectedUser={user}
+                users={users}
+                onChange={(nextUserId) => onChangeResponsible(s.id, nextUserId)}
+                UI={UI}
+              />
+            );
+          })}
+        </>
+      ) : (
+        <div style={{ padding: 18 }}>
+          <Empty message="Nenhum setor cadastrado." />
+        </div>
+      )}
+    </div>
+  </div>
+);
+
+
+function headerCellStyle(UI: Props["UI"]): React.CSSProperties {
+  return {
+    fontSize: 11,
+    fontWeight: 800,
+    color: UI.textMuted,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+  };
+}
+}
+
+function StatCard({
+  label,
+  value,
+  color,
+  icon,
+}: {
+  label: string;
+  value: number;
+  color: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        minWidth: 160,
+        padding: "16px 18px",
+        borderRadius: 16,
+        background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+        border: `1px solid rgba(0,0,0,0.05)`,
+        boxShadow: "0 8px 22px rgba(15,23,42,0.06)",
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        transition: "all 0.18s ease",
+      }}
+      onMouseEnter={(e) => {
+        const el = e.currentTarget;
+        el.style.transform = "translateY(-2px)";
+        el.style.boxShadow = "0 12px 30px rgba(15,23,42,0.10)";
+      }}
+      onMouseLeave={(e) => {
+        const el = e.currentTarget;
+        el.style.transform = "translateY(0)";
+        el.style.boxShadow = "0 8px 22px rgba(15,23,42,0.06)";
+      }}
+    >
+      {/* Ícone */}
+      <div
+        style={{
+          width: 42,
+          height: 42,
+          borderRadius: 12,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: `${color}15`,
+          color,
+          border: `1px solid ${color}30`,
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </div>
+
+      {/* Texto */}
+      <div>
+        <div
+          style={{
+            fontSize: 10.5,
+            fontWeight: 800,
+            color: "#94a3b8",
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            marginBottom: 4,
+          }}
+        >
+          {label}
+        </div>
+
+        <div
+          style={{
+            fontSize: 26,
+            fontWeight: 900,
+            color: "#0f172a",
+            lineHeight: 1,
+          }}
+        >
+          {value}
         </div>
       </div>
-    </SectionCard>
+    </div>
   );
 }

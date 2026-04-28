@@ -336,7 +336,7 @@ export function DashboardPage() {
                 width:"300px"
               }}
             >
-              <RefreshCw size={16} />
+              <RefreshCw size={18} />
               Atualizar
             </button>
           </div>

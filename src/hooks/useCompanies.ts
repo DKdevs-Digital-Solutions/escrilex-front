@@ -6,6 +6,9 @@ export function useCompanies() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  
 
   async function load() {
     setLoading(true);
@@ -22,11 +25,15 @@ export function useCompanies() {
 
   async function create(payload: any) {
     try {
+      setSaving(true);
       await companyRepository.create(payload);
       await load(); // recarrega lista
+      setModalOpen(false)
       return true;
     } catch (err) {
       return false;
+    } finally{
+      setSaving(false);
     }
   }
 
@@ -38,9 +45,7 @@ export function useCompanies() {
     }
   }
 
-  useEffect(() => {
-    load();
-  }, []);
+
 
 
 
@@ -51,5 +56,8 @@ export function useCompanies() {
     load,
     create,
     buscarCnpj,
+    modalOpen,
+    setModalOpen,
+    saving
   };
 }

@@ -138,90 +138,149 @@ export function CompanyHistoryTab({
   const latestRun = historicoRuns[0];
 
   return (
-    <SectionCard
-        title=""
-        style={{
-            background: "transparent",
-            border: "none",
-            boxShadow: "none",
-            marginBottom: 0,
-        }}
-        headerStyle={{
-            background: "transparent",
-            borderBottom: "none",
-            padding: "10px 0 18px 0",
-        }}
-      action={
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", width: "100%", justifyContent: "flex-end", padding: "5px 0 18px 0" }}>
-          {(["ENTRADA", "SAIDA"] as ChecklistType[]).map((t) => (
-            <button
-            className="btn"
-              key={t}
-              onClick={() => {
-                setHistoricoType(t);
-                loadHistoricoRuns(t);
-              }}
-              style={softButtonStyle(historicoType === t)}
-            >
-              <History size={14} strokeWidth={2} />
-              {getTypeLabel(t)}
-            </button>
-          ))}
-        </div>
-      }
-    >
+    
       <div style={{ display: "grid", gap: 16,  backgroundColor:"#f1f4f9" }}>
+        
+
         <div
-          style={{
-            padding: 18,
-            background: "linear-gradient(180deg, #ffffff 0%, #fbfdff 100%)",
-            borderRadius: "0px 0px 10px 10px",
-          }}
-        >
+      style={{
+        padding: 20,
+        borderRadius: 20,
+        border: `1px solid ${UI.border}`,
+        background:
+          "radial-gradient(circle at top left, rgba(37,99,235,0.10), transparent 34%), linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+        boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
+        overflow: "hidden",
+        position: "relative",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: 18,
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ minWidth: 260, flex: "1 1 520px" }}>
+        
+
           <div
             style={{
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "space-between",
-              gap: 16,
-              flexWrap: "wrap",
+              fontSize: 23,
+              fontWeight: 950,
+              color: UI.text,
+              lineHeight: 1.08,
+              letterSpacing: "-0.02em",
             }}
           >
-            <div style={{ minWidth: 0}}>
-              
+            Acompanhe as execuções anteriores
+          </div>
 
-              <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 900,
-                  color: UI.text,
-                  lineHeight: 1.1,
-                }}
-              >
-                Acompanhe as execuções anteriores
-              </div>
+          <div
+            style={{
+              marginTop: 8,
+              fontSize: 13.8,
+              color: UI.textSoft,
+              maxWidth: 760,
+              lineHeight: 1.55,
+            }}
+          >
+            Visualize as execuções já realizadas, consulte a âncora, a primeira ação registrada
+            e abra qualquer execução para análise detalhada.
+          </div>
 
-              <div
-                style={{
-                  marginTop: 6,
-                  fontSize: 13.5,
-                  color: UI.textSoft,
-                  maxWidth: 760,
-                }}
-              >
-                Visualize as execuções já realizadas, consulte a âncora, a primeira ação registrada
-                e abra qualquer execução para análise detalhada.
-              </div>
-            </div>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              marginTop: 14,
+              padding: "8px 11px",
+              borderRadius: 999,
+              background: historicoType === "ENTRADA" ? "#eff6ff" : "#f8fafc",
+              border: `1px solid ${historicoType === "ENTRADA" ? "#bfdbfe" : "#e2e8f0"}`,
+              color: historicoType === "ENTRADA" ? "#2c963e" : "#2563eb",
+              fontSize: 12.5,
+              fontWeight: 800,
+            }}
+          >
+            <span
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: 999,
+                background: historicoType === "ENTRADA" ? "rgb(70, 186, 89)" : "rgb(98, 115, 198)",
+                boxShadow:
+                  historicoType === "ENTRADA"
+                    ? "0 0 0 4px rgba(37,99,235,0.12)"
+                    : "0 0 0 4px rgba(100,116,139,0.10)",
+              }}
+            />
+            Tipo atual: {getTypeLabel(historicoType)}
+          </div>
+        </div>
 
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Badge
-                label={`Tipo: ${getTypeLabel(historicoType)}`}
-                variant={historicoType === "ENTRADA" ? "blue" : "gray"}
-              />
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                flexWrap: "wrap",
+                padding: 6,
+                borderRadius: 16,
+                background: "rgba(255,255,255,0.82)",
+                border: "1px solid rgba(226,232,240,0.9)",
+                boxShadow: "0 8px 22px rgba(15,23,42,0.06)",
+              }}
+            >
+              {(["ENTRADA", "SAIDA"] as ChecklistType[]).map((t) => {
+                const active = historicoType === t;
+
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => {
+                      setHistoricoType(t);
+                      loadHistoricoRuns(t);
+                    }}
+                    style={{
+                      height: 40,
+                      padding: "0 14px",
+                      borderRadius: 12,
+                      border: "none",
+                      background: active
+                        ? t === "ENTRADA"
+                          ? "linear-gradient(135deg, rgb(70, 186, 89), rgb(43, 153, 120))"
+                          : "linear-gradient(135deg, rgb(98, 115, 198), #2563eb)"
+                        : "transparent",
+                      color: active ? "#fff" : UI.textSoft,
+                      fontSize: 13,
+                      fontWeight: 850,
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      fontFamily: "inherit",
+                      transition: "all 0.18s ease",
+                      boxShadow: active
+                        ? t === "ENTRADA"
+                          ? "0 8px 18px rgba(37,99,235,0.24)"
+                          : "0 8px 18px rgba(71,85,105,0.22)"
+                        : "none",
+                    }}
+                  >
+                    <History size={14} strokeWidth={2.4} />
+                    {getTypeLabel(t)}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
+
+
 
         <div
           style={{
@@ -411,6 +470,5 @@ export function CompanyHistoryTab({
           )}
         </div>
       </div>
-    </SectionCard>
   );
 }

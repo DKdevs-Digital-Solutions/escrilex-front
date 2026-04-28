@@ -2,6 +2,7 @@ import React from "react";
 import { Modal } from "../Modal";
 import { Input, Select, FormGrid } from "../ui";
 import { Plus, Search, Loader2 } from "lucide-react";
+import { useToast } from "../toast";
 
 type Props = {
   open: boolean;
@@ -12,6 +13,7 @@ type Props = {
   loadingCnpj: boolean;
   onSubmit: (payload: any) => void;
   onBuscarCnpj: (cnpj: string) => void;
+  toast: (message: string, type?: "success" | "error" | "warning" | "info") => void;
 };
 
 export function CompanyFormModal({
@@ -23,12 +25,29 @@ export function CompanyFormModal({
   loadingCnpj,
   onSubmit,
   onBuscarCnpj,
+  toast
 }: Props) {
 
   function set(field: string) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       setForm((prev: any) => ({ ...prev, [field]: e.target.value }));
   }
+
+async function handleSubmit() {
+  try {
+    const payload = {
+      ...form,
+      cnpj: form.cnpj.replace(/\D/g, ""),
+    };
+
+    await onSubmit(payload);
+
+    toast("Empresa cadastrada com sucesso", "success");
+    onClose();
+  } catch (e: any) {
+    toast(e.message || "Erro ao cadastrar empresa", "error");
+  }
+}
 
   function maskCNPJ(value: string) {
   const v = value.replace(/\D/g, "").slice(0, 14);
@@ -51,14 +70,19 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
       width={800}
       footer={
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <button onClick={onClose} style={btnSecondary}>
+          <button type="button" onClick={onClose} style={btnSecondary}>
             Cancelar
           </button>
 
           <button
-            onClick={onSubmit}
-            disabled={saving || form.cnpj.replace(/\D/g, "").length < 8}
-            style={{ ...btnPrimary, opacity: saving ? 0.6 : 1 }}
+            type="button"
+            onClick={handleSubmit}
+            disabled={saving || !isCnpjValid}
+            style={{
+              ...btnPrimary,
+              opacity: saving || !isCnpjValid ? 0.6 : 1,
+              cursor: saving || !isCnpjValid ? "not-allowed" : "pointer",
+            }}
           >
             {saving ? <Loader2 size={14} className="spin" /> : <Plus size={14} />}
             {saving ? "Salvando..." : "Cadastrar"}
