@@ -256,7 +256,7 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
                     e.stopPropagation();
                     onOpenCompany(c.id);
                   }}
-                  style={actionBtnStyle("#4f46e5")}
+                  style={actionBtnStyle("#828080")}
                   onMouseEnter={(e) => {
                     const el = e.currentTarget;
                     el.style.background = "rgba(79,70,229,0.12)";

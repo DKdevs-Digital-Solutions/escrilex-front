@@ -411,3 +411,22 @@
   position:relative;
   top:5px
 }
+
+.recharts-wrapper:focus,
+.recharts-surface:focus,
+.recharts-responsive-container:focus {
+  outline: none !important;
+}
+
+.recharts-wrapper,
+    .recharts-wrapper * ,
+    .recharts-surface {
+      outline: none !important;
+    }
+
+    .recharts-wrapper:focus,
+    .recharts-wrapper *:focus,
+    .recharts-surface:focus {
+      outline: none !important;
+    }
+    

@@ -20,6 +20,8 @@ import {
   YAxis,
   Tooltip,
   Cell,
+  PieChart,
+  Pie,
 } from "recharts";
 import { useDashboardSummary } from "../hooks/useDashboardSummary";
 
@@ -93,16 +95,6 @@ export function DashboardPage() {
 
   const chartData = [
     {
-      name: "Novos",
-      value: data?.cards.newClients ?? 0,
-      color: "#2563eb",
-    },
-    {
-      name: "Saíram",
-      value: data?.cards.inactiveClients ?? 0,
-      color: "#dc2626",
-    },
-    {
       name: "Ativos",
       value: data?.cards.totalActive ?? 0,
       color: "#059669",
@@ -113,6 +105,19 @@ export function DashboardPage() {
       color: "#ea580c",
     },
   ];
+
+  const movementChartData = [
+  {
+    name: "Novos",
+    value: data?.cards.newClients ?? 0,
+    color: "#2563eb",
+  },
+  {
+    name: "Saíram",
+    value: data?.cards.inactiveClients ?? 0,
+    color: "#dc2626",
+  },
+];
 
   const cards = [
     {
@@ -372,206 +377,369 @@ export function DashboardPage() {
             ))}
           </div>
 
+
+
           <div
-            className="dashboard-main"
+        className="dashboard-main"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 340px",
+          gap: 16,
+        }}
+      >
+        {/* ESQUERDA: 2 gráficos alinhados 50/50 */}
+        <div
+          className="dashboard-charts-grid"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 16,
+            minWidth: 0,
+          }}
+        >
+          {/* GRÁFICO 1 */}
+          <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0, 1fr) 340px",
-              gap: 16,
+              borderRadius: 20,
+              padding: 22,
+              border: "1px solid #e2e8f0",
+              background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+              boxShadow: "0 12px 28px rgba(15,23,42,.06)",
             }}
           >
-            <div
+          <div style={{ marginBottom: 18 }}>
+            <h3
               style={{
-                borderRadius: 20,
-                padding: 22,
-                border: "1px solid #e2e8f0",
-                background:
-                  "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
-                boxShadow: "0 12px 28px rgba(15,23,42,.06)",
+                margin: 0,
+                fontSize: 17,
+                fontWeight: 900,
+                color: "#0f172a",
               }}
             >
-              <div style={{ marginBottom: 18 }}>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: 17,
-                    fontWeight: 900,
-                    color: "#0f172a",
-                  }}
-                >
-                  Movimento de clientes
-                </h3>
+              Entradas x Saídas
+            </h3>
 
-                <p
-                  style={{
-                    margin: "5px 0 0",
-                    color: "#64748b",
-                    fontSize: 13,
-                  }}
-                >
-                  {periodLabel}
-                </p>
-              </div>
-
-              <div style={{ width: "100%", height: 310 }}>
-                <ResponsiveContainer>
-                  <BarChart data={chartData} barSize={42}>
-                    <XAxis
-                      dataKey="name"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{
-                        fontSize: 12,
-                        fill: "#64748b",
-                        fontWeight: 700,
-                      }}
-                    />
-                    <YAxis
-                      allowDecimals={false}
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 12, fill: "#94a3b8" }}
-                    />
-                    <Tooltip
-                      cursor={{ fill: "rgba(15,23,42,.04)" }}
-                      contentStyle={{
-                        borderRadius: 14,
-                        border: "1px solid #e2e8f0",
-                        boxShadow: "0 12px 28px rgba(15,23,42,.12)",
-                        fontSize: 13,
-                        fontWeight: 700,
-                      }}
-                    />
-                    <Bar dataKey="value" radius={[12, 12, 6, 6]}>
-                      {chartData.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div
+            <p
               style={{
-                position: "relative",
-                overflow: "hidden",
-                borderRadius: 20,
-                padding: 22,
-                background:
-                  "linear-gradient(135deg, #0f172a 0%, #012942 100%)",
-                color: "#fff",
+                margin: "5px 0 0",
+                color: "#64748b",
+                fontSize: 13,
               }}
             >
-              <div
-                style={{
-                  position: "absolute",
-                  top: -40,
-                  right: -40,
-                  width: 130,
-                  height: 130,
-                  borderRadius: "50%",
-                  background: "rgba(56,189,248,.16)",
-                }}
-              />
+              Comparativo de clientes novos e clientes que saíram no período.
+            </p>
+         </div>
 
-              <div style={{ position: "relative" }}>
-                <div
-                  style={{
-                    width: 46,
-                    height: 46,
-                    borderRadius: 16,
-                    display: "grid",
-                    placeItems: "center",
-                    background: "rgba(255,255,255,.12)",
-                    border: "1px solid rgba(255,255,255,.18)",
-                    marginBottom: 14,
-                  }}
-                >
-                  <ArrowUpRight size={24} color="#7dd3fc" />
-                </div>
+      <div style={{ width: "100%", height: 260, position: "relative" }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={movementChartData}
+            dataKey="value"
+            nameKey="name"
+            innerRadius="58%"
+            outerRadius="82%"
+            paddingAngle={5}
+            stroke="#fff"
+            strokeWidth={1}
+          >
+            {movementChartData.map((entry) => (
+              <Cell key={entry.name} fill={entry.color} />
+            ))}
+          </Pie>
 
-                <h3 style={{ margin: 0, fontSize: 17, fontWeight: 900 }}>
-                  Resumo do período
-                </h3>
+          <Tooltip content={<CustomTooltip />} />
+            </PieChart>
+          </ResponsiveContainer>
 
-                <p
-                  style={{
-                    margin: "8px 0 18px",
-                    color: "rgba(255,255,255,.72)",
-                    fontSize: 13,
-                    lineHeight: 1.55,
-                  }}
-                >
-                  {insightText}
-                </p>
-
-                <div
-                  style={{
-                    padding: 15,
-                    borderRadius: 16,
-                    background: "rgba(255,255,255,.10)",
-                    border: "1px solid rgba(255,255,255,.14)",
-                    marginBottom: 12,
-                  }}
-                >
-                  <div style={{ fontSize: 12, color: "#cbd5e1" }}>
-                    Clientes ativos
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 4,
-                      fontSize: 34,
-                      fontWeight: 950,
-                      letterSpacing: -1,
-                      color: "#86efac",
-                    }}
-                  >
-                    {loading ? "..." : `${activeRate}%`}
-                  </div>
-
-                  <div
-                    style={{
-                      marginTop: 10,
-                      width: "100%",
-                      height: 8,
-                      borderRadius: 999,
-                      background: "rgba(255,255,255,.14)",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: `${activeRate}%`,
-                        height: "100%",
-                        borderRadius: 999,
-                        background:
-                          "linear-gradient(90deg, #22c55e, #7dd3fc)",
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 9,
-                  }}
-                >
-                  <MiniInfo label="Total de clientes" value={totalClients} />
-                  <MiniInfo
-                    label="Novos no período"
-                    value={data?.cards.newClients ?? 0}
-                  />
-                  <MiniInfo
-                    label="Saídas no período"
-                    value={data?.cards.inactiveClients ?? 0}
-                  />
-                </div>
-              </div>
-            </div>
+          <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          pointerEvents: "none",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              fontSize: 26,
+              fontWeight: 950,
+              color: "#0f172a",
+              lineHeight: 1,
+            }}
+          >
+            {movementChartData
+              .reduce((acc, item) => acc + item.value, 0)
+              .toLocaleString("pt-BR")}
           </div>
+
+          <div
+            style={{
+              marginTop: 4,
+              fontSize: 11,
+              fontWeight: 800,
+              color: "#64748b",
+              textTransform: "uppercase",
+              letterSpacing: ".08em",
+            }}
+          >
+            Total
+          </div>
+        </div>
+      </div>
+
+      <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+        gap: 10,
+        marginTop: 12,
+      }}
+    >
+      {movementChartData.map((item) => (
+        <div
+          key={item.name}
+          style={{
+            padding: "10px 12px",
+            borderRadius: 14,
+            background: "#f8fafc",
+            border: "1px solid #ccc",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 10,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 999,
+                background: item.color,
+              }}
+            />
+
+            <span
+              style={{
+                fontSize: 12,
+                fontWeight: 800,
+                color: "#475569",
+              }}
+            >
+              {item.name}
+            </span>
+          </div>
+
+          <strong
+            style={{
+              fontSize: 14,
+              fontWeight: 900,
+              color: "#0f172a",
+            }}
+          >
+            {item.value.toLocaleString("pt-BR")}
+          </strong>
+        </div>
+      ))}
+    </div>
+    </div>
+    </div>
+
+    {/* GRÁFICO 2 */}
+    <div
+      style={{
+        borderRadius: 20,
+        padding: 22,
+        border: "1px solid #e2e8f0",
+        background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+        boxShadow: "0 12px 28px rgba(15,23,42,.06)",
+      }}
+    >
+      <div style={{ marginBottom: 18 }}>
+        <h3
+          style={{
+            margin: 0,
+            fontSize: 17,
+            fontWeight: 900,
+            color: "#0f172a",
+          }}
+        >
+          Movimento de clientes
+        </h3>
+
+        <p
+          style={{
+            margin: "5px 0 0",
+            color: "#64748b",
+            fontSize: 13,
+          }}
+        >
+          {periodLabel}
+        </p>
+      </div>
+
+      <div style={{ width: "100%", height: 300 }}>
+        <ResponsiveContainer>
+          <BarChart data={chartData} barSize="70%">
+            <XAxis
+              dataKey="name"
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fontSize: 12,
+                fill: "#64748b",
+                fontWeight: 700,
+              }}
+            />
+
+            <YAxis
+              allowDecimals={false}
+              axisLine={false}
+              tickLine={false}
+              tick={{
+                fontSize: 12,
+                fill: "#94a3b8",
+              }}
+            />
+
+            <Tooltip content={<CustomTooltip />} />
+
+            <Bar dataKey="value" radius={[12, 12, 6, 6]}>
+              {chartData.map((entry) => (
+                <Cell key={entry.name} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  </div>
+
+  {/* DIREITA: resumo */}
+  <div
+    style={{
+      position: "relative",
+      overflow: "hidden",
+      borderRadius: 20,
+      padding: 22,
+      background: "linear-gradient(135deg, #0f172a 0%, #012942 100%)",
+      color: "#fff",
+    }}
+  >
+    <div
+      style={{
+        position: "absolute",
+        top: -40,
+        right: -40,
+        width: 130,
+        height: 130,
+        borderRadius: "50%",
+        background: "rgba(56,189,248,.16)",
+      }}
+    />
+
+    <div style={{ position: "relative" }}>
+      <div
+        style={{
+          width: 46,
+          height: 46,
+          borderRadius: 16,
+          display: "grid",
+          placeItems: "center",
+          background: "rgba(255,255,255,.12)",
+          border: "1px solid rgba(255,255,255,.18)",
+          marginBottom: 14,
+        }}
+      >
+        <ArrowUpRight size={24} color="#7dd3fc" />
+      </div>
+
+      <h3 style={{ margin: 0, fontSize: 17, fontWeight: 900 }}>
+        Resumo do período
+      </h3>
+
+      <p
+        style={{
+          margin: "8px 0 18px",
+          color: "rgba(255,255,255,.72)",
+          fontSize: 13,
+          lineHeight: 1.55,
+        }}
+      >
+        {insightText}
+      </p>
+
+      <div
+        style={{
+          padding: 15,
+          borderRadius: 16,
+          background: "rgba(255,255,255,.10)",
+          border: "1px solid rgba(255,255,255,.14)",
+          marginBottom: 12,
+        }}
+      >
+        <div style={{ fontSize: 12, color: "#cbd5e1" }}>
+          Clientes ativos
+        </div>
+
+        <div
+          style={{
+            marginTop: 4,
+            fontSize: 34,
+            fontWeight: 950,
+            letterSpacing: -1,
+            color: "#86efac",
+          }}
+        >
+          {loading ? "..." : `${activeRate}%`}
+        </div>
+
+        <div
+          style={{
+            marginTop: 10,
+            width: "100%",
+            height: 8,
+            borderRadius: 999,
+            background: "rgba(255,255,255,.14)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              width: `${activeRate}%`,
+              height: "100%",
+              borderRadius: 999,
+              background: "linear-gradient(90deg, #22c55e, #7dd3fc)",
+            }}
+          />
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gap: 9,
+        }}
+      >
+        <MiniInfo label="Total de clientes" value={totalClients} />
+        <MiniInfo
+          label="Novos no período"
+          value={data?.cards.newClients ?? 0}
+        />
+        <MiniInfo
+          label="Saídas no período"
+          value={data?.cards.inactiveClients ?? 0}
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+          
 
           {loading && (
             <p
@@ -750,3 +918,79 @@ const inputStyle: React.CSSProperties = {
   fontSize: 14,
   outline: "none",
 };
+
+function CustomTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+
+  const data = payload[0];
+
+  return (
+    <div
+      style={{
+        borderRadius: 14,
+        border: "1px solid #e2e8f0",
+        background: "rgba(255,255,255,0.95)",
+        backdropFilter: "blur(8px)",
+        boxShadow: "0 16px 40px rgba(15,23,42,.18)",
+        padding: "10px 12px",
+        minWidth: 120,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 12,
+          color: "#64748b",
+          fontWeight: 700,
+          marginBottom: 6,
+        }}
+      >
+        {label}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+        >
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 999,
+              background: data.payload.color,
+            }}
+          />
+          <span
+            style={{
+              fontSize: 13,
+              color: "#334155",
+              fontWeight: 700,
+            }}
+          >
+            Total
+          </span>
+        </div>
+
+        <strong
+          style={{
+            fontSize: 14,
+            color: "#0f172a",
+            fontWeight: 900,
+          }}
+        >
+          {data.value.toLocaleString("pt-BR")}
+        </strong>
+      </div>
+    </div>
+  );
+}
