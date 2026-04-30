@@ -73,13 +73,14 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
   const [search, setSearch] = useState("");
   const [filterSituacao, setFilterSituacao] = useState("");
   const [filterGrupo, setFilterGrupo] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [page, setPage] = useState(1);
 
   const { items, loading, create, buscarCnpj, load, modalOpen,setModalOpen, saving } = useCompanies();
 
   useEffect(() => {
     setPage(1);
-  }, [search, filterSituacao, filterGrupo]);
+  }, [search, filterSituacao, filterGrupo, filterStatus]);
 
     useEffect(() => {
     load();
@@ -89,19 +90,24 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
     const q = search.toLowerCase().trim();
 
     return items.filter((c) => {
-      if (filterSituacao && c.situacao !== filterSituacao) return false;
-      if (filterGrupo && c.grupo !== filterGrupo) return false;
-      if (!q) return true;
+    if (filterSituacao && c.situacao !== filterSituacao) return false;
+    if (filterGrupo && c.grupo !== filterGrupo) return false;
 
-      return (
-        (c.razaoSocial || "").toLowerCase().includes(q) ||
-        (c.nomeFantasia || "").toLowerCase().includes(q) ||
-        (c.cnpj || "").replace(/\D/g, "").includes(q.replace(/\D/g, "")) ||
-        (c.cod || "").toLowerCase().includes(q) ||
-        (c.grupo || "").toLowerCase().includes(q)
-      );
-    });
-  }, [items, search, filterSituacao, filterGrupo]);
+    if (filterStatus !== "all" && String(c.active) !== filterStatus) {
+      return false;
+    }
+
+    if (!q) return true;
+
+    return (
+      (c.razaoSocial || "").toLowerCase().includes(q) ||
+      (c.nomeFantasia || "").toLowerCase().includes(q) ||
+      (c.cnpj || "").replace(/\D/g, "").includes(q.replace(/\D/g, "")) ||
+      (c.cod || "").toLowerCase().includes(q) ||
+      (c.grupo || "").toLowerCase().includes(q)
+    );
+  });
+  }, [items, search, filterSituacao, filterGrupo, filterStatus]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -111,7 +117,12 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
     [items]
   );
 
-  const hasFilters = !!(search || filterSituacao || filterGrupo);
+  const hasFilters = !!(
+    search ||
+    filterSituacao ||
+    filterGrupo ||
+    filterStatus !== "all"
+  );
 
   const iStyle: React.CSSProperties = {
     padding: "10px 12px",
@@ -356,11 +367,23 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
           value={filterSituacao}
           onChange={setFilterSituacao}
           options={[
-            { value: "", label: "Todas" },
+            { value: "", label: "Todas situações" },
             { value: "ATIVA", label: "Ativa" },
             { value: "SAIDA", label: "Saída" },
             { value: "SUSPENSA", label: "Suspensa" },
             { value: "ENCERRADA", label: "Encerrada" },
+          ]}
+        />
+
+         <PremiumSelect
+          label="Status"
+          value={filterStatus}
+          onChange={setFilterStatus}
+          variant="active"
+          options={[
+            { value: "all", label: "Todas empresas" },
+            { value: "true", label: "Ativa" },
+            { value: "false", label: "Desativada" },
           ]}
         />
 
@@ -370,7 +393,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
             value={filterGrupo}
             onChange={setFilterGrupo}
             options={[
-              { value: "", label: "Todos" },
+              { value: "", label: "Todos grupos" },
               ...grupos.map((g) => ({ value: g, label: g })),
             ]}
           />
@@ -383,6 +406,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
               setSearch("");
               setFilterSituacao("");
               setFilterGrupo("");
+              setFilterStatus("all");
             }}
             style={{
               height: 52,
@@ -432,7 +456,6 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
               <X size={14} />
             </div>
 
-            Limpar filtros
           </button>
         )}
       </div>
@@ -616,63 +639,84 @@ type SelectTheme = {
   iconShadow: string;
 };
 
+const defaultTheme: SelectTheme = {
+  border: "#e2e8f0",
+  bg: "#fff",
+  icon: "#dfdfdf",
+  text: "#444",
+  soft: "#f7f7f7",
+  shadow: "0 4px 12px rgba(0,0,0,0.04)",
+  iconShadow: "none",
+};
+
 const statusTheme: Record<string, SelectTheme> = {
   ATIVA: {
-    border: "rgba(34,197,94,0.42)",
-    bg: "linear-gradient(135deg, rgba(34,197,94,0.13), rgba(255,255,255,0.96))",
-    icon: "linear-gradient(135deg, #16a34a, #86efac)",
+    ...defaultTheme,
+    border: "rgba(34,197,94,0.30)",
+    bg: "linear-gradient(135deg, rgba(34,197,94,0.075), #ffffff)",
+    icon: "linear-gradient(135deg, #22c55e, #86efac)",
     text: "#15803d",
-    soft: "rgba(34,197,94,0.14)",
-    shadow: "0 10px 26px rgba(34,197,94,0.14)",
-    iconShadow: "0 6px 16px rgba(34,197,94,0.26)",
+    soft: "rgba(34,197,94,0.10)",
+    iconShadow: "0 5px 12px rgba(34,197,94,0.18)",
   },
   SAIDA: {
-    border: "rgba(234,179,8,0.45)",
-    bg: "linear-gradient(135deg, rgba(234,179,8,0.14), rgba(255,255,255,0.96))",
-    icon: "linear-gradient(135deg, #ca8a04, #fde68a)",
-    text: "#a16207",
-    soft: "rgba(234,179,8,0.15)",
-    shadow: "0 10px 26px rgba(234,179,8,0.14)",
-    iconShadow: "0 6px 16px rgba(234,179,8,0.26)",
+    ...defaultTheme,
+    border: "rgba(234,179,8,0.32)",
+    bg: "linear-gradient(135deg, rgba(234,179,8,0.08), #ffffff)",
+    icon: "linear-gradient(135deg, #d97706, #fde68a)",
+    text: "#92400e",
+    soft: "rgba(234,179,8,0.10)",
+    iconShadow: "0 5px 12px rgba(234,179,8,0.18)",
   },
   SUSPENSA: {
-    border: "rgba(234,179,8,0.45)",
-    bg: "linear-gradient(135deg, rgba(234,179,8,0.14), rgba(255,255,255,0.96))",
-    icon: "linear-gradient(135deg, #ca8a04, #fde68a)",
-    text: "#a16207",
-    soft: "rgba(234,179,8,0.15)",
-    shadow: "0 10px 26px rgba(234,179,8,0.14)",
-    iconShadow: "0 6px 16px rgba(234,179,8,0.26)",
+    ...defaultTheme,
+    border: "rgba(245,158,11,0.34)",
+    bg: "linear-gradient(135deg, rgba(245,158,11,0.08), #ffffff)",
+    icon: "linear-gradient(135deg, #f59e0b, #fed7aa)",
+    text: "#92400e",
+    soft: "rgba(245,158,11,0.10)",
+    iconShadow: "0 5px 12px rgba(245,158,11,0.18)",
   },
   ENCERRADA: {
-    border: "rgba(249,45,22,0.42)",
-    bg: "linear-gradient(135deg, rgba(249,45,22,0.13), rgba(255,255,255,0.96))",
-    icon: "linear-gradient(135deg, #f93c16, rgba(249,45,22,0.42))",
-    text: "#c2410c",
-    soft: "rgba(249,56,22,0.14)",
-    shadow: "0 10px 26px rgba(249,45,22,0.14)",
-    iconShadow: "0 6px 16px rgba(249,64,22,0.26)",
+    ...defaultTheme,
+    border: "rgba(239,68,68,0.30)",
+    bg: "linear-gradient(135deg, rgba(239,68,68,0.075), #ffffff)",
+    icon: "linear-gradient(135deg, #ef4444, #fca5a5)",
+    text: "#991b1b",
+    soft: "rgba(239,68,68,0.10)",
+    iconShadow: "0 5px 12px rgba(239,68,68,0.18)",
   },
 };
 
-const defaultTheme: SelectTheme = {
-  border: "rgba(187,159,88,0.45)",
-  bg: "linear-gradient(135deg, rgba(187,159,88,0.12), rgba(255,255,255,0.96))",
-  icon: "linear-gradient(135deg, #BB9F58, #f5da8b)",
-  text: "#967b35",
-  soft: "rgba(187,159,88,0.14)",
-  shadow: "0 10px 26px rgba(187,159,88,0.14)",
-  iconShadow: "0 6px 16px rgba(187,159,88,0.26)",
+const activeTheme: Record<string, SelectTheme> = {
+  true: {
+    ...defaultTheme,
+    border: "rgba(34,197,94,0.30)",
+    bg: "linear-gradient(135deg, rgba(34,197,94,0.075), #ffffff)",
+    icon: "linear-gradient(135deg, #22c55e, #86efac)",
+    text: "#15803d",
+    soft: "rgba(34,197,94,0.10)",
+    iconShadow: "0 5px 12px rgba(34,197,94,0.18)",
+  },
+  false: {
+    ...defaultTheme,
+    border: "rgba(239,68,68,0.30)",
+    bg: "linear-gradient(135deg, rgba(239,68,68,0.075), #ffffff)",
+    icon: "linear-gradient(135deg, #ef4444, #fca5a5)",
+    text: "#991b1b",
+    soft: "rgba(239,68,68,0.10)",
+    iconShadow: "0 5px 12px rgba(239,68,68,0.18)",
+  },
 };
+
+
 
 function getGroupTheme(name: string): SelectTheme {
   const colors = [
     ["#2563eb", "#93c5fd"],
     ["#7c3aed", "#c4b5fd"],
     ["#059669", "#6ee7b7"],
-    ["#db2777", "#f9a8d4"],
     ["#0891b2", "#67e8f9"],
-    ["#4f46e5", "#a5b4fc"],
   ];
 
   let hash = 0;
@@ -684,15 +728,17 @@ function getGroupTheme(name: string): SelectTheme {
   const [primary, softColor] = colors[Math.abs(hash) % colors.length];
 
   return {
-    border: `${primary}55`,
-    bg: `linear-gradient(135deg, ${primary}20, rgba(255,255,255,0.96))`,
+    ...defaultTheme,
+    border: `${primary}45`,
+    bg: `linear-gradient(135deg, ${primary}12, #ffffff)`,
     icon: `linear-gradient(135deg, ${primary}, ${softColor})`,
     text: primary,
-    soft: `${primary}18`,
-    shadow: `0 10px 26px ${primary}22`,
-    iconShadow: `0 6px 16px ${primary}40`,
+    soft: `${primary}12`,
+    iconShadow: `0 5px 12px ${primary}25`,
   };
 }
+
+
 
 function PremiumSelect({
   label,
@@ -705,20 +751,24 @@ function PremiumSelect({
   value: string;
   onChange: (v: string) => void;
   options: { value: string; label: string }[];
-  variant?: "status" | "group";
+  variant?: "status" | "group" | "active";
 }) {
   const selectedLabel =
-    options.find((opt) => opt.value === value)?.label || options[0]?.label || "";
+    options.find((opt) => opt.value === value)?.label ||
+    options[0]?.label ||
+    "";
 
   const theme =
-    !value
+    !value || value === "all"
       ? defaultTheme
+      : variant === "active"
+      ? activeTheme[value] ?? defaultTheme
       : variant === "status"
       ? statusTheme[value] ?? defaultTheme
       : getGroupTheme(value);
 
   return (
-    <div style={{ position: "relative", minWidth: 215, height: 56 }}>
+    <div style={{ position: "relative", minWidth: 215, height: 52 }}>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -726,11 +776,11 @@ function PremiumSelect({
           width: "100%",
           height: "100%",
           padding: "20px 46px 7px 48px",
-          borderRadius: 18,
+          borderRadius: 14,
           border: `1px solid ${theme.border}`,
           background: theme.bg,
           fontSize: 14,
-          fontWeight: 850,
+          fontWeight: 700,
           color: "#0f172a",
           outline: "none",
           fontFamily: "inherit",
@@ -741,7 +791,11 @@ function PremiumSelect({
         }}
       >
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value} style={{ color: "#0f172a" }}>
+          <option
+            key={opt.value}
+            value={opt.value}
+            style={{ color: "#0f172a" }}
+          >
             {opt.label}
           </option>
         ))}
@@ -755,16 +809,17 @@ function PremiumSelect({
           transform: "translateY(-50%)",
           width: 26,
           height: 26,
-          borderRadius: 10,
+          borderRadius: 8,
           display: "grid",
           placeItems: "center",
           background: theme.icon,
-          color: "#fff",
+          color: theme.text,
           boxShadow: theme.iconShadow,
           pointerEvents: "none",
+          border: "1px solid #e2e8f0",
         }}
       >
-        <span style={{ fontSize: 11, fontWeight: 900 }}>
+        <span style={{ fontSize: 10.5, fontWeight: 800 }}>
           {selectedLabel?.slice(0, 2).toUpperCase() || "•"}
         </span>
       </div>
@@ -775,10 +830,10 @@ function PremiumSelect({
           left: 48,
           top: 8,
           fontSize: 10,
-          fontWeight: 900,
+          fontWeight: 800,
           color: theme.text,
           textTransform: "uppercase",
-          letterSpacing: "0.08em",
+          letterSpacing: "0.07em",
           pointerEvents: "none",
         }}
       >
@@ -799,6 +854,7 @@ function PremiumSelect({
           background: theme.soft,
           color: theme.text,
           pointerEvents: "none",
+          border: "1px solid #e2e8f0",
         }}
       >
         <ChevronDown size={16} strokeWidth={2.4} />

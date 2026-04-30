@@ -44,9 +44,10 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
         <tr>
           <Th style={{ ...thStyle, width: 90 }}>Cod.</Th>
           <Th style={thStyle}>Empresa</Th>
+          <Th style={thStyle}>Situação</Th>
           <Th style={thStyle}>CNPJ</Th>
           <Th style={thStyle}>Grupo</Th>
-          <Th style={thStyle}>Situação</Th>
+          <Th style={thStyle}>Status</Th>
           <Th style={{ ...thStyle, width: 70 }}></Th>
         </tr>
       </Thead>
@@ -104,6 +105,7 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
                   {c.cod || "—"}
                 </span>
               </div>
+               
             </Td>
 
             {/* Empresa */}
@@ -144,8 +146,27 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
                   >
                     {c.nomeFantasia || "Sem nome fantasia"}
                   </div>
+                 
                 </div>
               </div>
+            </Td>
+
+             {/* Situação */}
+            <Td style={tdBaseStyle}>
+              {c.situacao ? (
+                <Badge
+                  label={c.situacao}
+                  variant={
+                    c.situacao === "ATIVA"
+                      ? "green"
+                      : c.situacao === "ENCERRADA"
+                      ? "red"
+                      : "yellow"
+                  }
+                />
+              ) : (
+                <span style={{ color: "#cbd5e1", fontWeight: 600 }}>—</span>
+              )}
             </Td>
 
             {/* CNPJ */}
@@ -174,6 +195,8 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
               </div>
             </Td>
 
+             
+
             {/* Grupo */}
             <Td style={tdBaseStyle}>
               {c.grupo ? (
@@ -199,22 +222,14 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
               )}
             </Td>
 
-            {/* Situação */}
+           
+
             <Td style={tdBaseStyle}>
-              {c.situacao ? (
-                <Badge
-                  label={c.situacao}
-                  variant={
-                    c.situacao === "ATIVA"
-                      ? "green"
-                      : c.situacao === "ENCERRADA"
-                      ? "red"
-                      : "yellow"
-                  }
-                />
-              ) : (
-                <span style={{ color: "#cbd5e1", fontWeight: 600 }}>—</span>
-              )}
+              
+                  <span className={`status-badge ${c.active ? "on" : "off"}`}>
+                    <span className="status-dot" />
+                    {c.active ? "Ativo" : "Desativado"}
+                  </span>
             </Td>
 
             {/* Ação */}
