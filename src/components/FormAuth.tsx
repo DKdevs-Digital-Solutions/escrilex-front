@@ -39,10 +39,10 @@ export function LoginForm({
         
 
         <div className="login-head">
-          <span className="login-kicker">
+          {/* <span className="login-kicker">
             <ShieldCheck className="login-kicker-icon" />
             Acesso seguro
-          </span>
+          </span> */}
           <h2 className="lr-h2">Bem-vindo de volta</h2>
           <p className="lr-sub">Entre com suas credenciais para acessar o painel.</p>
         </div>

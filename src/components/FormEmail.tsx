@@ -13,18 +13,40 @@ import {
   Settings2,
   UserRound,
   BadgeCheck,
+  Eye,
+  EyeClosed,
 } from "lucide-react";
-import { useEmailAccount } from "../hooks/useEmailAccount";
+import { EmailAccountPayload } from "../repository/emailAccount.repository";
 
-export function EmailNotificationsSettings() {
-  const { 
-    form, 
-    saving, 
-    success, 
-    error, 
-    updateForm, 
-    saveEmailAccount 
-  } = useEmailAccount();
+type Props = {
+  form: EmailAccountPayload;
+  loading: boolean;
+  saving: boolean;
+  success: string;
+  error: string;
+  hasAccount: boolean;
+  updateForm: <K extends keyof EmailAccountPayload>(
+    field: K,
+    value: EmailAccountPayload[K]
+  ) => void;
+  saveEmailAccount: () => void;
+  removeEmailAccount: () => void;
+};
+
+
+export function EmailNotificationsSettings({
+  form,
+  saving,
+  success,
+  error,
+  updateForm,
+  saveEmailAccount,
+  hasAccount,
+  loading,
+  removeEmailAccount
+}: Props) {
+
+  const [showPassword, setShowPassword] = React.useState(false);
 
   return (
     <div
@@ -321,19 +343,41 @@ export function EmailNotificationsSettings() {
               </div>
 
               <div style={{ gridColumn: "1 / -1" }}>
-                <Field
-                  label="Senha SMTP"
-                  icon={<KeyRound size={15} color="#9333ea" />}
-                >
+              <Field
+                label="Senha SMTP"
+                icon={<KeyRound size={15} color="#9333ea" />}
+              >
+                <div style={{ position: "relative" }}>
                   <input
-                    type="password"
-                    style={inputStyle}
+                    type={showPassword ? "text" : "password"}
+                    style={{
+                      ...inputStyle,
+                      paddingRight: 40, // espaço pro botão
+                    }}
                     placeholder="••••••••••••"
                     value={form.password}
                     onChange={(e) => updateForm("password", e.target.value)}
                   />
-                </Field>
-              </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    style={{
+                      position: "absolute",
+                      right: 10,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      border: "none",
+                      background: "transparent",
+                      cursor: "pointer",
+                      color: "#64748b",
+                    }}
+                  >
+                    {showPassword ? <Eye size={20} /> : <EyeClosed size={20} />}
+                  </button>
+                </div>
+              </Field>
+            </div>
 
               <div style={{ gridColumn: "1 / -1" }}>
                 <Field
@@ -394,14 +438,14 @@ export function EmailNotificationsSettings() {
                   gridColumn: "1 / -1",
                 }}
               >
-                <button
+                {/* <button
                   type="button"
                   className="email-button"
                   style={secondaryButton}
                 >
                   <Send size={15} color="#2563eb" />
                   Enviar teste
-                </button>
+                </button> */}
 
                 <button
                   type="button"
@@ -415,7 +459,11 @@ export function EmailNotificationsSettings() {
                   onClick={saveEmailAccount}
                 >
                   <Save size={16} color="#7dd3fc" />
-                  {saving ? "Salvando..." : "Salvar configurações"}
+                  {saving
+                    ? "Salvando..."
+                    : hasAccount
+                      ? "Atualizar configurações"
+                      : "Salvar configurações"}
                 </button>
               </div>
             </div>
@@ -560,7 +608,24 @@ export function EmailNotificationsSettings() {
                   value={form.fromName || "Não informado"}
                   active={Boolean(form.fromName)}
                 />
+
+                 {hasAccount && (
+                <button
+                  type="button"
+                  className="email-button"
+                  style={{
+                    ...secondaryButton,
+                    border: "1px solid #fecaca",
+                    background: "#fff",
+                    color: "#b91c1c",
+                  }}
+                  onClick={removeEmailAccount}
+                >
+                  Remover conta
+                </button>
+              )}
               </div>
+             
             </div>
           </aside>
         </div>
@@ -661,9 +726,9 @@ function Alert({ type, message }: { type: "success" | "error"; message: string }
   return (
     <div
       style={{
-        marginBottom: 16,
+        marginBottom: 20,
         padding: "12px 14px",
-        borderRadius: 14,
+        borderRadius: 8,
         background: success ? "#ecfdf5" : "#fef2f2",
         border: success ? "1px solid #bbf7d0" : "1px solid #fecaca",
         color: success ? "#047857" : "#991b1b",
@@ -744,8 +809,8 @@ const primaryButton: React.CSSProperties = {
   fontWeight: 800,
   cursor: "pointer",
   boxShadow: "0 12px 22px rgba(1, 41, 66, 0.24)",
-  width: "210px",
-  maxWidth: "210px",
+  width: "240px",
+  maxWidth: "250px",
   justifyContent: "center",
 };
 
@@ -762,7 +827,6 @@ const secondaryButton: React.CSSProperties = {
   fontWeight: 800,
   cursor: "pointer",
   boxShadow: "0 1px 2px rgba(15, 23, 42, 0.06)",
-  width: "210px",
-  maxWidth: "210px",
+  width: "100%",
   justifyContent: "center",
 };

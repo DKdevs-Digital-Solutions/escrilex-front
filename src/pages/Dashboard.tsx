@@ -420,14 +420,16 @@ export function DashboardPage() {
             </h3>
 
             <p
-              style={{
-                margin: "5px 0 0",
-                color: "#64748b",
-                fontSize: 13,
-              }}
-            >
-              Comparativo de clientes novos e clientes que saíram no período.
-            </p>
+          style={{
+            margin: "5px 0 0",
+            color: "#64748b",
+            fontSize: 13,
+          }}
+        >
+          {periodLabel}
+        </p>
+
+            
          </div>
 
       <div style={{ width: "100%", height: 260, position: "relative" }}>
@@ -572,14 +574,16 @@ export function DashboardPage() {
         </h3>
 
         <p
-          style={{
-            margin: "5px 0 0",
-            color: "#64748b",
-            fontSize: 13,
-          }}
-        >
-          {periodLabel}
-        </p>
+              style={{
+                margin: "5px 0 0",
+                color: "#64748b",
+                fontSize: 13,
+              }}
+            >
+              Comparativo de clientes ativos e clientes inativos.
+            </p>
+
+        
       </div>
 
       <div style={{ width: "100%", height: 300 }}>

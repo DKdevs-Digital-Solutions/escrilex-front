@@ -1,7 +1,6 @@
 import React from "react";
 import { Table, Thead, Th, Td, Badge, Empty } from "../ui";
-import { Eye, Building2, Hash, FolderTree, PowerOff, Power } from "lucide-react";
-import { Avatar } from "./Avatar";
+import { Eye, Hash, FolderTree, PowerOff, Power } from "lucide-react";
 
 type Props = {
   items: any[];

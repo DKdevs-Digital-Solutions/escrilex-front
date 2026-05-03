@@ -258,7 +258,6 @@ function RowCard({
       alignItems: "stretch",
       padding: 16,
       borderBottom: `1px solid ${UI.borderSoft}`,
-      background: `linear-gradient(90deg, ${sectorVisual.bg} 0%, #ffffff 22%)`,
     }}
     >
       <div style={{ minWidth: 0 }}>
@@ -278,7 +277,7 @@ function RowCard({
               alignItems: "center",
               justifyContent: "center",
               background: sectorVisual.bg,
-              border: `1px solid ${sectorVisual.border}`,
+              border: `2px solid ${sectorVisual.border}`,
               color: sectorVisual.color,
               flexShrink: 0,
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.65)",

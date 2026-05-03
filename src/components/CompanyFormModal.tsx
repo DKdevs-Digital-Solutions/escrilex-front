@@ -110,7 +110,7 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
                 />
             </div>
 
-            <button
+            {/* <button
                 onClick={() => onBuscarCnpj(form.cnpj)}
                 disabled={loadingCnpj || !isCnpjValid}
                 style={{
@@ -127,7 +127,7 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
                 <Search size={16} />
                 )}
                 Buscar
-            </button>
+            </button> */}
             </div>
         </Section>
 

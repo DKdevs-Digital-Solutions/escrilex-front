@@ -214,14 +214,14 @@
 
 .ll-premium-item {
   position: relative;
-  padding: 16px 14px;
+  padding: 5px 14px;
   border-radius: 20px;
 
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.10);
 
   transition: all 0.2s ease;
-  cursor: default;
+  cursor: pointer;
 }
 
 /* ✨ HOVER PREMIUM */
@@ -230,6 +230,27 @@
   background: rgba(255,255,255,0.09);
   border-color: rgba(255,255,255,0.18);
 }
+
+
+.ll-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ll-premium-item strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ll-premium-item span {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+
 
 /* 🔥 DESTAQUE PRINCIPAL */
 .ll-premium-item.highlight {
@@ -248,8 +269,8 @@
 
 /* ICON DOT */
 .ll-premium-item .icon {
-  width: 28px;
-  height: 28px;
+  width: 25px;
+  height: 25px;
   border-radius: 12px;
   margin-bottom: 10px;
 
@@ -430,3 +451,38 @@
       outline: none !important;
     }
     
+
+
+    .icon-gold {
+  color: #e2c878;
+  filter: drop-shadow(0 0 6px rgba(226, 200, 120, 0.35));
+}
+
+.icon-green {
+  color: #22c55e;
+  filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.35));
+}
+
+.icon-blue {
+  color: #38bdf8;
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.35));
+}
+
+
+.ll-item-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.ll-icon {
+  flex-shrink: 0;
+  position: relative;
+  top: 1px; /* micro ajuste fino */
+  width: 19px;
+  height: 19px;
+  margin-right: 6px;
+  top: 2px;
+}

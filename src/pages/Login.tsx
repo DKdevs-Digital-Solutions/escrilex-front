@@ -599,48 +599,53 @@ export function Login({ onLogin }: { onLogin: () => void }) {
 
         {/* ── LEFT ── */}
         <div className="ll">
-
-           <div className="ll-logo">
+          <div className="ll-logo">
             <img src={Logo} alt="Logo da empresa" className="ll-logo-img" />
           </div>
 
           <div className="ll-body">
             <h1 className="ll-h1">
-              Controle total<br />
+              Gestão completa<br />
               <span>da sua operação</span>
             </h1>
-
-          
 
             <div className="ll-premium-card">
               <div className="ll-premium-top">
                 <span className="ll-premium-pulse" />
-                Operação conectada
+                Gestão inteligente
               </div>
 
               <div className="ll-premium-title">
-                Fluxos, responsáveis e auditoria em uma única visão.
+                Controle processos, responsáveis e auditoria em tempo real.
               </div>
 
-             <div className="ll-premium-grid">
-              <div className="ll-premium-item highlight">
-                <Zap className="ll-icon" />
-                <strong>Tempo real</strong>
-                <span>Atualizações instantâneas</span>
+              <div className="ll-premium-grid">
+                <div className="ll-premium-item highlight">
+                  <strong className="ll-item-title">
+                    <Zap className="ll-icon icon-gold" size={14} />
+                    Tempo real
+                  </strong>
+                  <span>Dados sempre atualizados</span>
+                </div>
+
+                <div className="ll-premium-item">
+                  <strong className="ll-item-title">
+                    <ShieldCheck className="ll-icon icon-green" size={14} />
+                    Seguro
+                  </strong>
+                  <span>Controle de acesso e permissões</span>
+                </div>
+
+                <div className="ll-premium-item">
+                  <strong className="ll-item-title">
+                    <Activity className="ll-icon icon-blue" size={14} />
+                    Auditável
+                  </strong>
+                  <span>Histórico completo e rastreável</span>
+                </div>
               </div>
 
-              <div className="ll-premium-item">
-                <ShieldCheck className="ll-icon" />
-                <strong>Seguro</strong>
-                <span>Controle de acesso avançado</span>
-              </div>
 
-              <div className="ll-premium-item">
-                <Activity className="ll-icon" />
-                <strong>Auditável</strong>
-                <span>Histórico completo</span>
-              </div>
-            </div>
             </div>
           </div>
 
