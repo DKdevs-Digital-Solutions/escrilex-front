@@ -1,274 +1,673 @@
 import React, { useState } from "react";
-import { api, setToken } from "../api";
 import { LogIn, Eye, EyeOff, Loader2 } from "lucide-react";
+import { LoginForm } from "../components/FormAuth";
+import { useAuth } from "../hooks/useAuth";
+import Logo from "../assets/logo.png";
+import { Zap, ShieldCheck, Activity } from "lucide-react";
 
 export function Login({ onLogin }: { onLogin: () => void }) {
-  const [email, setEmail]       = useState("admin@local.com");
-  const [password, setPassword] = useState("admin123");
-  const [error, setError]       = useState<string | null>(null);
-  const [loading, setLoading]   = useState(false);
-  const [showPw, setShowPw]     = useState(false);
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-    try {
-      const r = await api("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
-      setToken(r.token);
-      onLogin();
-    } catch (err: any) {
-      setError(err.message || "Credenciais inválidas");
-    } finally {
-      setLoading(false);
+
+  const { 
+    email, 
+    setEmail, 
+    password, 
+    setPassword, 
+    showPw, 
+    setShowPw, 
+    login, 
+    loading, 
+    emailError,
+    passwordError,
+    error 
+  } = useAuth();
+
+  
+
+  async function handleLogin() {
+    const ok = await login();
+
+    if (ok) {
+      onLogin(); 
     }
   }
 
   return (
     <>
+      
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap');
-        html, body, #root { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
 
-        .lw {
-          position: fixed; inset: 0;
-          display: grid;
-          grid-template-columns: 1fr 420px;
-          font-family: 'DM Sans', system-ui, sans-serif;
-        }
+  :root {
+    --blue: #012942;
+    --blue-2: #063b5c;
+    --gold: #BB9F58;
+    --gold-2: #e2c878;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e5e7eb;
+  }
 
-        /* ── LEFT ── */
-        .ll {
-          position: relative;
-          background: #0d1117;
-          display: flex;
-          flex-direction: column;
-          padding: 44px 64px;
-          overflow: hidden;
-        }
-        .ll::before {
-          content: '';
-          position: absolute; inset: 0; z-index: 0;
-          background-image:
-            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-          background-size: 48px 48px;
-          pointer-events: none;
-        }
-        .ll::after {
-          content: '';
-          position: absolute; z-index: 0;
-          bottom: -140px; right: -100px;
-          width: 560px; height: 560px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(37,99,235,0.16) 0%, transparent 68%);
-          pointer-events: none;
-        }
+  html, body, #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+  }
 
-        /* logo row */
-        .ll-logo {
-          display: flex; align-items: center; gap: 10px;
-          position: relative; z-index: 1; flex-shrink: 0;
-        }
-        .ll-logo-icon {
-          width: 36px; height: 36px; border-radius: 9px; background: #2563eb; flex-shrink: 0;
-          display: flex; align-items: center; justify-content: center;
-        }
-        .ll-logo-name { font-weight: 800; font-size: 15px; color: #fff; letter-spacing: -0.03em; line-height: 1; }
-        .ll-logo-pro  { font-size: 9px; color: #60a5fa; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-top: 2px; }
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--blue);
+  }
 
-        /* center block */
-        .ll-body {
-  flex: 1;
+  * {
+    box-sizing: border-box;
+  }
+.lw {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(820px, 650px) minmax(420px, 480px);
+  justify-content: center;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(187,159,88,0.25), transparent 28%),
+    radial-gradient(circle at 78% 72%, rgba(255,255,255,0.10), transparent 32%),
+    linear-gradient(135deg, #011827 0%, var(--blue) 48%, #03111c 100%);
+  overflow: hidden;
+}
+
+.ll {
+  position: relative;
+  padding: 52px 42px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  color: #fff;
+}
+
+  .ll::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: linear-gradient(to bottom, black 0%, transparent 92%);
+    pointer-events: none;
+  }
+
+
+
+  .ll-logo,
+  .ll-body,
+  .ll-footer {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ll-logo {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+  }
+
+  .ll-logo-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 18px 42px rgba(187,159,88,0.28);
+  }
+
+  .ll-logo-name {
+    font-size: 17px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .ll-logo-pro {
+    margin-top: 4px;
+    font-size: 10px;
+    font-weight: 900;
+    color: var(--gold-2);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .ll-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 650px;
+    position: relative;
+    bottom: 30px;
+  }
+
+  .ll-tag {
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 15px;
+    margin-bottom: 30px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: #f8fafc;
+    font-size: 12px;
+    font-weight: 800;
+    backdrop-filter: blur(14px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  .ll-tag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--gold);
+    box-shadow: 0 0 0 6px rgba(187,159,88,0.16);
+  }
+
+  .ll-h1 {
+    margin: 0;
+    max-width: 680px;
+    font-size: clamp(46px, 5.4vw, 78px);
+    line-height: 0.94;
+    font-weight: 900;
+    letter-spacing: -0.075em;
+    color: #fff;
+  }
+
+  .ll-h1 span {
+    background: linear-gradient(135deg, var(--gold) 0%, #f7e6a4 48%, #ffffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .ll-desc {
+    margin: 26px 0 42px;
+    max-width: 520px;
+    font-size: 16px;
+    line-height: 1.75;
+    color: #cbd5e1;
+  }
+
+  .ll-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .ll-stat {
+    min-width: 138px;
+    padding: 17px 18px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.075);
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(16px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  .ll-stat-sep {
+    display: none;
+  }
+
+  .ll-stat-val {
+    font-size: 28px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.05em;
+    line-height: 1;
+  }
+
+  .ll-stat-lbl {
+    margin-top: 7px;
+    font-size: 12px;
+    color: #cbd5e1;
+    font-weight: 700;
+  }
+
+  .ll-footer {
+    font-size: 12px;
+    color: rgba(255,255,255,0.42);
+  }
+
+.lr {
+  position: relative;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;     /* ✅ centraliza horizontal */
-  text-align: center;      /* ✅ centraliza texto */
+  padding: 42px 32px;
+}
+
+  .lr::before {
+  content: "";
+  position: absolute;
+  inset: 22px;
+  border-radius: 34px;
+  padding: 2px;
+
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    transparent 30%,
+    rgba(187,159,88,0.6) 50%,
+    transparent 70%,
+    transparent 100%
+  );
+
+  background-size: 200% 200%;
+  animation: borderMove 3s linear infinite;
+
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+
+  pointer-events: none;
+}
+
+@keyframes borderMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+  .lr-wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 390px;
+    padding: 36px;
+    border-radius: 30px;
+    background: rgba(255,255,255,0.96);
+    border: 1px solid rgba(226,232,240,0.95);
+    box-shadow:
+      0 28px 80px rgba(15,23,42,0.14),
+      0 1px 0 rgba(255,255,255,0.9) inset;
+  }
+
+  .lr-h2 {
+    margin: 0 0 7px;
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--text);
+    letter-spacing: -0.06em;
+  }
+
+  .lr-sub {
+    margin: 0 0 30px;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .lr-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 11px;
+    font-weight: 900;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+  }
+
+  .lr-field {
+    margin-bottom: 16px;
+  }
+
+  .lr-input {
+    width: 100%;
+    height: 48px;
+    padding: 0 15px;
+    font-size: 14px;
+    border-radius: 15px;
+    border: 1.5px solid #e2e8f0;
+    color: var(--text);
+    background: #f8fafc;
+    outline: none;
+    transition: all 0.16s ease;
+    font-family: inherit;
+  }
+
+  .lr-input:hover {
+    border-color: #cbd5e1;
+    background: #fff;
+  }
+
+  .lr-input:focus {
+    border-color: var(--gold);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(187,159,88,0.18);
+  }
+
+  .lr-pw {
+    position: relative;
+  }
+
+  .lr-pw .lr-input {
+    padding-right: 46px;
+  }
+
+  .lr-pw-btn {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    transition: color 0.14s ease;
+  }
+
+  .lr-pw-btn:hover {
+    color: var(--gold);
+  }
+
+  .lr-btn {
+    width: 100%;
+    height: 50px;
+    margin-top: 8px;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-2) 100%);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow:
+      0 18px 38px rgba(1,41,66,0.32),
+      inset 0 1px 0 rgba(255,255,255,0.12);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  }
+
+  .lr-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+    box-shadow:
+      0 22px 48px rgba(1,41,66,0.42),
+      inset 0 1px 0 rgba(255,255,255,0.16);
+  }
+
+  .lr-btn:disabled {
+    opacity: 0.58;
+    cursor: not-allowed;
+  }
+
+  .lr-err {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 14px;
+    padding: 11px 13px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 15px;
+    color: #b91c1c;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .lr-div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 22px 0 14px;
+    font-size: 10px;
+    color: #cbd5e1;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+  }
+
+  .lr-div::before,
+  .lr-div::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+  }
+
+  .lr-demo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
+    padding: 15px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+    border: 1px solid #e2e8f0;
+  }
+
+  .lr-demo-lbl {
+    margin-bottom: 3px;
+    font-size: 10px;
+    font-weight: 900;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .lr-demo-val {
+    font-family: monospace;
+    font-size: 12.5px;
+    color: #334155;
+    font-weight: 800;
+    word-break: break-word;
+  }
+
+  @media (max-width: 1180px) {
+    .lw {
+      grid-template-columns: minmax(0, 1fr) 440px;
+    }
+
+    .ll {
+      padding: 44px 52px;
+    }
+  }
+
+  @media (max-width: 999px) {
+    html, body, #root {
+      min-height: 100%;
+      overflow: auto;
+    }
+
+    .lw {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px 16px;
+      overflow: auto;
+      background:
+        radial-gradient(circle at top left, rgba(187,159,88,0.28), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(255,255,255,0.10), transparent 30%),
+        linear-gradient(135deg, var(--blue) 0%, #03111c 100%);
+    }
+
+    .ll {
+      display: none;
+    }
+
+    .lr {
+      width: 100%;
+      min-height: auto;
+      padding: 0;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .lr::before {
+      display: none;
+    }
+
+    .lr-wrap {
+      width: 100%;
+      max-width: 430px;
+      padding: 30px 22px;
+      border-radius: 26px;
+      background: rgba(255,255,255,0.98);
+    }
+
+    .lr-h2 {
+      font-size: 27px;
+    }
+
+    .lr-sub {
+      margin-bottom: 26px;
+      font-size: 13.5px;
+    }
+
+    .lr-input {
+      height: 48px;
+    }
+
+    .lr-demo {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .lw {
+      padding: 14px;
+      align-items: stretch;
+    }
+
+    .lr {
+      align-items: center;
+    }
+
+    .lr-wrap {
+      max-width: none;
+      padding: 26px 18px;
+      border-radius: 22px;
+    }
+
+    .lr-h2 {
+      font-size: 25px;
+    }
+
+    .lr-btn {
+      height: 48px;
+    }
+  }
+
+  .ll-logo {
   position: relative;
   z-index: 1;
-  padding: 20px 0;
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+  right: 10px;
 }
-        .ll-tag {
-          display: inline-flex; align-items: center; gap: 7px;
-          background: rgba(37,99,235,0.13); border: 1px solid rgba(37,99,235,0.28);
-          border-radius: 99px; padding: 5px 14px; margin-bottom: 28px; width: fit-content;
-          font-size: 11.5px; font-weight: 600; color: #93c5fd; letter-spacing: 0.05em;
-        }
-        .ll-tag-dot { width: 6px; height: 6px; border-radius: 50%; background: #3b82f6; flex-shrink: 0; }
-        .ll-h1 {
-          margin: 0 0 18px; font-size: 54px; font-weight: 800; color: #fff;
-          letter-spacing: -0.045em; line-height: 1.04;
-        }
-        .ll-h1 span {
-          background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .ll-desc { margin: 0 0 52px; font-size: 15px; color: #4b5563; line-height: 1.7; max-width: 400px; }
-        .ll-stats { display: flex; align-items: center; gap: 0; }
-        .ll-stat { padding: 0 32px; }
-        .ll-stat:first-child { padding-left: 0; }
-        .ll-stat-sep { width: 1px; height: 36px; background: #1e2535; flex-shrink: 0; }
-        .ll-stat-val { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.03em; line-height: 1; }
-        .ll-stat-lbl { font-size: 11.5px; color: #4b5563; font-weight: 500; margin-top: 5px; }
 
-        /* footer row */
-        .ll-footer { font-size: 11px; color: #1e2535; position: relative; z-index: 1; flex-shrink: 0; }
+.ll-logo-img {
+  height: 55px;
+  max-width: 210px;
+  object-fit: contain;
+}
 
-        /* ── RIGHT ── */
-        .lr {
-          background: #fff;
-          display: flex; align-items: center; justify-content: center;
-          padding: 40px 44px;
-          box-shadow: -1px 0 0 rgba(0,0,0,0.07);
-        }
-        .lr-wrap { width: 100%; }
-        .lr-h2  { margin: 0 0 5px; font-size: 23px; font-weight: 800; color: #0f172a; letter-spacing: -0.04em; }
-        .lr-sub { margin: 0 0 26px; font-size: 13.5px; color: #94a3b8; }
-        .lr-label { display: block; font-size: 10.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
-        .lr-field { margin-bottom: 15px; }
-        .lr-input {
-          width: 100%; padding: 10px 13px; font-size: 13.5px;
-          border-radius: 8px; border: 1.5px solid #e2e8f0;
-          color: #0f172a; font-family: inherit; background: #f8fafc;
-          outline: none; box-sizing: border-box;
-          transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
-        }
-        .lr-input:focus { border-color: #2563eb; background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.11); }
-        .lr-pw { position: relative; }
-        .lr-pw-btn {
-          position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
-          background: none; border: none; cursor: pointer; color: #94a3b8;
-          display: flex; align-items: center; padding: 0; transition: color 0.12s;
-        }
-        .lr-pw-btn:hover { color: #2563eb; }
-        .lr-err {
-          display: flex; align-items: center; gap: 9px;
-          background: #fef2f2; border: 1.5px solid #fecaca;
-          border-radius: 8px; padding: 9px 13px; margin-bottom: 13px;
-          font-size: 13px; color: #b91c1c; font-weight: 500;
-        }
-        .lr-btn {
-          width: 100%; padding: 11px; font-size: 14px; font-weight: 700;
-          border-radius: 9px; background: #2563eb; color: #fff; border: none;
-          cursor: pointer; font-family: inherit; margin-top: 6px;
-          display: flex; align-items: center; justify-content: center; gap: 7px;
-          box-shadow: 0 2px 10px rgba(37,99,235,0.28);
-          transition: background 0.15s, box-shadow 0.15s;
-        }
-        .lr-btn:hover:not(:disabled) { background: #1d4ed8; box-shadow: 0 4px 16px rgba(37,99,235,0.36); }
-        .lr-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .lr-div {
-          display: flex; align-items: center; gap: 10px;
-          margin: 18px 0 13px; font-size: 10px; color: #cbd5e1; font-weight: 700; letter-spacing: 0.06em;
-        }
-        .lr-div::before, .lr-div::after { content: ''; flex: 1; height: 1px; background: #f1f5f9; }
-        .lr-demo {
-          background: #f8fafc; border: 1.5px solid #e2e8f0;
-          border-radius: 9px; padding: 12px 14px;
-          display: grid; grid-template-columns: 1fr 1fr; gap: 3px 12px;
-        }
-        .lr-demo-lbl { font-size: 9.5px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
-        .lr-demo-val { font-family: monospace; font-size: 12.5px; color: #334155; font-weight: 600; }
-        @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
-        .spin { animation: spin 0.8s linear infinite; }
-      `}</style>
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .spin {
+    animation: spin 0.8s linear infinite;
+  }
+`}</style>
 
       <div className="lw">
 
         {/* ── LEFT ── */}
         <div className="ll">
           <div className="ll-logo">
-            <div className="ll-logo-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 11 12 14 22 4"/>
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-              </svg>
-            </div>
-            <div>
-              <div className="ll-logo-name">Gestão</div>
-              <div className="ll-logo-pro">PRO</div>
-            </div>
+            <img src={Logo} alt="Logo da empresa" className="ll-logo-img" />
           </div>
 
           <div className="ll-body">
-            <div className="ll-tag">
-              <span className="ll-tag-dot" />
-              Sistema de Gestão
-            </div>
             <h1 className="ll-h1">
-              Sistema de<br />
-              <span>Gestão</span>
+              Gestão completa<br />
+              <span>da sua operação</span>
             </h1>
-            <p className="ll-desc">
-              Controle completo de entradas e saídas com rastreabilidade e auditoria em tempo real.
-            </p>
-            <div className="ll-stats">
-              {[["100%","Rastreável"],["24/7","Disponível"],["∞","Empresas"]].map(([v,l], i) => (
-                <React.Fragment key={l}>
-                  {i > 0 && <div className="ll-stat-sep" />}
-                  <div className="ll-stat">
-                    <div className="ll-stat-val">{v}</div>
-                    <div className="ll-stat-lbl">{l}</div>
-                  </div>
-                </React.Fragment>
-              ))}
+
+            <div className="ll-premium-card">
+              <div className="ll-premium-top">
+                <span className="ll-premium-pulse" />
+                Gestão inteligente
+              </div>
+
+              <div className="ll-premium-title">
+                Controle processos, responsáveis e auditoria em tempo real.
+              </div>
+
+              <div className="ll-premium-grid">
+                <div className="ll-premium-item highlight">
+                  <strong className="ll-item-title">
+                    <Zap className="ll-icon icon-gold" size={14} />
+                    Tempo real
+                  </strong>
+                  <span>Dados sempre atualizados</span>
+                </div>
+
+                <div className="ll-premium-item">
+                  <strong className="ll-item-title">
+                    <ShieldCheck className="ll-icon icon-green" size={14} />
+                    Seguro
+                  </strong>
+                  <span>Controle de acesso e permissões</span>
+                </div>
+
+                <div className="ll-premium-item">
+                  <strong className="ll-item-title">
+                    <Activity className="ll-icon icon-blue" size={14} />
+                    Auditável
+                  </strong>
+                  <span>Histórico completo e rastreável</span>
+                </div>
+              </div>
+
+
             </div>
           </div>
 
-          <div className="ll-footer">© 2025 Gestão · Todos os direitos reservados</div>
+          <div className="ll-footer">
+            © 2025 SGE · Todos os direitos reservados
+          </div>
         </div>
 
         {/* ── RIGHT ── */}
-        <div className="lr">
-          <div className="lr-wrap">
-            <h2 className="lr-h2">Bem-vindo de volta</h2>
-            <p className="lr-sub">Entre com suas credenciais para continuar</p>
-
-            <form onSubmit={submit}>
-              <div className="lr-field">
-                <label className="lr-label">E-mail</label>
-                <input className="lr-input" type="email" value={email}
-                  onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" autoComplete="email" />
-              </div>
-              <div className="lr-field">
-                <label className="lr-label">Senha</label>
-                <div className="lr-pw">
-                  <input className="lr-input" type={showPw ? "text" : "password"}
-                    value={password} onChange={e => setPassword(e.target.value)}
-                    placeholder="••••••••" autoComplete="current-password"
-                    style={{ paddingRight: 38 }} />
-                  <button type="button" className="lr-pw-btn" onClick={() => setShowPw(p => !p)}>
-                    {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </button>
-                </div>
-              </div>
-
-              {error && (
-                <div className="lr-err">
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef4444", flexShrink: 0 }} />
-                  {error}
-                </div>
-              )}
-
-              <button type="submit" disabled={loading} className="lr-btn">
-                {loading
-                  ? <><Loader2 size={15} className="spin" /> Entrando...</>
-                  : <><LogIn size={15} strokeWidth={2.5} /> Entrar</>}
-              </button>
-            </form>
-
-            <div className="lr-div">ACESSO DEMO</div>
-            <div className="lr-demo">
-              {[["E-MAIL","admin@local.com"],["SENHA","admin123"]].map(([l,v]) => (
-                <div key={l}>
-                  <div className="lr-demo-lbl">{l}</div>
-                  <div className="lr-demo-val">{v}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <LoginForm
+          email={email}
+          setEmail={setEmail}
+          password={password}
+          setPassword={setPassword}
+          showPw={showPw}
+          setShowPw={setShowPw}
+          onSubmit={handleLogin}
+          loading={loading}
+          error={error}
+          emailError={emailError}
+          passwordError={passwordError}
+        />
 
       </div>
     </>

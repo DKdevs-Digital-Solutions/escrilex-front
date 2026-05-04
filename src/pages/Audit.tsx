@@ -1,113 +1,312 @@
 import React, { useEffect, useState } from "react";
-import { api } from "../api";
-import { Input, Card, Table, Thead, Th, Tr, Td, Empty, PageHeader, Badge } from "../ui";
-import { SlidersHorizontal } from "lucide-react";
-
-const entityLabel: Record<string, string> = {
-  Company: "Empresa", User: "Usuário", Sector: "Setor",
-  ChecklistRun: "Checklist", ChecklistItemRun: "Item do checklist",
-  ChecklistTemplate: "Template", ChecklistTemplateSection: "Seção",
-  ChecklistTemplateItem: "Item do template",
-};
-
-const actionLabel: Record<string, string> = {
-  LOGIN: "Login", COMPANY_CREATE: "Empresa criada", COMPANY_UPDATE: "Empresa atualizada",
-  COMPANY_RESPONSIBLES_SET: "Responsáveis alterados", CHECKLIST_START: "Checklist iniciado",
-  CHECKLIST_ITEM_UPDATE: "Checklist atualizado", USER_CREATE: "Usuário criado",
-  USER_DISABLE: "Usuário desativado", SECTOR_CREATE: "Setor criado",
-  SECTOR_DISABLE: "Setor desativado", TEMPLATE_CREATE: "Template criado",
-  TEMPLATE_UPDATE: "Template atualizado", TEMPLATE_SECTION_CREATE: "Seção criada",
-  TEMPLATE_SECTION_UPDATE: "Seção atualizada", TEMPLATE_SECTION_DELETE: "Seção excluída",
-  TEMPLATE_ITEM_CREATE: "Item criado", TEMPLATE_ITEM_UPDATE: "Item atualizado",
-  TEMPLATE_ITEM_DELETE: "Item excluído",
-};
-
-const actionBadge: Record<string, any> = {
-  LOGIN: "gray", COMPANY_CREATE: "green", COMPANY_UPDATE: "blue",
-  USER_CREATE: "blue", USER_DISABLE: "red",
-  SECTOR_DISABLE: "red", CHECKLIST_START: "yellow",
-  CHECKLIST_ITEM_UPDATE: "green",
-};
+import { Input } from "../ui";
+import { SlidersHorizontal, Search, History } from "lucide-react";
+import { useAudit } from "../hooks/useAudit";
+import { AuditList } from "../components/AuditList";
 
 export function Audit() {
-  const [items, setItems] = useState<any[]>([]);
   const [filters, setFilters] = useState({ entity: "", action: "" });
+  const { items, loading, loadAudit } = useAudit();
 
-  async function load() {
-    const qs = new URLSearchParams();
-    if (filters.entity) qs.set("entity", filters.entity);
-    if (filters.action) qs.set("action", filters.action);
-    const r = await api(`/api/admin/audit?${qs.toString()}`);
-    setItems(r.items || []);
+  useEffect(() => {
+    loadAudit();
+  }, [loadAudit]);
+
+  function handleFilter() {
+    loadAudit(filters);
   }
 
-  useEffect(() => { load(); }, []);
+  if (loading && !items.length) {
+    return (
+      <div
+        style={{
+          height: "100%",
+          minHeight: "60vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 18,
+          }}
+        >
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: "50%",
+              border: "4px solid #e5e7eb",
+              borderTop: "4px solid #2563eb",
+              animation: "spin 0.9s linear infinite",
+            }}
+          />
+
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 700,
+                color: "#0f172a",
+              }}
+            >
+              Carregando auditoria
+            </div>
+
+            <div
+              style={{
+                marginTop: 4,
+                fontSize: 13,
+                color: "#64748b",
+              }}
+            >
+              Aguarde enquanto buscamos os registros...
+            </div>
+          </div>
+        </div>
+
+        <style>
+          {`
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}
+        </style>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <PageHeader title="Auditoria" subtitle="Registro histórico de ações no sistema" />
-
-      <div style={{
-        background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12,
-        padding: "16px 20px", marginBottom: 20,
-        display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end",
-      }}>
-        <div style={{ flex: 1, minWidth: 150 }}>
-          <Input label="Entidade" placeholder="Ex: Company, User..." value={filters.entity}
-            onChange={e => setFilters(f => ({ ...f, entity: e.target.value }))} />
-        </div>
-        <div style={{ flex: 1, minWidth: 150 }}>
-          <Input label="Ação" placeholder="Ex: USER_CREATE..." value={filters.action}
-            onChange={e => setFilters(f => ({ ...f, action: e.target.value }))} />
-        </div>
-        <button
-          onClick={load}
+      <div
+        style={{
+          marginBottom: 20,
+          padding: "22px 24px",
+          borderRadius: 20,
+          border: "1px solid #e2e8f0",
+          background:
+            "linear-gradient(135deg, #ffffff 0%, #f8fbff 55%, #eef6ff 100%)",
+          boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
+        }}
+      >
+        <div
           style={{
-            display: "inline-flex", alignItems: "center", gap: 7,
-            padding: "9px 16px", fontSize: 13.5, fontWeight: 600,
-            borderRadius: 9, border: "1.5px solid #e2e8f0",
-            background: "#fff", color: "#374151", cursor: "pointer",
-            fontFamily: "inherit", transition: "background 0.12s, border-color 0.12s",
-            height: 40,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 16,
+            flexWrap: "wrap",
           }}
-          onMouseOver={e => { e.currentTarget.style.background = "#f8fafc"; e.currentTarget.style.borderColor = "#cbd5e1"; }}
-          onMouseOut={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.borderColor = "#e2e8f0"; }}
         >
-          <SlidersHorizontal size={14} strokeWidth={2} />
-          Filtrar
+          <div>
+
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 28,
+                lineHeight: 1.1,
+                fontWeight: 900,
+                color: "#0f172a",
+                letterSpacing: "-0.03em",
+              }}
+            >
+              Auditoria do sistema
+            </h1>
+
+            <p
+              style={{
+                margin: "10px 0 0",
+                fontSize: 14.5,
+                color: "#64748b",
+                maxWidth: 700,
+                lineHeight: 1.6,
+              }}
+            >
+              Acompanhe o histórico de ações, acessos e alterações realizadas
+              dentro da plataforma.
+            </p>
+          </div>
+
+          <div
+            style={{
+              padding: "16px 18px",
+              borderRadius: 14,
+              background: "#fff",
+              border: "1px solid #e5e7eb",
+              minWidth: 210,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    color: "#94a3b8",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                  }}
+                >
+                  Total de eventos
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 30,
+                    fontWeight: 900,
+                    color: "#0f172a",
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1,
+                    
+                  }}
+                >
+                  {items.length}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 12.5,
+                    color: "#64748b",
+                    fontWeight: 600,
+                  }}
+                >
+                  {items.length === 1
+                    ? "Último registro encontrado"
+                    : `Últimos ${items.length} registros encontrados`}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: 12,
+                  background: "rgba(37,99,235,0.10)",
+                  border: "1px solid rgba(37,99,235,0.18)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#2563eb",
+                  flexShrink: 0,
+                }}
+              >
+                <History size={18} strokeWidth={2.2} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          background: "#fff",
+          border: "1px solid #e2e8f0",
+          borderRadius: 18,
+          padding: "18px 20px",
+          marginBottom: 20,
+          display: "flex",
+          gap: 12,
+          flexWrap: "wrap",
+          alignItems: "flex-end",
+          boxShadow: "0 8px 24px rgba(15,23,42,0.04)",
+        }}
+      >
+        <div style={{ width: "100%", marginBottom: 4 }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 13,
+              fontWeight: 800,
+              color: "#334155",
+            }}
+          >
+            <Search size={15} strokeWidth={2.2} />
+            Filtros de auditoria
+          </div>
+          <div
+            style={{
+              marginTop: 4,
+              fontSize: 12.5,
+              color: "#64748b",
+            }}
+          >
+            Refine a visualização por entidade ou por ação registrada.
+          </div>
+        </div>
+
+        <div style={{ flex: 1, minWidth: 180 }}>
+          <Input
+            label="Entidade"
+            placeholder="Ex: Company, User..."
+            value={filters.entity}
+            onChange={(e) =>
+              setFilters((f) => ({ ...f, entity: e.target.value }))
+            }
+          />
+        </div>
+
+        <div style={{ flex: 1, minWidth: 180 }}>
+          <Input
+            label="Ação"
+            placeholder="Ex: USER_CREATE..."
+            value={filters.action}
+            onChange={(e) =>
+              setFilters((f) => ({ ...f, action: e.target.value }))
+            }
+          />
+        </div>
+
+        <button
+          onClick={handleFilter}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "11px 16px",
+            fontSize: 13.5,
+            fontWeight: 700,
+            borderRadius: 12,
+            border: "1px solid #cbd5e1",
+            background: "#fff",
+            color: "#334155",
+            cursor: "pointer",
+            fontFamily: "inherit",
+            transition: "all 0.16s ease",
+            height: 44,
+            boxShadow: "0 4px 12px rgba(15,23,42,0.04)",
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = "#f8fafc";
+            e.currentTarget.style.borderColor = "#94a3b8";
+            e.currentTarget.style.transform = "translateY(-1px)";
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = "#fff";
+            e.currentTarget.style.borderColor = "#cbd5e1";
+            e.currentTarget.style.transform = "translateY(0)";
+          }}
+        >
+          <SlidersHorizontal size={15} strokeWidth={2.1} />
+          Aplicar filtros
         </button>
       </div>
 
-      <Card>
-        <Table>
-          <Thead>
-            <tr>
-              <Th>Data / Hora</Th>
-              <Th>Usuário</Th>
-              <Th>Ação</Th>
-              <Th>Entidade</Th>
-            </tr>
-          </Thead>
-          <tbody>
-            {items.map(r => (
-              <Tr key={r.id}>
-                <Td style={{ fontSize: 12.5, color: "#9ca3af", whiteSpace: "nowrap" }}>
-                  {new Date(r.createdAt).toLocaleString("pt-BR")}
-                </Td>
-                <Td>
-                  <div style={{ fontWeight: 600, fontSize: 13.5 }}>{r.actor?.name ?? "—"}</div>
-                  <div style={{ fontSize: 11.5, color: "#9ca3af" }}>{r.actor?.email ?? ""}</div>
-                </Td>
-                <Td>
-                  <Badge label={actionLabel[r.action] ?? r.action} variant={actionBadge[r.action] || "gray"} />
-                </Td>
-                <Td style={{ fontSize: 13, color: "#6b7280" }}>{entityLabel[r.entity] ?? r.entity}</Td>
-              </Tr>
-            ))}
-          </tbody>
-        </Table>
-        {!items.length && <Empty message="Nenhum evento encontrado." />}
-      </Card>
+      <AuditList items={items} />
     </div>
   );
 }

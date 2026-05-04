@@ -1,226 +1,573 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { api } from "../api";
 import { useToast } from "../toast";
-import { Modal } from "../Modal";
-import { Input, Select, Card, Table, Thead, Th, Tr, Td, Empty, PageHeader, FormGrid, Divider, Badge, Loading } from "../ui";
-import { Plus, FolderOpen, Search, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Card, Empty, Loading } from "../ui";
+import {
+  Plus,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Building2,
+  SlidersHorizontal,
+} from "lucide-react";
+import { useCompanies } from "../hooks/useCompanies";
+import { CompanyList } from "../components/CompanyList";
+import { CompanyFormModal } from "../components/CompanyFormModal";
 
 interface CompanyForm {
-  cnpj: string; razaoSocial: string; nomeFantasia: string; cod: string; filial: string; grupo: string;
-  tributacao: string; ieAtual: string; dataTributacao: string;
-  motivoEntrada: string; situacao: string; dataSituacao: string;
-  ramo: string; consultoria: string; banco: string; perfil: string; licitacao: string; qtdeFolha: string;
-  responsavelComercial: string; dataEntrada: string; dataInicioCobranca: string; dataFimCobranca: string;
+  cnpj: string;
+  razaoSocial: string;
+  nomeFantasia: string;
+  cod: string;
+  filial: string;
+  grupo: string;
+  tributacao: string;
+  ieAtual: string;
+  dataTributacao: string;
+  motivoEntrada: string;
+  situacao: string;
+  dataSituacao: string;
+  ramo: string;
+  consultoria: string;
+  banco: string;
+  perfil: string;
+  licitacao: string;
+  qtdeFolha: string;
+  responsavelComercial: string;
+  dataEntrada: string;
+  dataInicioCobranca: string;
+  dataFimCobranca: string;
 }
 
 const EMPTY_FORM: CompanyForm = {
-  cnpj: "", razaoSocial: "", nomeFantasia: "", cod: "", filial: "", grupo: "",
-  tributacao: "", ieAtual: "", dataTributacao: "", motivoEntrada: "", situacao: "", dataSituacao: "",
-  ramo: "", consultoria: "", banco: "", perfil: "", licitacao: "", qtdeFolha: "",
-  responsavelComercial: "", dataEntrada: "", dataInicioCobranca: "", dataFimCobranca: "",
+  cnpj: "",
+  razaoSocial: "",
+  nomeFantasia: "",
+  cod: "",
+  filial: "",
+  grupo: "",
+  tributacao: "",
+  ieAtual: "",
+  dataTributacao: "",
+  motivoEntrada: "",
+  situacao: "",
+  dataSituacao: "",
+  ramo: "",
+  consultoria: "",
+  banco: "",
+  perfil: "",
+  licitacao: "",
+  qtdeFolha: "",
+  responsavelComercial: "",
+  dataEntrada: "",
+  dataInicioCobranca: "",
+  dataFimCobranca: "",
 };
-
-function formatCnpj(v: string) {
-  const d = v.replace(/\D/g, "").slice(0, 14);
-  if (d.length === 14) return d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
-  if (d.length >= 12)  return d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})/, "$1.$2.$3/$4");
-  if (d.length >= 9)   return d.replace(/^(\d{2})(\d{3})(\d{3})/, "$1.$2.$3");
-  if (d.length >= 6)   return d.replace(/^(\d{2})(\d{3})/, "$1.$2");
-  return d;
-}
 
 const PAGE_SIZE = 20;
 
 export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => void }) {
   const { toast } = useToast();
-  const [items, setItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState<CompanyForm>(EMPTY_FORM);
   const [loadingCnpj, setLoadingCnpj] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [filterSituacao, setFilterSituacao] = useState("");
   const [filterGrupo, setFilterGrupo] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [page, setPage] = useState(1);
 
-  async function load() {
-    setLoading(true);
-    try { setItems(await api("/api/companies")); }
-    finally { setLoading(false); }
-  }
-  useEffect(() => { load(); }, []);
-  useEffect(() => { setPage(1); }, [search, filterSituacao, filterGrupo]);
+  const { items, loading, create, buscarCnpj, load, modalOpen,setModalOpen, saving } = useCompanies();
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, filterSituacao, filterGrupo, filterStatus]);
+
+    useEffect(() => {
+    load();
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    return items.filter(c => {
-      if (filterSituacao && c.situacao !== filterSituacao) return false;
-      if (filterGrupo && c.grupo !== filterGrupo) return false;
-      if (!q) return true;
-      return (
-        (c.razaoSocial || "").toLowerCase().includes(q) ||
-        (c.nomeFantasia || "").toLowerCase().includes(q) ||
-        (c.cnpj || "").replace(/\D/g, "").includes(q.replace(/\D/g, "")) ||
-        (c.cod || "").toLowerCase().includes(q) ||
-        (c.grupo || "").toLowerCase().includes(q)
-      );
-    });
-  }, [items, search, filterSituacao, filterGrupo]);
+
+    return items.filter((c) => {
+    if (filterSituacao && c.situacao !== filterSituacao) return false;
+    if (filterGrupo && c.grupo !== filterGrupo) return false;
+
+    if (filterStatus !== "all" && String(c.active) !== filterStatus) {
+      return false;
+    }
+
+    if (!q) return true;
+
+    return (
+      (c.razaoSocial || "").toLowerCase().includes(q) ||
+      (c.nomeFantasia || "").toLowerCase().includes(q) ||
+      (c.cnpj || "").replace(/\D/g, "").includes(q.replace(/\D/g, "")) ||
+      (c.cod || "").toLowerCase().includes(q) ||
+      (c.grupo || "").toLowerCase().includes(q)
+    );
+  });
+  }, [items, search, filterSituacao, filterGrupo, filterStatus]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const grupos = useMemo(() => [...new Set(items.map(c => c.grupo).filter(Boolean))].sort() as string[], [items]);
-  const hasFilters = !!(search || filterSituacao || filterGrupo);
 
-  function set(field: keyof CompanyForm) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-      setForm(p => ({ ...p, [field]: e.target.value }));
+  const grupos = useMemo(
+    () => [...new Set(items.map((c) => c.grupo).filter(Boolean))].sort() as string[],
+    [items]
+  );
+
+  const hasFilters = !!(
+    search ||
+    filterSituacao ||
+    filterGrupo ||
+    filterStatus !== "all"
+  );
+
+  const iStyle: React.CSSProperties = {
+    padding: "10px 12px",
+    fontSize: 14.5,
+    borderRadius: 12,
+    border: "1px solid #e2e8f0",
+    outline: "none",
+    color: "#0f172a",
+    background: "#fff",
+    fontFamily: "inherit",
+    cursor: "pointer",
+    transition: "all 0.16s ease",
+    height: 50,
+  };
+
+  async function handleToggleActive(id: string, active: boolean) {
+  try {
+    await companyRepository.update(id, { active });
+
+    toast(
+      active ? "Empresa ativada com sucesso" : "Empresa desativada",
+      "success"
+    );
+
+    await load(); // recarrega lista
+  } catch (e: any) {
+    toast(e.message || "Erro ao atualizar status", "error");
   }
-
-  async function buscarCnpj() {
-    const cnpj = form.cnpj.replace(/\D/g, "");
-    if (cnpj.length < 8) return;
-    setLoadingCnpj(true);
-    try {
-      const r = await api(`/api/integrations/cnpj/${cnpj}`);
-      setForm(p => ({ ...p, razaoSocial: r.razaoSocial || p.razaoSocial, nomeFantasia: r.nomeFantasia || p.nomeFantasia, ieAtual: r.ie || p.ieAtual, situacao: r.situacao || p.situacao, ramo: r.cnaePrincipal?.descricao || p.ramo }));
-      toast("Dados do CNPJ carregados", "success");
-    } catch (e: any) { toast(e.message || "Erro ao buscar CNPJ", "error"); }
-    finally { setLoadingCnpj(false); }
-  }
-
-  async function create() {
-    const cnpj = form.cnpj.replace(/\D/g, "");
-    setSaving(true);
-    try {
-      await api("/api/companies", { method: "POST", body: JSON.stringify({ cnpj, razaoSocial: form.razaoSocial || undefined, nomeFantasia: form.nomeFantasia || undefined, cod: form.cod || undefined, filial: form.filial || undefined, grupo: form.grupo || undefined, tributacao: form.tributacao || undefined, ieAtual: form.ieAtual || undefined, dataTributacao: form.dataTributacao || undefined, motivoEntrada: form.motivoEntrada || undefined, situacao: form.situacao || undefined, dataSituacao: form.dataSituacao || undefined, ramo: form.ramo || undefined, consultoria: form.consultoria || undefined, banco: form.banco || undefined, perfil: form.perfil || undefined, licitacao: form.licitacao || undefined, qtdeFolha: form.qtdeFolha ? Number(form.qtdeFolha) : undefined, responsavelComercial: form.responsavelComercial || undefined, dataEntrada: form.dataEntrada || undefined, dataInicioCobranca: form.dataInicioCobranca || undefined, dataFimCobranca: form.dataFimCobranca || undefined }) });
-      toast("Empresa cadastrada com sucesso", "success");
-      setModalOpen(false); setForm(EMPTY_FORM); load();
-    } catch (e: any) { toast(e.message || "Erro ao criar empresa", "error"); }
-    finally { setSaving(false); }
-  }
-
-  const iStyle: React.CSSProperties = { padding: "9px 12px", fontSize: 13.5, borderRadius: 9, border: "1.5px solid #e2e8f0", outline: "none", color: "#0f172a", background: "#f8fafc", fontFamily: "inherit", cursor: "pointer" };
+}
 
   return (
     <div>
-      <PageHeader
-        title="Empresas"
-        subtitle={loading ? "" : `${filtered.length} de ${items.length} empresa${items.length !== 1 ? "s" : ""}`}
-        action={
-          <button onClick={() => { setForm(EMPTY_FORM); setModalOpen(true); }}
-            style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "8px 16px", fontSize: 13.5, fontWeight: 600, borderRadius: 9, border: "none", background: "#2563eb", color: "#fff", cursor: "pointer", fontFamily: "inherit", transition: "background 0.15s", boxShadow: "0 2px 8px rgba(37,99,235,0.22)" }}
-            onMouseOver={e => { e.currentTarget.style.background = "#1d4ed8"; }}
-            onMouseOut={e => { e.currentTarget.style.background = "#2563eb"; }}>
-            <Plus size={15} strokeWidth={2.5} /> Nova empresa
-          </button>
-        }
-      />
+      {/* topo premium */}
+      <div
+        style={{
+          marginBottom: 20,
+          padding: "22px 24px",
+          borderRadius: 20,
+          border: "1px solid #e2e8f0",
+          background:
+            "linear-gradient(135deg, #ffffff 0%, #f8fbff 55%, #eef6ff 100%)",
+          boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 16,
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+           
 
-      {/* Filtros */}
-      <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: "14px 18px", marginBottom: 18, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-        <div style={{ flex: 1, minWidth: 220, position: "relative" }}>
-          <div style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", color: "#94a3b8", pointerEvents: "none" }}>
-            <Search size={14} />
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 28,
+                lineHeight: 1.1,
+                fontWeight: 900,
+                color: "#0f172a",
+                letterSpacing: "-0.03em",
+              }}
+            >
+              Gestão de empresas
+            </h1>
+
+            <p
+              style={{
+                margin: "10px 0 0",
+                fontSize: 14.5,
+                color: "#64748b",
+                maxWidth: 720,
+                lineHeight: 1.6,
+              }}
+            >
+              Visualize, filtre e acompanhe os registros das empresas cadastradas
+              em um único painel.
+            </p>
           </div>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar razão social, CNPJ, código, grupo..."
-            style={{ ...iStyle, width: "100%", paddingLeft: 34, boxSizing: "border-box" as const }}
-            onFocus={e => { e.target.style.borderColor = "#2563eb"; e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.10)"; }}
-            onBlur={e => { e.target.style.borderColor = "#e2e8f0"; e.target.style.boxShadow = "none"; }}
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            
+            <button
+              onClick={() => {
+                setForm(EMPTY_FORM);
+                setModalOpen(true);
+              }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "13px 18px",
+                fontSize: 14,
+                fontWeight: 800,
+                borderRadius: 14,
+                border: "1px solid #BB9F58", // Borda combinando com o fundo
+                background: "#BB9F58",       // A cor que você solicitou
+                color: "#fff",
+                cursor: "pointer",
+                fontFamily: "inherit",
+                transition: "all 0.18s ease",
+                // Sombra ajustada para um tom escuro neutro ou quente
+                boxShadow: "0 10px 24px rgba(187, 159, 88, 0.3)", 
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.background = "#A38A4A"; // Escurece um pouco no hover
+                e.currentTarget.style.boxShadow = "0 14px 28px rgba(187, 159, 88, 0.45)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.background = "#BB9F58"; // Volta para a cor original
+                e.currentTarget.style.boxShadow = "0 10px 24px rgba(187, 159, 88, 0.3)";
+              }}
+            >
+              <span
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 999,
+                  background: "rgba(255,255,255,0.16)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Plus size={15} strokeWidth={2.8} />
+              </span>
+              Nova empresa
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* filtros */}
+      <div
+        style={{
+          background: "#fff",
+          border: "1px solid #e2e8f0",
+          borderRadius: 18,
+          padding: "18px 20px",
+          marginBottom: 20,
+          display: "flex",
+          gap: 12,
+          flexWrap: "wrap",
+          alignItems: "flex-end",
+          boxShadow: "0 8px 24px rgba(15,23,42,0.04)",
+        }}
+      >
+        <div style={{ width: "100%", marginBottom: 4 }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 13,
+              fontWeight: 800,
+              color: "#334155",
+            }}
+          >
+            <SlidersHorizontal size={15} strokeWidth={2.2} />
+            Filtros da listagem
+          </div>
+          <div
+            style={{
+              marginTop: 4,
+              fontSize: 13,
+              color: "#64748b",
+            }}
+          >
+            Refine a busca por empresa, situação ou grupo.
+          </div>
+        </div>
+
+        <div style={{ flex: 1, minWidth: 240, position: "relative" }}>
+          <div
+            style={{
+              position: "absolute",
+              left: 12,
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "#94a3b8",
+              pointerEvents: "none",
+            }}
+          >
+            <Search size={15} />
+          </div>
+
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar razão social, CNPJ, código, grupo..."
+            style={{
+              ...iStyle,
+              width: "100%",
+              paddingLeft: 36,
+              boxSizing: "border-box",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#2563eb";
+              e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.10)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "#e2e8f0";
+              e.target.style.boxShadow = "none";
+            }}
           />
+
           {search && (
-            <button onClick={() => setSearch("")} style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#94a3b8", display: "flex" }}>
+            <button
+              onClick={() => setSearch("")}
+              style={{
+                position: "absolute",
+                right: 10,
+                top: "50%",
+                height: 50,
+                transform: "translateY(-15%)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#94a3b8",
+                display: "flex",
+              }}
+            >
               <X size={14} />
             </button>
           )}
         </div>
-        <select value={filterSituacao} onChange={e => setFilterSituacao(e.target.value)} style={{ ...iStyle, minWidth: 160 }}>
-          <option value="">Situação (todas)</option>
-          <option value="ATIVA">Ativa</option>
-          <option value="SAIDA">Saída</option>
-          <option value="SUSPENSA">Suspensa</option>
-          <option value="ENCERRADA">Encerrada</option>
-        </select>
+
+        <PremiumSelect
+          label="Situação"
+          value={filterSituacao}
+          onChange={setFilterSituacao}
+          options={[
+            { value: "", label: "Todas situações" },
+            { value: "ATIVA", label: "Ativa" },
+            { value: "SAIDA", label: "Saída" },
+            { value: "SUSPENSA", label: "Suspensa" },
+            { value: "ENCERRADA", label: "Encerrada" },
+          ]}
+        />
+
+         <PremiumSelect
+          label="Status"
+          value={filterStatus}
+          onChange={setFilterStatus}
+          variant="active"
+          options={[
+            { value: "all", label: "Todas empresas" },
+            { value: "true", label: "Ativa" },
+            { value: "false", label: "Desativada" },
+          ]}
+        />
+
         {grupos.length > 0 && (
-          <select value={filterGrupo} onChange={e => setFilterGrupo(e.target.value)} style={{ ...iStyle, minWidth: 150 }}>
-            <option value="">Grupo (todos)</option>
-            {grupos.map(g => <option key={g} value={g}>{g}</option>)}
-          </select>
+          <PremiumSelect
+            label="Grupo"
+            value={filterGrupo}
+            onChange={setFilterGrupo}
+            options={[
+              { value: "", label: "Todos grupos" },
+              ...grupos.map((g) => ({ value: g, label: g })),
+            ]}
+          />
         )}
+
         {hasFilters && (
-          <button onClick={() => { setSearch(""); setFilterSituacao(""); setFilterGrupo(""); }}
-            style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "9px 13px", fontSize: 13, fontWeight: 600, borderRadius: 9, border: "1.5px solid #e2e8f0", background: "#fff", color: "#64748b", cursor: "pointer", fontFamily: "inherit" }}
-            onMouseOver={e => { e.currentTarget.style.background = "#f8fafc"; }}
-            onMouseOut={e => { e.currentTarget.style.background = "#fff"; }}>
-            <X size={13} /> Limpar filtros
+          <button
+            type="button"
+            onClick={() => {
+              setSearch("");
+              setFilterSituacao("");
+              setFilterGrupo("");
+              setFilterStatus("all");
+            }}
+            style={{
+              height: 52,
+              padding: "0 18px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              borderRadius: 14,
+              border: "1px solid rgba(239,68,68,0.25)",
+              background:
+                "linear-gradient(135deg, rgba(239,68,68,0.08), rgba(248,113,113,0.08))",
+              color: "#ef4444",
+              fontSize: 13.5,
+              fontWeight: 800,
+              cursor: "pointer",
+              fontFamily: "inherit",
+              transition: "all 0.18s ease",
+              boxShadow: "0 6px 18px rgba(239,68,68,0.08)",
+              backdropFilter: "blur(6px)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background =
+                "linear-gradient(135deg, rgba(239,68,68,0.16), rgba(248,113,113,0.16))";
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow =
+                "0 10px 24px rgba(239,68,68,0.18)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background =
+                "linear-gradient(135deg, rgba(239,68,68,0.08), rgba(248,113,113,0.08))";
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow =
+                "0 6px 18px rgba(239,68,68,0.08)";
+            }}
+          >
+            <div
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 999,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "rgba(239,68,68,0.12)",
+              }}
+            >
+              <X size={14} />
+            </div>
+
           </button>
         )}
       </div>
 
-      <Card>
+      {/* listagem */}
+      <Card
+        style={{
+          borderRadius: 20,
+          border: "1px solid #e5e7eb",
+          background: "linear-gradient(180deg, #ffffff 0%, #fcfdff 100%)",
+          boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
+          overflow: "hidden",
+          padding: 0,
+        }}
+      >
         {loading ? (
-          <Loading message="Carregando empresas..." />
+          <div style={{ padding: 24 }}>
+            <Loading message="Carregando empresas..." />
+          </div>
         ) : (
           <>
-            <Table>
-              <Thead>
-                <tr>
-                  <Th style={{ width: 50 }}>Cod.</Th><Th>Razão social</Th><Th>Nome fantasia</Th><Th>CNPJ</Th>
-                  <Th>Grupo</Th><Th>Situação</Th><Th>Perfil</Th><Th></Th>
-                </tr>
-              </Thead>
-              <tbody>
-                {paginated.map(c => (
-                  <Tr key={c.id}>
-                    <Td style={{ fontFamily: "monospace", fontSize: 12, color: "#9ca3af" }}>{c.cod ?? "—"}</Td>
-                    <Td style={{ fontWeight: 600 }}>{c.razaoSocial ?? <span style={{ color: "#d1d5db" }}>—</span>}</Td>
-                    <Td style={{ color: "#6b7280" }}>{c.nomeFantasia ?? <span style={{ color: "#d1d5db" }}>—</span>}</Td>
-                    <Td><span style={{ fontFamily: "monospace", fontSize: 12 }}>{c.cnpj}</span></Td>
-                    <Td style={{ color: "#6b7280" }}>{c.grupo ?? <span style={{ color: "#d1d5db" }}>—</span>}</Td>
-                    <Td>{c.situacao ? <Badge label={c.situacao} variant={c.situacao === "SAIDA" || c.situacao === "ENCERRADA" ? "red" : c.situacao === "ATIVA" ? "green" : "yellow"} /> : <span style={{ color: "#d1d5db" }}>—</span>}</Td>
-                    <Td style={{ fontSize: 12.5 }}>{c.perfil ?? <span style={{ color: "#d1d5db" }}>—</span>}</Td>
-                    <Td align="right">
-                      <button title="Abrir empresa" onClick={() => onOpenCompany(c.id)}
-                        style={{ width: 32, height: 32, borderRadius: 8, border: "1.5px solid #e2e8f0", background: "#fff", color: "#374151", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", transition: "all 0.12s" }}
-                        onMouseOver={e => { e.currentTarget.style.background = "#f0f0ff"; e.currentTarget.style.borderColor = "#93c5fd"; (e.currentTarget as any).style.color = "#2563eb"; }}
-                        onMouseOut={e => { e.currentTarget.style.background = "#fff"; e.currentTarget.style.borderColor = "#e2e8f0"; (e.currentTarget as any).style.color = "#374151"; }}>
-                        <FolderOpen size={14} strokeWidth={2} />
-                      </button>
-                    </Td>
-                  </Tr>
-                ))}
-              </tbody>
-            </Table>
-            {!paginated.length && <Empty message={hasFilters ? "Nenhuma empresa encontrada para esse filtro." : "Nenhuma empresa cadastrada."} />}
+            <CompanyList
+              items={paginated}
+              loading={loading}
+              onOpenCompany={onOpenCompany}
+              onToggleActive={handleToggleActive}
+            />
 
-            {/* Paginação */}
+           
             {filtered.length > PAGE_SIZE && (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 20px", borderTop: "1px solid #f1f5f9", background: "#fafbfc" }}>
-                <span style={{ fontSize: 12.5, color: "#94a3b8" }}>
-                  {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "14px 20px",
+                  borderTop: "1px solid #eef2f7",
+                  background: "#fafbfc",
+                  gap: 12,
+                  flexWrap: "wrap",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 12.5,
+                    color: "#64748b",
+                    fontWeight: 600,
+                  }}
+                >
+                  {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de{" "}
+                  {filtered.length} resultados
                 </span>
-                <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                  <button disabled={page === 1} onClick={() => setPage(p => p - 1)}
-                    style={{ width: 32, height: 32, borderRadius: 7, border: "1.5px solid #e2e8f0", background: "#fff", color: page === 1 ? "#d1d5db" : "#374151", cursor: page === 1 ? "default" : "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <button
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => p - 1)}
+                    style={pageBtn(page === 1)}
+                  >
                     <ChevronLeft size={14} strokeWidth={2.5} />
                   </button>
+
                   {(() => {
                     const pages: number[] = [];
-                    if (totalPages <= 7) { for (let i = 1; i <= totalPages; i++) pages.push(i); }
-                    else if (page <= 4)  { pages.push(1,2,3,4,5,-1,totalPages); }
-                    else if (page >= totalPages - 3) { pages.push(1,-1,totalPages-4,totalPages-3,totalPages-2,totalPages-1,totalPages); }
-                    else { pages.push(1,-1,page-1,page,page+1,-2,totalPages); }
+
+                    if (totalPages <= 7) {
+                      for (let i = 1; i <= totalPages; i++) pages.push(i);
+                    } else if (page <= 4) {
+                      pages.push(1, 2, 3, 4, 5, -1, totalPages);
+                    } else if (page >= totalPages - 3) {
+                      pages.push(
+                        1,
+                        -1,
+                        totalPages - 4,
+                        totalPages - 3,
+                        totalPages - 2,
+                        totalPages - 1,
+                        totalPages
+                      );
+                    } else {
+                      pages.push(1, -1, page - 1, page, page + 1, -2, totalPages);
+                    }
+
                     return pages.map((p, i) =>
-                      p < 0 ? <span key={`e${i}`} style={{ padding: "0 3px", color: "#94a3b8", fontSize: 13 }}>…</span> :
-                      <button key={p} onClick={() => setPage(p)}
-                        style={{ width: 32, height: 32, borderRadius: 7, border: `1.5px solid ${p === page ? "#2563eb" : "#e2e8f0"}`, background: p === page ? "#dbeafe" : "#fff", color: p === page ? "#2563eb" : "#374151", fontWeight: p === page ? 700 : 500, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}>
-                        {p}
-                      </button>
+                      p < 0 ? (
+                        <span
+                          key={`e${i}`}
+                          style={{
+                            padding: "0 4px",
+                            color: "#94a3b8",
+                            fontSize: 13,
+                          }}
+                        >
+                          …
+                        </span>
+                      ) : (
+                        <button
+                          key={p}
+                          onClick={() => setPage(p)}
+                          style={pageNumberBtn(p === page)}
+                        >
+                          {p}
+                        </button>
+                      )
                     );
                   })()}
-                  <button disabled={page === totalPages} onClick={() => setPage(p => p + 1)}
-                    style={{ width: 32, height: 32, borderRadius: 7, border: "1.5px solid #e2e8f0", background: "#fff", color: page === totalPages ? "#d1d5db" : "#374151", cursor: page === totalPages ? "default" : "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+
+                  <button
+                    disabled={page === totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                    style={pageBtn(page === totalPages)}
+                  >
                     <ChevronRight size={14} strokeWidth={2.5} />
                   </button>
                 </div>
@@ -230,43 +577,288 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
         )}
       </Card>
 
-      {/* Modal cadastro */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nova empresa" width={640}
-        footer={
-          <>
-            <button onClick={() => setModalOpen(false)} style={{ padding: "8px 16px", fontSize: 13.5, fontWeight: 600, borderRadius: 9, border: "1.5px solid #e2e8f0", background: "#fff", color: "#475569", cursor: "pointer", fontFamily: "inherit" }}>Cancelar</button>
-            <button onClick={create} disabled={form.cnpj.replace(/\D/g, "").length < 8 || saving}
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", fontSize: 13.5, fontWeight: 700, borderRadius: 9, border: "none", background: "#2563eb", color: "#fff", cursor: "pointer", fontFamily: "inherit", opacity: (form.cnpj.replace(/\D/g, "").length < 8 || saving) ? 0.45 : 1 }}>
-              <Plus size={14} strokeWidth={2.5} />
-              {saving ? "Salvando..." : "Cadastrar"}
-            </button>
-          </>
-        }>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
-            <div style={{ flex: 1 }}>
-              <Input label="CNPJ *" placeholder="00.000.000/0000-00" value={form.cnpj} onChange={e => setForm(p => ({ ...p, cnpj: formatCnpj(e.target.value) }))} />
-            </div>
-            <button onClick={buscarCnpj} disabled={loadingCnpj || form.cnpj.replace(/\D/g, "").length < 8}
-              style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "9px 14px", fontSize: 13.5, fontWeight: 600, borderRadius: 9, border: "1.5px solid #e2e8f0", background: "#fff", color: "#374151", cursor: "pointer", fontFamily: "inherit", height: 42, flexShrink: 0, opacity: (loadingCnpj || form.cnpj.replace(/\D/g, "").length < 8) ? 0.45 : 1 }}>
-              <Search size={14} strokeWidth={2} />{loadingCnpj ? "Buscando..." : "Consultar"}
-            </button>
-          </div>
-          <Divider label="Identificação" />
-          <FormGrid cols={3}><div style={{ gridColumn: "span 2" }}><Input label="Razão social" value={form.razaoSocial} onChange={set("razaoSocial")} /></div><Input label="Cód." value={form.cod} onChange={set("cod")} /></FormGrid>
-          <FormGrid><Input label="Nome fantasia" value={form.nomeFantasia} onChange={set("nomeFantasia")} /><Input label="Grupo" value={form.grupo} onChange={set("grupo")} /></FormGrid>
-          <FormGrid><Select label="Filial" value={form.filial} onChange={set("filial")}><option value="">Selecione...</option><option value="Matriz">Matriz</option><option value="Filial">Filial</option></Select><Input label="Resp. Comercial" value={form.responsavelComercial} onChange={set("responsavelComercial")} /></FormGrid>
-          <Divider label="Fiscal / Tributação" />
-          <FormGrid cols={3}><Select label="Tributação" value={form.tributacao} onChange={set("tributacao")}><option value="">Selecione...</option><option value="SIMPLES">Simples Nacional</option><option value="PRESUMIDO">Lucro Presumido</option><option value="REAL">Lucro Real</option><option value="MEI">MEI</option><option value="ISENTO">Isento</option></Select><Input label="IE Atual" value={form.ieAtual} onChange={set("ieAtual")} /><Input label="Data Tributação" type="date" value={form.dataTributacao} onChange={set("dataTributacao")} /></FormGrid>
-          <Divider label="Situação" />
-          <FormGrid cols={3}><Select label="Motivo de Entrada" value={form.motivoEntrada} onChange={set("motivoEntrada")}><option value="">Selecione...</option><option value="CONSTITUIÇÃO">Constituição</option><option value="TRANSFERÊNCIA">Transferência</option><option value="INDICAÇÃO">Indicação</option><option value="OUTROS">Outros</option></Select><Select label="Situação" value={form.situacao} onChange={set("situacao")}><option value="">Selecione...</option><option value="ATIVA">Ativa</option><option value="SAIDA">Saída</option><option value="SUSPENSA">Suspensa</option><option value="ENCERRADA">Encerrada</option></Select><Input label="Data da Situação" type="date" value={form.dataSituacao} onChange={set("dataSituacao")} /></FormGrid>
-          <Divider label="Operacional" />
-          <FormGrid cols={3}><Input label="Ramo" value={form.ramo} onChange={set("ramo")} /><Input label="Consultoria" value={form.consultoria} onChange={set("consultoria")} /><Input label="Qtde Folha" type="number" value={form.qtdeFolha} onChange={set("qtdeFolha")} /></FormGrid>
-          <FormGrid cols={3}><Select label="Banco" value={form.banco} onChange={set("banco")}><option value="">Selecione...</option><option value="SIM">Sim</option><option value="NÃO">Não</option></Select><Select label="Licitação" value={form.licitacao} onChange={set("licitacao")}><option value="">Selecione...</option><option value="SIM">Sim</option><option value="NÃO">Não</option></Select><Input label="Perfil" value={form.perfil} onChange={set("perfil")} /></FormGrid>
-          <Divider label="Datas" />
-          <FormGrid cols={3}><Input label="Data de Entrada" type="date" value={form.dataEntrada} onChange={set("dataEntrada")} /><Input label="Início Cobrança" type="date" value={form.dataInicioCobranca} onChange={set("dataInicioCobranca")} /><Input label="Fim Cobrança" type="date" value={form.dataFimCobranca} onChange={set("dataFimCobranca")} /></FormGrid>
-        </div>
-      </Modal>
+      <CompanyFormModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        form={form}
+        setForm={setForm}
+        saving={saving}
+        loadingCnpj={loadingCnpj}
+        onSubmit={create}
+        onBuscarCnpj={buscarCnpj}
+        toast={toast}
+      />
+    </div>
+  );
+}
+
+function pageBtn(disabled: boolean): React.CSSProperties {
+  return {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    border: "1px solid #e2e8f0",
+    background: "#fff",
+    color: disabled ? "#cbd5e1" : "#374151",
+    cursor: disabled ? "default" : "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.16s ease",
+    boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
+  };
+}
+
+function pageNumberBtn(active: boolean): React.CSSProperties {
+  return {
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    border: `1px solid ${active ? "#2563eb" : "#e2e8f0"}`,
+    background: active ? "#dbeafe" : "#fff",
+    color: active ? "#2563eb" : "#374151",
+    fontWeight: active ? 800 : 600,
+    fontSize: 13,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    transition: "all 0.16s ease",
+  };
+}
+
+
+import { ChevronDown } from "lucide-react";
+import { companyRepository } from "../repository/company.repository";
+
+type SelectTheme = {
+  border: string;
+  bg: string;
+  icon: string;
+  text: string;
+  soft: string;
+  shadow: string;
+  iconShadow: string;
+};
+
+const defaultTheme: SelectTheme = {
+  border: "#e2e8f0",
+  bg: "#fff",
+  icon: "#dfdfdf",
+  text: "#444",
+  soft: "#f7f7f7",
+  shadow: "0 4px 12px rgba(0,0,0,0.04)",
+  iconShadow: "none",
+};
+
+const statusTheme: Record<string, SelectTheme> = {
+  ATIVA: {
+    ...defaultTheme,
+    border: "rgba(34,197,94,0.30)",
+    bg: "linear-gradient(135deg, rgba(34,197,94,0.075), #ffffff)",
+    icon: "linear-gradient(135deg, #22c55e, #86efac)",
+    text: "#15803d",
+    soft: "rgba(34,197,94,0.10)",
+    iconShadow: "0 5px 12px rgba(34,197,94,0.18)",
+  },
+  SAIDA: {
+    ...defaultTheme,
+    border: "rgba(234,179,8,0.32)",
+    bg: "linear-gradient(135deg, rgba(234,179,8,0.08), #ffffff)",
+    icon: "linear-gradient(135deg, #d97706, #fde68a)",
+    text: "#92400e",
+    soft: "rgba(234,179,8,0.10)",
+    iconShadow: "0 5px 12px rgba(234,179,8,0.18)",
+  },
+  SUSPENSA: {
+    ...defaultTheme,
+    border: "rgba(245,158,11,0.34)",
+    bg: "linear-gradient(135deg, rgba(245,158,11,0.08), #ffffff)",
+    icon: "linear-gradient(135deg, #f59e0b, #fed7aa)",
+    text: "#92400e",
+    soft: "rgba(245,158,11,0.10)",
+    iconShadow: "0 5px 12px rgba(245,158,11,0.18)",
+  },
+  ENCERRADA: {
+    ...defaultTheme,
+    border: "rgba(239,68,68,0.30)",
+    bg: "linear-gradient(135deg, rgba(239,68,68,0.075), #ffffff)",
+    icon: "linear-gradient(135deg, #ef4444, #fca5a5)",
+    text: "#991b1b",
+    soft: "rgba(239,68,68,0.10)",
+    iconShadow: "0 5px 12px rgba(239,68,68,0.18)",
+  },
+};
+
+const activeTheme: Record<string, SelectTheme> = {
+  true: {
+    ...defaultTheme,
+    border: "rgba(34,197,94,0.30)",
+    bg: "linear-gradient(135deg, rgba(34,197,94,0.075), #ffffff)",
+    icon: "linear-gradient(135deg, #22c55e, #86efac)",
+    text: "#15803d",
+    soft: "rgba(34,197,94,0.10)",
+    iconShadow: "0 5px 12px rgba(34,197,94,0.18)",
+  },
+  false: {
+    ...defaultTheme,
+    border: "rgba(239,68,68,0.30)",
+    bg: "linear-gradient(135deg, rgba(239,68,68,0.075), #ffffff)",
+    icon: "linear-gradient(135deg, #ef4444, #fca5a5)",
+    text: "#991b1b",
+    soft: "rgba(239,68,68,0.10)",
+    iconShadow: "0 5px 12px rgba(239,68,68,0.18)",
+  },
+};
+
+
+
+function getGroupTheme(name: string): SelectTheme {
+  const colors = [
+    ["#2563eb", "#93c5fd"],
+    ["#7c3aed", "#c4b5fd"],
+    ["#059669", "#6ee7b7"],
+    ["#0891b2", "#67e8f9"],
+  ];
+
+  let hash = 0;
+
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const [primary, softColor] = colors[Math.abs(hash) % colors.length];
+
+  return {
+    ...defaultTheme,
+    border: `${primary}45`,
+    bg: `linear-gradient(135deg, ${primary}12, #ffffff)`,
+    icon: `linear-gradient(135deg, ${primary}, ${softColor})`,
+    text: primary,
+    soft: `${primary}12`,
+    iconShadow: `0 5px 12px ${primary}25`,
+  };
+}
+
+
+
+function PremiumSelect({
+  label,
+  value,
+  onChange,
+  options,
+  variant = "status",
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  variant?: "status" | "group" | "active";
+}) {
+  const selectedLabel =
+    options.find((opt) => opt.value === value)?.label ||
+    options[0]?.label ||
+    "";
+
+  const theme =
+    !value || value === "all"
+      ? defaultTheme
+      : variant === "active"
+      ? activeTheme[value] ?? defaultTheme
+      : variant === "status"
+      ? statusTheme[value] ?? defaultTheme
+      : getGroupTheme(value);
+
+  return (
+    <div style={{ position: "relative", minWidth: 215, height: 52 }}>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          width: "100%",
+          height: "100%",
+          padding: "20px 46px 7px 48px",
+          borderRadius: 14,
+          border: `1px solid ${theme.border}`,
+          background: theme.bg,
+          fontSize: 14,
+          fontWeight: 700,
+          color: "#0f172a",
+          outline: "none",
+          fontFamily: "inherit",
+          appearance: "none",
+          boxShadow: theme.shadow,
+          transition: "all 0.18s ease",
+          cursor: "pointer",
+        }}
+      >
+        {options.map((opt) => (
+          <option
+            key={opt.value}
+            value={opt.value}
+            style={{ color: "#0f172a" }}
+          >
+            {opt.label}
+          </option>
+        ))}
+      </select>
+
+      <div
+        style={{
+          position: "absolute",
+          left: 14,
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: 26,
+          height: 26,
+          borderRadius: 8,
+          display: "grid",
+          placeItems: "center",
+          background: theme.icon,
+          color: theme.text,
+          boxShadow: theme.iconShadow,
+          pointerEvents: "none",
+          border: "1px solid #e2e8f0",
+        }}
+      >
+        <span style={{ fontSize: 10.5, fontWeight: 800 }}>
+          {selectedLabel?.slice(0, 2).toUpperCase() || "•"}
+        </span>
+      </div>
+
+      <span
+        style={{
+          position: "absolute",
+          left: 48,
+          top: 8,
+          fontSize: 10,
+          fontWeight: 800,
+          color: theme.text,
+          textTransform: "uppercase",
+          letterSpacing: "0.07em",
+          pointerEvents: "none",
+        }}
+      >
+        {label}
+      </span>
+
+      <div
+        style={{
+          position: "absolute",
+          right: 12,
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: 30,
+          height: 30,
+          borderRadius: 999,
+          display: "grid",
+          placeItems: "center",
+          background: theme.soft,
+          color: theme.text,
+          pointerEvents: "none",
+          border: "1px solid #e2e8f0",
+        }}
+      >
+        <ChevronDown size={16} strokeWidth={2.4} />
+      </div>
     </div>
   );
 }

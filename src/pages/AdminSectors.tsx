@@ -4,6 +4,8 @@ import { useToast } from "../toast";
 import { Modal } from "../Modal";
 import { Input, Badge, Card, Table, Thead, Th, Tr, Td, Empty, PageHeader } from "../ui";
 import { Plus, Pencil, PowerOff, Power } from "lucide-react";
+import { useAdminSectors } from "../hooks/useAdminSectors";
+import { SectorList } from "../components/SectorList";
 
 function IconBtn({ icon, title, onClick, variant = "secondary" }: {
   icon: React.ReactNode; title: string; onClick: () => void; variant?: "secondary" | "danger" | "success";
@@ -34,110 +36,199 @@ function IconBtn({ icon, title, onClick, variant = "secondary" }: {
 
 export function AdminSectors() {
   const { toast } = useToast();
-  const [items, setItems] = useState<any[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
   const [name, setName] = useState("");
   const [editName, setEditName] = useState("");
   const [saving, setSaving] = useState(false);
 
-  async function load() { setItems(await api("/api/admin/sectors")); }
+  const {
+  items,
+  loading,
+  createSector,
+  updateSector,
+  disableSector,
+  activateSector,
+  load
+  } = useAdminSectors();
+
   useEffect(() => { load(); }, []);
 
   async function create() {
     setSaving(true);
     try {
-      await api("/api/admin/sectors", { method: "POST", body: JSON.stringify({ name }) });
+      await createSector({ name });
       toast("Setor criado", "success");
-      setName(""); setCreateOpen(false); load();
-    } catch (e: any) { toast(e.message || "Erro ao criar setor", "error"); }
-    finally { setSaving(false); }
+      setName("");
+      setCreateOpen(false);
+    } catch (e: any) {
+      toast(e.message || "Erro ao criar setor", "error");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function saveEdit() {
-    if (!editItem) return;
-    setSaving(true);
-    try {
-      await api(`/api/admin/sectors/${editItem.id}`, { method: "PUT", body: JSON.stringify({ name: editName }) });
-      toast("Setor atualizado", "success");
-      setEditItem(null); load();
-    } catch (e: any) { toast(e.message || "Erro ao salvar", "error"); }
-    finally { setSaving(false); }
+  if (!editItem) return;
+
+  setSaving(true);
+  try {
+    await updateSector(editItem.id, { name: editName });
+    toast("Setor atualizado", "success");
+    setEditItem(null);
+  } catch (e: any) {
+    toast(e.message || "Erro ao salvar", "error");
+  } finally {
+    setSaving(false);
+  }
   }
 
   async function disable(id: string) {
     try {
-      await api(`/api/admin/sectors/${id}`, { method: "DELETE" });
-      toast("Setor desativado", "warning"); load();
-    } catch (e: any) { toast(e.message || "Erro", "error"); }
+    await disableSector(id);
+    toast("Setor desativado", "warning");
+  } catch (e: any) {
+    toast(e.message || "Erro", "error");
+  }
   }
 
   async function activate(id: string) {
     try {
-      await api(`/api/admin/sectors/${id}/activate`, { method: "PUT" });
-      toast("Setor reativado", "success"); load();
-    } catch (e: any) { toast(e.message || "Erro", "error"); }
+    await activateSector(id);
+    toast("Setor reativado", "success");
+    } catch (e: any) {
+      toast(e.message || "Erro", "error");
+    }
+  }
+
+   function handleEdit(sector: any) {
+    setEditItem(sector);
+    setEditName(sector.name);
   }
 
   return (
     <div>
-      <PageHeader
-        title="Setores"
-        subtitle={`${items.length} registro${items.length !== 1 ? "s" : ""}`}
-        action={
-          <button
-            onClick={() => { setName(""); setCreateOpen(true); }}
-            title="Adicionar setor"
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 7,
-              padding: "8px 16px", fontSize: 13.5, fontWeight: 600,
-              borderRadius: 9, border: "none", background: "#2563eb", color: "#fff",
-              cursor: "pointer", fontFamily: "inherit", transition: "background 0.15s",
-              boxShadow: "0 2px 8px rgba(37,99,235,0.22)",
-            }}
-            onMouseOver={e => { e.currentTarget.style.background = "#1d4ed8"; }}
-            onMouseOut={e => { e.currentTarget.style.background = "#2563eb"; }}
-          >
-            <Plus size={15} strokeWidth={2.5} />
-            Novo setor
-          </button>
-        }
-      />
+     <div
+  style={{
+    marginBottom: 20,
+    padding: "22px 24px",
+    borderRadius: 20,
+    border: "1px solid #e2e8f0",
+    background:
+      "linear-gradient(135deg, #ffffff 0%, #f8fbff 55%, #eef6ff 100%)",
+    boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 16,
+      flexWrap: "wrap",
+    }}
+  >
+    <div>
+      
+      <h1
+        style={{
+          margin: 0,
+          fontSize: 28,
+          lineHeight: 1.1,
+          fontWeight: 900,
+          color: "#0f172a",
+          letterSpacing: "-0.03em",
+        }}
+      >
+        Gestão de setores
+      </h1>
 
-      <Card>
-        <Table>
-          <Thead>
-            <tr>
-              <Th>Nome</Th>
-              <Th>Status</Th>
-              <Th></Th>
-            </tr>
-          </Thead>
-          <tbody>
-            {items.map(s => (
-              <Tr key={s.id}>
-                <Td style={{ fontWeight: 600 }}>{s.name}</Td>
-                <Td><Badge label={s.active ? "Ativo" : "Inativo"} variant={s.active ? "green" : "gray"} /></Td>
-                <Td align="right">
-                  <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
-                    {s.active && <IconBtn icon={<Pencil size={14} strokeWidth={2} />} title="Editar" onClick={() => { setEditItem(s); setEditName(s.name); }} />}
-                    {s.active
-                      ? <IconBtn icon={<PowerOff size={14} strokeWidth={2} />} title="Desativar" onClick={() => disable(s.id)} variant="danger" />
-                      : <IconBtn icon={<Power size={14} strokeWidth={2} />} title="Reativar" onClick={() => activate(s.id)} variant="success" />}
-                  </div>
-                </Td>
-              </Tr>
-            ))}
-          </tbody>
-        </Table>
-        {!items.length && <Empty message="Nenhum setor cadastrado." />}
-      </Card>
+      <p
+        style={{
+          margin: "10px 0 0",
+          fontSize: 14.5,
+          color: "#64748b",
+          maxWidth: 620,
+          lineHeight: 1.6,
+        }}
+      >
+        Organize, acompanhe e mantenha atualizados os setores cadastrados no sistema.
+        Centralize a estrutura da operação em um único painel.
+      </p>
+    </div>
+
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        flexWrap: "wrap",
+        marginLeft: "auto",
+      }}
+    >
+      
+
+        <button
+          onClick={() => {
+            setName("");
+            setCreateOpen(true);
+          }}
+          title="Adicionar setor"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "13px 18px",
+            fontSize: 14,
+            fontWeight: 800,
+            borderRadius: 14,
+            border: "1px solid #ccc",
+            background: "#BB9F58",
+            color: "#fff",
+            cursor: "pointer",
+            fontFamily: "inherit",
+            transition: "all 0.18s ease",
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = "translateY(-1px)";
+            e.currentTarget.style.filter = "brightness(1.03)";
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.filter = "brightness(1)";
+          }}
+        >
+          <span
+            style={{
+              width: 24,
+              height: 24,
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.16)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Plus size={15} strokeWidth={2.8} />
+          </span>
+          Novo setor
+        </button>
+      </div>
+    </div>
+  </div>
+
+     <SectorList
+        items={items}
+        onEdit={handleEdit}
+        onDisable={disable}
+        onActivate={activate}
+      />
 
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Novo setor"
         footer={
           <>
-            <button onClick={() => setCreateOpen(false)} style={{ padding: "8px 16px", fontSize: 13.5, fontWeight: 600, borderRadius: 9, border: "1.5px solid #e2e8f0", background: "#fff", color: "#475569", cursor: "pointer", fontFamily: "inherit" }}>Cancelar</button>
-            <button onClick={create} disabled={!name.trim() || saving} style={{ padding: "8px 16px", fontSize: 13.5, fontWeight: 700, borderRadius: 9, border: "none", background: "#2563eb", color: "#fff", cursor: "pointer", fontFamily: "inherit", opacity: (!name.trim() || saving) ? 0.45 : 1 }}>
+            <button onClick={() => setCreateOpen(false)} style={{ padding: "8px 16px", fontSize: 13.5, fontWeight: 600, borderRadius: 9, border: "2px solid #ccc", background: "#fff", color: "#475569", cursor: "pointer", fontFamily: "inherit" }}>Cancelar</button>
+            <button onClick={create} disabled={!name.trim() || saving} style={{ padding: "8px 16px", fontSize: 13.5, fontWeight: 700, borderRadius: 9, border: "none", background: "#012942", color: "#fff", cursor: "pointer", fontFamily: "inherit", opacity: (!name.trim() || saving) ? 0.45 : 1 }}>
               {saving ? "Salvando..." : "Criar setor"}
             </button>
           </>
@@ -149,8 +240,8 @@ export function AdminSectors() {
       <Modal open={!!editItem} onClose={() => setEditItem(null)} title={`Editar — ${editItem?.name || ""}`}
         footer={
           <>
-            <button onClick={() => setEditItem(null)} style={{ padding: "8px 16px", fontSize: 13.5, fontWeight: 600, borderRadius: 9, border: "1.5px solid #e2e8f0", background: "#fff", color: "#475569", cursor: "pointer", fontFamily: "inherit" }}>Cancelar</button>
-            <button onClick={saveEdit} disabled={!editName.trim() || saving} style={{ padding: "8px 16px", fontSize: 13.5, fontWeight: 700, borderRadius: 9, border: "none", background: "#2563eb", color: "#fff", cursor: "pointer", fontFamily: "inherit", opacity: (!editName.trim() || saving) ? 0.45 : 1 }}>
+            <button onClick={() => setEditItem(null)} style={{ padding: "8px 16px", fontSize: 13.5, fontWeight: 600, borderRadius: 9, border: "2px solid #ccc", background: "#fff", color: "#475569", cursor: "pointer", fontFamily: "inherit" }}>Cancelar</button>
+            <button onClick={saveEdit} disabled={!editName.trim() || saving} style={{ padding: "8px 16px", fontSize: 13.5, fontWeight: 700, borderRadius: 9, border: "none", background: "#012942", color: "#fff", cursor: "pointer", fontFamily: "inherit", opacity: (!editName.trim() || saving) ? 0.45 : 1 }}>
               {saving ? "Salvando..." : "Salvar"}
             </button>
           </>
