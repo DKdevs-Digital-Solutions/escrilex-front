@@ -121,15 +121,22 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
                     }}
                   >
                     <span
-                      style={{
-                        fontWeight: 800,
-                        color: "#0f172a",
-                        fontSize: 13.5,
-                        lineHeight: 1.3,
-                      }}
-                    >
-                      {c.razaoSocial || "—"}
-                    </span>
+                    style={{
+                      fontWeight: 800,
+                      color: "#0f172a",
+                      fontSize: 13.5,
+                      lineHeight: 1.3,
+
+                      display: "block",
+                      maxWidth: 220,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                    title={c.razaoSocial}
+                  >
+                    {c.razaoSocial || "—"}
+                  </span>
                   </div>
 
                   <div

@@ -176,7 +176,7 @@ export function TemplateEditorHeader({
                     color: "#475569",
                   }}
                 >
-                  Status do template
+                  Status do processo
                 </span>
 
                 <Toggle

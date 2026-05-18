@@ -90,6 +90,8 @@
   .template-section{
     flex-direction: column;
   }
+
+   
 }
 
 
@@ -203,7 +205,11 @@
   .login-brand-mobile {
     display: flex;
   }
+
+
 }
+
+
 
 .ll-premium-grid {
   margin-top: 20px;
@@ -486,3 +492,9 @@
   margin-right: 6px;
   top: 2px;
 }
+
+@keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }

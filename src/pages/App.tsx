@@ -21,7 +21,7 @@ import Logo from "../assets/logo.png";
 import EmailNotificationsPage from "./Emailpage";
 import { DashboardPage } from "./Dashboard";
 
-type Page = "companies" | "company" | "users" | "sectors" | "templates" | "checklistRun" | "audit" | "emailSettings" | "dashboard";
+type Page = "companies" | "company" | "users" | "sectors" | "processos" | "checklistRun" | "audit" | "emailSettings" | "dashboard";
 
 interface NavItem {
   id: Page;
@@ -42,7 +42,10 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
       roles: ["ADMIN","GESTOR_EMPRESA"],
     },
       { id: "companies", label: "Empresas", icon: <Briefcase size={15} strokeWidth={1.8} />, roles: [] },
-      { id: "templates", label: "Templates", icon: <FileText size={15} strokeWidth={1.8} />, roles: ["ADMIN", "GESTOR_EMPRESA"] },
+      {
+        id: "audit", label: "Auditoria", icon: <Search size={15} strokeWidth={1.8} />, roles: ["ADMIN"],
+        badge: { text: "LOG", color: "#2563eb" }
+      },
     ],
   },
   {
@@ -50,10 +53,8 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
     items: [
       { id: "users", label: "Usuários", icon: <Users size={15} strokeWidth={1.8} />, roles: ["ADMIN"] },
       { id: "sectors", label: "Setores", icon: <Layers size={15} strokeWidth={1.8} />, roles: ["ADMIN"] },
-      {
-        id: "audit", label: "Auditoria", icon: <Search size={15} strokeWidth={1.8} />, roles: ["ADMIN"],
-        badge: { text: "LOG", color: "#2563eb" }
-      },
+      
+      { id: "processos", label: "Processos", icon: <FileText size={15} strokeWidth={1.8} />, roles: ["ADMIN", "GESTOR_EMPRESA"] },
        {
         id: "emailSettings",
         label: "E-mail",
@@ -71,7 +72,7 @@ const PAGE_TITLES: Record<Page, string> = {
   company: "Detalhe da Empresa",
   users: "Usuários", 
   sectors: "Setores",
-  templates: "Templates", 
+  processos: "Processos", 
   checklistRun: "Checklist", 
   audit: "Auditoria",
   emailSettings: "Email",
@@ -952,14 +953,16 @@ const topIconBtn: React.CSSProperties = {
                   onBack={() => { setPage("companies"); setCompanyId(""); }}
                   onOpenRun={rid => { setRunId(rid); setPage("checklistRun"); }} />
               )}
+              {page === "audit" && isAdmin && <Audit />}
+
+              
+              {page === "dashboard" && isAdmin && <DashboardPage />}
+              {page === "processos" && canEditTemplates && <Templates />}
+              {page === "users" && isAdmin && <AdminUsers />}
+              {page === "sectors" && isAdmin && <AdminSectors />}
               {page === "checklistRun" && runId && (
                 <ChecklistRun runId={runId} onBack={() => { setRunId(""); setPage(companyId ? "company" : "companies"); }} />
               )}
-              {page === "dashboard" && isAdmin && <DashboardPage />}
-              {page === "templates" && canEditTemplates && <Templates />}
-              {page === "users" && isAdmin && <AdminUsers />}
-              {page === "sectors" && isAdmin && <AdminSectors />}
-              {page === "audit" && isAdmin && <Audit />}
               {page === "emailSettings" && isAdmin && <EmailNotificationsPage />}
             </main>
           </div>
