@@ -6,9 +6,11 @@ import {
   Building2,
   CalendarDays,
   Maximize2,
+  RefreshCcw,
   RefreshCw,
   ShieldCheck,
   Sparkles,
+  UserCog,
   Users,
   UserX,
   X,
@@ -68,7 +70,9 @@ export function DashboardPage() {
   
 } = useDashboardSummary();
 
-const [modalChart, setModalChart] = useState<null | "movimento" | "clientes" | "responsibles">(null);
+const [modalChart, setModalChart] = useState<
+  null | "movimento" | "clientes" | "responsibles" | "alterations" | "responsibleChanges"
+>(null);
 const [modalTab, setModalTab] = useState<"ativos" | "inativos" | "entradas" | "saidas" | "responsibles">("ativos");
 
 type ModalTab = "ativos" | "inativos" | "entradas" | "saidas" | "responsibles";
@@ -238,9 +242,9 @@ const periodLabel = useMemo(() => {
       : 0;
 
   const insightText =
-  (data?.cards.exits?.total ?? 0) === 0
+  (data?.cards?.inactiveClients ?? 0) === 0
     ? "Nenhum cliente foi inativado neste período."
-    : `${data?.cards.exits?.total} cliente(s) foram inativados neste período.`;
+    : `${data?.cards?.inactiveClients} cliente(s) foram inativados neste período.`;
 
   const chartData = [
     {
@@ -258,59 +262,89 @@ const periodLabel = useMemo(() => {
   const movementChartData = [
   {
     name: "Novos",
-    value: data?.cards.entries?.total ?? 0,
+    value: data?.cards?.newClients?? 0,
     color: "#2563eb",
   },
   {
     name: "Saíram",
-    value: data?.cards.exits?.total ?? 0,
+    value: data?.cards?.inactiveClients ?? 0,
     color: "#dc2626",
   },
 ];
 
-  const cards = [
-    {
-      title: "Clientes novos",
-      value: data?.cards?.entries?.total ?? 0,
-      description: "Novos cadastros no período",
-      icon: <Users size={22} />,
-      bg: "linear-gradient(135deg, #eff6ff, #dbeafe)",
-      color: "#2563eb",
-      badge: "Entrada",
-      badgeBg: "#dbeafe",
-    },
-    {
-      title: "Saíram no período",
-      value: data?.cards?.exits?.total ?? 0,
-      description: "Clientes inativados no filtro",
-      icon: <ArrowDownRight size={22} />,
-      bg: "linear-gradient(135deg, #fef2f2, #fee2e2)",
-      color: "#dc2626",
-      badge: "Saída",
-      badgeBg: "#fee2e2",
-    },
-    {
-      title: "Clientes ativos",
-      value: data?.cards.totalActive ?? 0,
-      description: "Empresas atualmente ativas",
-      icon: <Building2 size={22} />,
-      bg: "linear-gradient(135deg, #ecfdf5, #d1fae5)",
-      color: "#059669",
-      badge: "Ativos",
-      badgeBg: "#d1fae5",
-    },
-    {
-      title: "Clientes inativos",
-      value: data?.cards.totalInactive ?? 0,
-      description: "Empresas desativadas",
-      icon: <UserX size={22} />,
-      bg: "linear-gradient(135deg, #fff7ed, #ffedd5)",
-      color: "#ea580c",
-      badge: "Inativos",
-      badgeBg: "#ffedd5",
-    },
-    
-  ];
+ const cards = [
+  {
+    title: "Clientes novos",
+    value: data?.cards?.newClients ?? 0,
+    description: "Novos cadastros no período",
+    icon: <Users size={22} />,
+    bg: "linear-gradient(135deg, #eff6ff, #dbeafe)",
+    color: "#2563eb",
+    badge: "Entrada",
+    badgeBg: "#dbeafe",
+    onClick: () => { setModalChart("clientes"); setModalTab("entradas");}
+
+  },
+  {
+    title: "Saíram no período",
+    value: data?.cards?.inactiveClients ?? 0,
+    description: "Clientes inativados no filtro",
+    icon: <ArrowDownRight size={22} />,
+    bg: "linear-gradient(135deg, #fef2f2, #fee2e2)",
+    color: "#dc2626",
+    badge: "Saída",
+    badgeBg: "#fee2e2",
+    onClick: () => { setModalChart("clientes"); setModalTab("saidas") }
+
+  },
+  {
+    title: "Clientes ativos",
+    value: data?.cards?.totalActive ?? 0,
+    description: "Empresas atualmente ativas",
+    icon: <Building2 size={22} />,
+    bg: "linear-gradient(135deg, #ecfdf5, #d1fae5)",
+    color: "#059669",
+    badge: "Ativos",
+    badgeBg: "#d1fae5",
+    onClick: () => { setModalChart("movimento"); setModalTab("ativos") }
+
+  },
+  {
+    title: "Clientes inativos",
+    value: data?.cards?.totalInactive ?? 0,
+    description: "Empresas desativadas",
+    icon: <UserX size={22} />,
+    bg: "linear-gradient(135deg, #fff7ed, #ffedd5)",
+    color: "#ea580c",
+    badge: "Inativos",
+    badgeBg: "#ffedd5",
+    onClick: () => { setModalChart("movimento"); setModalTab("inativos") }
+
+  },
+  {
+    title: "Alterações",
+    value: data?.cards?.alterations ?? 0,
+    description: "Alterações realizadas no período",
+    icon: <RefreshCcw size={22} />,
+    bg: "linear-gradient(135deg, #f5f3ff, #ede9fe)",
+    color: "#7c3aed",
+    badge: "Mudanças",
+    badgeBg: "#ede9fe",
+    onClick: () => setModalChart("alterations"),
+  },
+  {
+    title: "Trocas de responsável",
+    value: data?.cards?.responsibleChanges ?? 0,
+    description: "Clientes com responsável alterado",
+    icon: <UserCog size={22} />,
+    bg: "linear-gradient(135deg, #f0fdfa, #ccfbf1)",
+    color: "#0f766e",
+    badge: "Responsável",
+    badgeBg: "#ccfbf1",
+    onClick: () => setModalChart("responsibleChanges"),
+  },
+];
+
 
   type DashboardChartType =
   | "tributacao"
@@ -338,61 +372,20 @@ const drilldownTypeByChartType: Record<DashboardChartType, DrilldownType> = {
   exitReasons: "changes",
 };
 
-const premiumChartData: PremiumChartItem[] = useMemo(() => {
-  const charts = data?.charts;
-
-  if (!charts) return [];
-
-  if (selectedChartType === "responsibleByDepartment") {
-    return (charts.responsibleByDepartment ?? []).map((item) => ({
-      name: item.department || "Não informado",
-      value: item.total ?? 0,
-    }));
-  }
-
-  return (charts[selectedChartType] ?? []).map((item: any) => ({
-    name: item.key || "Não informado",
-    value: item.total ?? 0,
-  }));
-}, [data, selectedChartType]);
 
 
-      const isResponsibleChart =
-  selectedChartType === "responsibleByDepartment";
 
-  const premiumMiniBox: React.CSSProperties = {
-  padding: 14,
-  borderRadius: 16,
-  background: "rgba(255,255,255,.10)",
-  border: "1px solid rgba(255,255,255,.14)",
-  display: "grid",
-  gap: 5,
-};
-
+    
 
 const [selectedDrilldownLabel, setSelectedDrilldownLabel] = useState("");
 const [selectedDrilldownKey, setSelectedDrilldownKey] = useState("");
 
       
-function openChartDrilldown(item: PremiumChartItem) {
-  const drilldownType = drilldownTypeByChartType[selectedChartType];
 
-  setSelectedDrilldownType(drilldownType);
-  setSelectedDrilldownLabel(item.name);
-  setSelectedDrilldownKey(item.name);
-
-  setModalChart("clientes");
-  setModalTab("entradas");
-
-  loadDrilldown(drilldownType, item.name);
-}
 
 const isResponsibleModal = selectedDrilldownType === "responsibles";
 
-function resetDrilldownModal() {
-  setSelectedDrilldownLabel("");
-  setSelectedDrilldownKey("");
-}
+
 
 function closeModal() {
   setModalChart(null);
@@ -596,7 +589,6 @@ function closeModal() {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 8,
-                boxShadow: "0 12px 22px rgba(1,41,66,.22)",
                 width:"300px"
               }}
             >
@@ -626,7 +618,7 @@ function closeModal() {
             className="dashboard-cards"
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
               gap: 16,
               marginBottom: 20,
             }}
@@ -1028,454 +1020,26 @@ function closeModal() {
         <MiniInfo label="Total de clientes" value={totalClients} />
         <MiniInfo
           label="Novos no período"
-          value={data?.cards.entries?.total ?? 0}
+          value={data?.cards?.newClients ?? 0}
         />
         <MiniInfo
           label="Saídas no período"
-          value={data?.cards.exits?.total ?? 0}
+          value={data?.cards?.inactiveClients ?? 0}
         />
       </div>
     </div>
   </div>
-
-
-
-
-
-
-
-{/* GRÁFICO 3 - PREMIUM */}
-<div
-  style={{
-    gridColumn: "1 / -1",
-    borderRadius: 24,
-    padding: 24,
-    border: "1px solid #e2e8f0",
-    background:
-      "radial-gradient(circle at top right, rgba(37,99,235,.10), transparent 34%), linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
-    boxShadow: "0 18px 42px rgba(15,23,42,.08)",
-    overflow: "hidden",
-  }}
->
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-      gap: 18,
-      marginBottom: 24,
-    }}
-  >
-    <div>
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          padding: "5px 10px",
-          borderRadius: 999,
-          background: "#eff6ff",
-          color: "#2563eb",
-          fontSize: 11,
-          fontWeight: 950,
-          textTransform: "uppercase",
-          letterSpacing: ".08em",
-          marginBottom: 8,
-        }}
-      >
-        Análise estratégica
-      </span>
-
-      <h3
-        style={{
-          margin: 0,
-          fontSize: 20,
-          fontWeight: 950,
-          color: "#0f172a",
-          letterSpacing: -0.4,
-        }}
-      >
-        Distribuição por categoria
-      </h3>
-    </div>
-
-    <div style={{ width: 230 }}>
-      <select
-        value={selectedChartType}
-        onChange={(e) =>
-          setSelectedChartType(e.target.value as DashboardChartType)
-        }
-        style={{
-          ...inputStyle,
-          height: 42,
-          borderRadius: 14,
-          fontSize: 13,
-          fontWeight: 900,
-          cursor: "pointer",
-          boxShadow: "0 10px 22px rgba(15,23,42,.06)",
-        }}
-      >
-        <option value="tributacao">Tributação</option>
-        <option value="ramo">Ramo</option>
-        <option value="perfil">Perfil</option>
-        <option value="exitReasons">Motivos de saída</option>
-        <option value="responsibleByDepartment">Responsáveis</option>
-      </select>
-    </div>
   </div>
 
-  <div
-    style={{
-      display: "grid",
-      gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
-      gap: 18,
-      alignItems: "stretch",
-      width: "100%",
-    }}
-  >
-    {/* CARD ESQUERDA - 50% */}
-    <div
-      style={{
-        borderRadius: 24,
-        padding: 22,
-        background:
-          "radial-gradient(circle at top right, rgba(125,211,252,.22), transparent 34%), linear-gradient(135deg, #020617 0%, #012942 55%, #0f172a 100%)",
-        color: "#fff",
-        position: "relative",
-        overflow: "hidden",
-        border: "1px solid rgba(255,255,255,.10)",
-        boxShadow:
-          "inset 0 1px 0 rgba(255,255,255,.08), 0 20px 42px rgba(2,6,23,.28)",
-        minHeight: 260,
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          width: 180,
-          height: 180,
-          borderRadius: "50%",
-          right: -70,
-          top: -70,
-          background: "radial-gradient(circle, rgba(56,189,248,.28), transparent 70%)",
-        }}
-      />
-
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,.04), transparent 28%)",
-          pointerEvents: "none",
-        }}
-      />
-
-      <div style={{ position: "relative" }}>
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "6px 12px",
-            borderRadius: 999,
-            background: "rgba(255,255,255,.08)",
-            border: "1px solid rgba(255,255,255,.10)",
-            backdropFilter: "blur(8px)",
-            marginBottom: 18,
-          }}
-        >
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 999,
-              background: "#22c55e",
-              boxShadow: "0 0 0 5px rgba(34,197,94,.14)",
-            }}
-          />
-
-          <span
-            style={{
-              fontSize: 11,
-              color: "#cbd5e1",
-              fontWeight: 900,
-              textTransform: "uppercase",
-              letterSpacing: ".08em",
-            }}
-          >
-            Total analisado
-          </span>
-        </div>
-
-        <strong
-          style={{
-            display: "block",
-            fontSize: 50,
-            lineHeight: 1,
-            fontWeight: 950,
-            color: "#fff",
-            letterSpacing: -2,
-            textShadow: "0 10px 30px rgba(56,189,248,.24)",
-          }}
-        >
-          {premiumChartData
-            .reduce((acc, item) => acc + item.value, 0)
-            .toLocaleString("pt-BR")}
-        </strong>
-
-        <div
-          style={{
-            marginTop: 8,
-            color: "rgba(255,255,255,.58)",
-            fontSize: 12,
-            fontWeight: 700,
-          }}
-        >
-          registros encontrados no período
-        </div>
-
-        
-        <div
-          style={{
-            marginTop: 18,
-            padding: 14,
-            borderRadius: 18,
-            background:
-              "linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.04))",
-            border: "1px solid rgba(255,255,255,.10)",
-            backdropFilter: "blur(10px)",
-          }}
-        >
-          <div
-            style={{
-              color: "rgba(255,255,255,.52)",
-              fontSize: 10,
-              fontWeight: 900,
-              textTransform: "uppercase",
-              letterSpacing: ".10em",
-              marginBottom: 6,
-            }}
-          >
-            Categoria atual
-          </div>
-
-          <div
-            style={{
-              color: "#e0f2fe",
-              fontSize: 15,
-              fontWeight: 950,
-              letterSpacing: -0.2,
-            }}
-          >
-            {chartTypeLabels[selectedChartType]}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    {/* MAP DIREITA - 50% */}
-    <div
-      style={{
-        display: "grid",
-        gap: 12,
-        alignContent: "start",
-        minWidth: 0,
-      }}
-    >
-      {premiumChartData.map((item, index) => {
-        const total = premiumChartData.reduce((acc, row) => acc + row.value, 0);
-        const percent = total > 0 ? Math.round((item.value / total) * 100) : 0;
-
-        const colors = ["#2563eb", "#059669", "#7c3aed", "#ea580c", "#dc2626"];
-        const color = colors[index % colors.length];
-
-        if (isResponsibleChart) {
-          return (
-            <div
-              key={item.name}
-              onClick={() => openChartDrilldown(item)}
-              style={{
-                padding: 14,
-                borderRadius: 18,
-                background: "#fff",
-                border: "1px solid #e2e8f0",
-                boxShadow: "0 10px 24px rgba(15,23,42,.04)",
-                height: 70,
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                cursor: "pointer",
-
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  marginBottom: 10,
-                }}
-              >
-                <strong
-                  style={{
-                    color: "#0f172a",
-                    fontSize: 13,
-                    fontWeight: 950,
-                  }}
-                >
-                  {item.name}
-                </strong>
-
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <strong
-                    style={{
-                      color: "#0f172a",
-                      fontSize: 14,
-                      fontWeight: 950,
-                    }}
-                  >
-                    {item.value.toLocaleString("pt-BR")}
-                  </strong>
-
-                  <span
-                    style={{
-                      padding: "4px 8px",
-                      borderRadius: 999,
-                      background: `${color}14`,
-                      color,
-                      fontSize: 11,
-                      fontWeight: 950,
-                    }}
-                  >
-                    {percent}% 
-                  </span>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  height: 10,
-                  borderRadius: 999,
-                  background: "#f1f5f9",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    width: `${percent}%`,
-                    height: "100%",
-                    borderRadius: 999,
-                    background: `linear-gradient(90deg, ${color}, ${color}99)`,
-                  }}
-                />
-              </div>
-            </div>
-          );
-        }
-
-        return (
-          <button
-            key={item.name}
-            onClick={() => openChartDrilldown(item)}
-            style={{
-              border: "1px solid #e2e8f0",
-              background: "#fff",
-              borderRadius: 18,
-              padding: "14px 16px",
-              display: "grid",
-              gridTemplateColumns: "44px 1fr auto",
-              gap: 12,
-              alignItems: "center",
-              cursor: "pointer",
-              textAlign: "left",
-              boxShadow: "0 10px 24px rgba(15,23,42,.04)",
-              minHeight: 72,
-            }}
-          >
-            <div
-              style={{
-                width: 42,
-                height: 42,
-                borderRadius: 14,
-                background: `${color}14`,
-                color,
-                display: "grid",
-                placeItems: "center",
-                fontWeight: 950,
-              }}
-            >
-              <Maximize2 /> 
-            </div>
-
-            <div style={{ minWidth: 0 }}>
-              <strong
-                style={{
-                  display: "block",
-                  color: "#0f172a",
-                  fontSize: 14,
-                  fontWeight: 950,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {chartTypeLabels[selectedChartType]}
-              </strong>
-
-              <span
-                style={{
-                  display: "block",
-                  marginTop: 3,
-                  color: "#64748b",
-                  fontSize: 12,
-                  fontWeight: 700,
-                }}
-              >
-                Clique para visualizar os registros
-              </span>
-            </div>
-
-            <div
-              style={{
-                padding: "8px 12px",
-                borderRadius: 999,
-                background: "#f8fafc",
-                color: "#0f172a",
-                fontSize: 15,
-                fontWeight: 950,
-              }}
-            >
-              {item.value}
-            </div>
-          </button>
-        );
-      })}
-
-      {premiumChartData.length === 0 && (
-        <div
-          style={{
-            padding: 24,
-            textAlign: "center",
-            borderRadius: 18,
-            background: "#f8fafc",
-            border: "1px solid #e2e8f0",
-            color: "#64748b",
-            fontWeight: 800,
-          }}
-        >
-          Nenhum dado encontrado para esta categoria.
-        </div>
-      )}
-    </div>
-  </div>
-</div>
-</div>
 
 
 
 
 
-    {modalChart && (
+
+
+
+{modalChart && (
   <div
     onClick={closeModal}
     style={{
@@ -1505,18 +1069,66 @@ function closeModal() {
     >
       <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 950 }}>
-          {modalChart === "clientes" && selectedDrilldownLabel
-            ? `${chartTypeLabels[selectedChartType]}: ${selectedDrilldownLabel}`
-            : modalChart === "movimento"
-              ? "Movimento de clientes"
-              : "Entradas x Saídas"}
+  <h2
+    style={{
+      margin: 0,
+      fontSize: 22,
+      fontWeight: 950,
+      color: "#0f172a",
+      letterSpacing: "-0.02em",
+    }}
+  >
+    {modalChart === "alterations"
+      ? "Alterações no período"
+      : modalChart === "responsibleChanges"
+        ? "Trocas de responsável"
+        : modalChart === "clientes" && selectedDrilldownLabel
+          ? `${chartTypeLabels[selectedChartType]}: ${selectedDrilldownLabel}`
+          : modalChart === "movimento"
+            ? "Movimento de clientes"
+            : "Entradas x Saídas"}
         </h2>
 
-          {/* <p style={{ margin: "6px 0 0", color: "#64748b", fontSize: 13 }}>
-            {periodLabel}
-          </p> */}
+        <p
+          style={{
+            margin: "6px 0 0",
+            color: "#64748b",
+            fontSize: 13,
+            lineHeight: 1.5,
+            fontWeight: 500,
+            maxWidth: 520,
+          }}
+        >
+          {modalChart === "alterations"
+            ? "Visualize os tipos de alterações realizadas nas empresas durante o período selecionado."
+            : modalChart === "responsibleChanges"
+              ? "Acompanhe as movimentações de responsáveis por departamento e quantidade de empresas impactadas."
+              : modalChart === "movimento"
+                ? "Consulte empresas ativas, inativas e movimentações registradas no período."
+                : "Detalhamento completo das entradas e saídas registradas no dashboard."}
+        </p>
+
+        <div
+          style={{
+            marginTop: 10,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "6px 10px",
+            borderRadius: 999,
+            background: "#f8fafc",
+            border: "1px solid #e2e8f0",
+            color: "#475569",
+            fontSize: 11,
+            fontWeight: 900,
+            textTransform: "uppercase",
+            letterSpacing: ".04em",
+          }}
+        >
+          <CalendarDays size={13} />
+          {periodLabel}
         </div>
+      </div>
 
         <button
           onClick={closeModal}
@@ -1530,59 +1142,59 @@ function closeModal() {
             fontWeight: 900,
           }}
         >
-          <X size={20} style={{top:"2px", position:"relative"}} /> 
+          <X size={20} style={{ top: "2px", position: "relative" }} />
         </button>
       </div>
 
-     {!selectedDrilldownLabel && (
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-          gap: 12,
-          marginTop: 22,
-          marginBottom: 18,
-        }}
-      >
-        {modalChart === "movimento" ? (
-          <>
-            <ModalOption
-              active={modalTab === "ativos"}
-              label="Ativos"
-              value={data?.cards.totalActive ?? 0}
-              color="#059669"
-              onClick={() => openModal("movimento", "ativos")}
-            />
+      {modalChart !== "alterations" && modalChart !== "responsibleChanges" && !selectedDrilldownLabel && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gap: 12,
+            marginTop: 22,
+            marginBottom: 18,
+          }}
+        >
+          {modalChart === "movimento" ? (
+            <>
+              <ModalOption
+                active={modalTab === "ativos"}
+                label="Ativos"
+                value={data?.cards.totalActive ?? 0}
+                color="#059669"
+                onClick={() => openModal("movimento", "ativos")}
+              />
 
-            <ModalOption
-              active={modalTab === "inativos"}
-              label="Inativos"
-              value={data?.cards.totalInactive ?? 0}
-              color="#ea580c"
-              onClick={() => openModal("movimento", "inativos")}
-            />
-          </>
-        ) : (
-          <>
-            <ModalOption
-              active={modalTab === "entradas"}
-              label="Entradas"
-              value={data?.cards.entries?.total ?? 0}
-              color="#2563eb"
-              onClick={() => openModal("clientes", "entradas")}
-            />
+              <ModalOption
+                active={modalTab === "inativos"}
+                label="Inativos"
+                value={data?.cards.totalInactive ?? 0}
+                color="#ea580c"
+                onClick={() => openModal("movimento", "inativos")}
+              />
+            </>
+          ) : (
+            <>
+              <ModalOption
+                active={modalTab === "entradas"}
+                label="Entradas"
+                value={data?.cards?.newClients ?? 0}
+                color="#2563eb"
+                onClick={() => openModal("clientes", "entradas")}
+              />
 
-            <ModalOption
-              active={modalTab === "saidas"}
-              label="Saídas"
-              value={data?.cards.exits?.total ?? 0}
-              color="#dc2626"
-              onClick={() => openModal("clientes", "saidas")}
-            />
-          </>
-        )}
-      </div>
-    )}
+              <ModalOption
+                active={modalTab === "saidas"}
+                label="Saídas"
+                value={data?.cards?.inactiveClients ?? 0}
+                color="#dc2626"
+                onClick={() => openModal("clientes", "saidas")}
+              />
+            </>
+          )}
+        </div>
+      )}
 
       <div
         style={{
@@ -1590,196 +1202,275 @@ function closeModal() {
           borderRadius: !selectedDrilldownLabel ? 15 : 10,
           top: !selectedDrilldownLabel ? 0 : 10,
           overflow: "hidden",
-          position:"relative"
+          position: "relative",
+          marginTop:
+            modalChart === "alterations" || modalChart === "responsibleChanges"
+              ? 22
+              : 0,
         }}
       >
-       
-  {drilldownLoading ? (
-    <div
-      style={{
-        minHeight: 280,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-        gap: 14,
-      }}
-    >
-      <div
-        style={{
-          width: 46,
-          height: 46,
-          borderRadius: "50%",
-          border: "3px solid #dbeafe",
-          borderTopColor: "#2563eb",
-          animation: "spin 0.9s linear infinite",
-        }}
-      />
+        {modalChart === "alterations" ? (
+          <table style={tableStyle}>
+            <thead>
+              <tr style={{ background: "#f8fafc" }}>
+                <th style={thStyle}>Tipo de alteração</th>
+                <th style={thStyle}>Total</th>
+              </tr>
+            </thead>
 
-      <div
-        style={{
-          color: "#64748b",
-          fontSize: 13,
-          fontWeight: 800,
-        }}
-      >
-        Carregando detalhamento...
-      </div>
-    </div>
-  ) : (
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            fontSize: 13,
-            tableLayout: "fixed",
-          }}
-        >
-         <thead>
-          {isResponsibleModal ? (
-            <tr style={{ background: "#f8fafc" }}>
-              <th style={thStyle}>Empresa</th>
-              <th style={thStyle}>CNPJ</th>
-              <th style={thStyle}>Departamento</th>
-              <th style={thStyle}>Responsável</th>
-              <th style={thStyle}>Data</th>
-            </tr>
-          ) : (
-            <tr style={{ background: "#f8fafc" }}>
-              <th style={thStyle}>Código</th>
-              <th style={thStyle}>Empresa</th>
-              <th style={thStyle}>CNPJ</th>
-              <th style={thStyle}>Grupo</th>
-              <th style={thStyle}>Situação</th>
-            </tr>
-          )}
-        </thead>
-
-
-         <tbody>
-          {getModalRows().map((item: any) => {
-            if (isResponsibleModal) {
-              return (
-                <tr key={`${item.id}-${item.date}`}>
+            <tbody>
+              {(data?.charts?.alterations ?? []).map((item: any) => (
+                <tr key={item.label}>
                   <td style={tdStyle}>
-                    <strong>{item.razaoSocial || "--"}</strong>
-                    {item.nomeFantasia && (
-                      <div style={{ fontSize: 11, color: "#64748b", marginTop: 3 }}>
-                        {item.nomeFantasia}
-                      </div>
-                    )}
+                    <strong>{item.label || "--"}</strong>
                   </td>
 
                   <td style={tdStyle}>
-                    <span style={{ fontFamily: "monospace", fontSize: 12 }}>
-                      {item.cnpj || "--"}
-                    </span>
-                  </td>
-
-                  <td style={tdStyle}>{item.department || "--"}</td>
-
-                  <td style={tdStyle}>
-                    <strong>{item.newResponsible?.name || "--"}</strong>
-                    {item.newResponsible?.email && (
-                      <div style={{ fontSize: 11, color: "#64748b", marginTop: 3 }}>
-                        {item.newResponsible.email}
-                      </div>
-                    )}
-                  </td>
-
-                  <td style={tdStyle}>
-                    {item.date
-                      ? new Date(item.date).toLocaleDateString("pt-BR")
-                      : "--"}
+                    {item.total?.toLocaleString("pt-BR") ?? 0}
                   </td>
                 </tr>
-              );
-            }
+              ))}
 
-            return (
-              <tr key={item.id}>
-                <td style={tdStyle}>{item.cod || "--"}</td>
-
-                <td style={tdStyle}>
-                  <strong>{item.razaoSocial || "--"}</strong>
-                  {item.nomeFantasia && (
-                    <div style={{ fontSize: 11, color: "#64748b", marginTop: 3 }}>
-                      {item.nomeFantasia}
-                    </div>
-                  )}
-                </td>
-
-                <td style={tdStyle}>
-                  <span style={{ fontFamily: "monospace", fontSize: 12 }}>
-                    {item.cnpj || "--"}
-                  </span>
-                </td>
-
-                <td style={tdStyle}>
-                  {item.grupo || item.department || item.newResponsible?.name || "--"}
-                </td>
-
-                <td style={tdStyle}>
-                  {(() => {
-                    const statusStyle = getStatusStyle(item.situacao);
-
-                    return (
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: 8,
-                          padding: "7px 8px",
-                          borderRadius: 999,
-                          background: statusStyle.bg,
-                          border: `1px solid ${statusStyle.border}`,
-                          color: statusStyle.color,
-                          fontWeight: 900,
-                          fontSize: 11,
-                          width: "110px",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <span
-                          style={{
-                            width: 7,
-                            height: 7,
-                            borderRadius: 999,
-                            background: statusStyle.dot,
-                          }}
-                        />
-                        {statusStyle.label}
-                      </span>
-                    );
-                  })()}
-                </td>
+              {(data?.charts?.alterations ?? []).length === 0 && (
+                <tr>
+                  <td
+                    colSpan={2}
+                    style={{
+                      padding: 24,
+                      textAlign: "center",
+                      color: "#64748b",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Nenhuma alteração encontrada.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        ) : modalChart === "responsibleChanges" ? (
+          <table style={tableStyle}>
+            <thead>
+              <tr style={{ background: "#f8fafc" }}>
+                <th style={thStyle}>Departamento</th>
+                <th style={thStyle}>Trocas</th>
+                <th style={thStyle}>Empresas</th>
               </tr>
-            );
-          })}
+            </thead>
 
-          {!drilldownLoading && getModalRows().length === 0 && (
-            <tr>
-              <td
-                colSpan={5}
-                style={{
-                  padding: 24,
-                  textAlign: "center",
-                  color: "#64748b",
-                  fontWeight: 700,
-                }}
-              >
-                Nenhum registro encontrado.
-              </td>
-            </tr>
-          )}
-        </tbody>
-                </table>
-                 )}
-</div>
-              </div>
+            <tbody>
+              {(data?.charts?.responsibleChanges?.byDepartment ?? []).map(
+                (item: any) => (
+                  <tr key={item.label}>
+                    <td style={tdStyle}>
+                      <strong>{item.label || "--"}</strong>
+                    </td>
+
+                    <td style={tdStyle}>
+                      {item.total?.toLocaleString("pt-BR") ?? 0}
+                    </td>
+
+                    <td style={tdStyle}>
+                      {item.companiesTotal?.toLocaleString("pt-BR") ?? 0}
+                    </td>
+                  </tr>
+                )
+              )}
+
+              {(data?.charts?.responsibleChanges?.byDepartment ?? []).length === 0 && (
+                <tr>
+                  <td
+                    colSpan={3}
+                    style={{
+                      padding: 24,
+                      textAlign: "center",
+                      color: "#64748b",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Nenhuma troca de responsável encontrada.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        ) : drilldownLoading ? (
+          <div
+            style={{
+              minHeight: 280,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              gap: 14,
+            }}
+          >
+            <div
+              style={{
+                width: 46,
+                height: 46,
+                borderRadius: "50%",
+                border: "3px solid #dbeafe",
+                borderTopColor: "#2563eb",
+                animation: "spin 0.9s linear infinite",
+              }}
+            />
+
+            <div
+              style={{
+                color: "#64748b",
+                fontSize: 13,
+                fontWeight: 800,
+              }}
+            >
+              Carregando detalhamento...
             </div>
-        )}
+          </div>
+        ) : (
+          <table style={tableStyle}>
+            <thead>
+              {isResponsibleModal ? (
+                <tr style={{ background: "#f8fafc" }}>
+                  <th style={thStyle}>Empresa</th>
+                  <th style={thStyle}>CNPJ</th>
+                  <th style={thStyle}>Departamento</th>
+                  <th style={thStyle}>Responsável</th>
+                  <th style={thStyle}>Data</th>
+                </tr>
+              ) : (
+                <tr style={{ background: "#f8fafc" }}>
+                  <th style={thStyle}>Código</th>
+                  <th style={thStyle}>Empresa</th>
+                  <th style={thStyle}>CNPJ</th>
+                  <th style={thStyle}>Grupo</th>
+                  <th style={thStyle}>Situação</th>
+                </tr>
+              )}
+            </thead>
 
+            <tbody>
+              {getModalRows().map((item: any) => {
+                if (isResponsibleModal) {
+                  return (
+                    <tr key={`${item.id}-${item.date}`}>
+                      <td style={tdStyle}>
+                        <strong>{item.razaoSocial || "--"}</strong>
+                        {item.nomeFantasia && (
+                          <div style={{ fontSize: 11, color: "#64748b", marginTop: 3 }}>
+                            {item.nomeFantasia}
+                          </div>
+                        )}
+                      </td>
+
+                      <td style={tdStyle}>
+                        <span style={{ fontFamily: "monospace", fontSize: 12 }}>
+                          {item.cnpj || "--"}
+                        </span>
+                      </td>
+
+                      <td style={tdStyle}>{item.department || "--"}</td>
+
+                      <td style={tdStyle}>
+                        <strong>{item.newResponsible?.name || "--"}</strong>
+                        {item.newResponsible?.email && (
+                          <div style={{ fontSize: 11, color: "#64748b", marginTop: 3 }}>
+                            {item.newResponsible.email}
+                          </div>
+                        )}
+                      </td>
+
+                      <td style={tdStyle}>
+                        {item.date
+                          ? new Date(item.date).toLocaleDateString("pt-BR")
+                          : "--"}
+                      </td>
+                    </tr>
+                  );
+                }
+
+                return (
+                  <tr key={item.id}>
+                    <td style={tdStyle}>{item.cod || "--"}</td>
+
+                    <td style={tdStyle}>
+                      <strong>{item.razaoSocial || "--"}</strong>
+                      {item.nomeFantasia && (
+                        <div style={{ fontSize: 11, color: "#64748b", marginTop: 3 }}>
+                          {item.nomeFantasia}
+                        </div>
+                      )}
+                    </td>
+
+                    <td style={tdStyle}>
+                      <span style={{ fontFamily: "monospace", fontSize: 12 }}>
+                        {item.cnpj || "--"}
+                      </span>
+                    </td>
+
+                    <td style={tdStyle}>
+                      {item.grupo || item.department || item.newResponsible?.name || "--"}
+                    </td>
+
+                    <td style={tdStyle}>
+                      {(() => {
+                        const statusStyle = getStatusStyle(item.situacao);
+
+                        return (
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 8,
+                              padding: "7px 8px",
+                              borderRadius: 999,
+                              background: statusStyle.bg,
+                              border: `1px solid ${statusStyle.border}`,
+                              color: statusStyle.color,
+                              fontWeight: 900,
+                              fontSize: 11,
+                              width: "110px",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <span
+                              style={{
+                                width: 7,
+                                height: 7,
+                                borderRadius: 999,
+                                background: statusStyle.dot,
+                              }}
+                            />
+                            {statusStyle.label}
+                          </span>
+                        );
+                      })()}
+                    </td>
+                  </tr>
+                );
+              })}
+
+              {getModalRows().length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    style={{
+                      padding: 24,
+                      textAlign: "center",
+                      color: "#64748b",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Nenhum registro encontrado.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  </div>
+)}
           
 
           {loading && (
@@ -1798,6 +1489,7 @@ function closeModal() {
         
       </div>
     </div>
+    
   );
 }
 
@@ -1811,14 +1503,37 @@ function DashboardCard({
   badge,
   badgeBg,
   loading,
+  onClick
 }: any) {
   return (
     <div
+      onClick={onClick}
       style={{
         borderRadius: 20,
         padding: 18,
         background: "#fff",
         border: "1px solid #e2e8f0",
+        cursor: "pointer",
+        transition:
+          "all 0.18s ease, transform 0.15s ease, box-shadow 0.18s ease",
+        boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.border = `1px solid ${color}`;
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow =
+          "0 10px 30px rgba(59,130,246,0.12)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.border = "1px solid #e2e8f0";
+        e.currentTarget.style.boxShadow =
+          "0 1px 2px rgba(15,23,42,0.04)";
+      }}
+      onMouseDown={(e) => {
+        e.currentTarget.style.transform = "scale(0.985)";
+      }}
+      onMouseUp={(e) => {
+        e.currentTarget.style.transform = "translateY(-2px)";
       }}
     >
       <div
@@ -2106,3 +1821,9 @@ function ModalOption({
   );
 }
 
+const tableStyle: React.CSSProperties = {
+  width: "100%",
+  borderCollapse: "collapse",
+  fontSize: 13,
+  tableLayout: "fixed",
+};

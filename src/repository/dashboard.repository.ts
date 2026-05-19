@@ -1,45 +1,60 @@
 import api from "../services/api";
 
 export type DashboardGrowthMetric = {
-  total: number;
+  current: number;
   previous: number;
   growthPercent: number;
 };
 
 export type DashboardChartItem = {
-  key: string;
+  label: string;
   total: number;
 };
 
-export type DashboardResponsibleByDepartment = {
-  department: string;
+export type DashboardResponsibleDepartmentItem = {
+  label: string;
   total: number;
+  companiesTotal: number;
+};
+
+export type DashboardResponsibleChanges = {
+  totalCompanies: number;
+  byDepartment: DashboardResponsibleDepartmentItem[];
 };
 
 export type DashboardSummary = {
   period: {
     startDate: string;
     endDate: string;
-    previousStart: string;
-    previousEnd: string;
+    previousStartDate: string;
+    previousEndDate: string;
   };
 
   cards: {
-    entries: DashboardGrowthMetric;
-    exits: DashboardGrowthMetric;
+    alterations: number;
+    inactiveClients: number;
+    newClients: number;
+    responsibleChanges: number;
     totalActive: number;
     totalInactive: number;
-    companyChanges: number;
-    responsibleChanges: number;
+  };
+
+  comparisons: {
+    entries: DashboardGrowthMetric;
+    exits: DashboardGrowthMetric;
   };
 
   charts: {
-    tributacao: DashboardChartItem[];
-    ramo: DashboardChartItem[];
-    perfil: DashboardChartItem[];
-    exitReasons: DashboardChartItem[];
-    responsibleByDepartment: DashboardResponsibleByDepartment[];
+    taxation: DashboardChartItem[];
+    activityBranch: DashboardChartItem[];
+    profile: DashboardChartItem[];
+    status: DashboardChartItem[];
+    alterations: DashboardChartItem[];
+    responsibleChanges: DashboardResponsibleChanges;
   };
+
+  drilldownEndpoint: string;
+  expectationMatrixEndpoint: string;
 };
 
 export type DashboardSummaryParams = {
@@ -114,7 +129,7 @@ export async function getDashboardDrilldown(
   }
 
   const response = await api.get<DashboardDrilldown>(
-    `/api/dashboard/drilldown?${query.toString()}`
+    `/api/dashboard/details?${query.toString()}`
   );
 
   return response.data;
