@@ -20,8 +20,19 @@ import { useMe } from "../hooks/useMe";
 import Logo from "../assets/logo.png";
 import EmailNotificationsPage from "./Emailpage";
 import { DashboardPage } from "./Dashboard";
+import { ExpectationMatrixPage } from "./Matriz";
 
-type Page = "companies" | "company" | "users" | "sectors" | "processos" | "checklistRun" | "audit" | "emailSettings" | "dashboard";
+type Page =
+  | "companies"
+  | "company"
+  | "users"
+  | "sectors"
+  | "processos"
+  | "checklistRun"
+  | "audit"
+  | "emailSettings"
+  | "dashboard"
+  | "expectationMatrix";
 
 interface NavItem {
   id: Page;
@@ -41,6 +52,12 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
       icon: <Activity size={15} strokeWidth={1.8} />,
       roles: ["ADMIN","GESTOR_EMPRESA"],
     },
+    {
+        id: "expectationMatrix",
+        label: "Matriz",
+        icon: <ClipboardList size={15} strokeWidth={1.8} />,
+        roles: ["ADMIN", "GESTOR_EMPRESA"],
+      },
       { id: "companies", label: "Empresas", icon: <Briefcase size={15} strokeWidth={1.8} />, roles: [] },
       {
         id: "audit", label: "Auditoria", icon: <Search size={15} strokeWidth={1.8} />, roles: ["ADMIN"],
@@ -76,6 +93,7 @@ const PAGE_TITLES: Record<Page, string> = {
   checklistRun: "Checklist", 
   audit: "Auditoria",
   emailSettings: "Email",
+  expectationMatrix: "Matriz",
 };
 
 // ── Confirm logout modal ──────────────────────────────────────────────────────
@@ -957,6 +975,7 @@ const topIconBtn: React.CSSProperties = {
 
               
               {page === "dashboard" && isAdmin && <DashboardPage />}
+              {page === "expectationMatrix" && <ExpectationMatrixPage />}
               {page === "processos" && canEditTemplates && <Templates />}
               {page === "users" && isAdmin && <AdminUsers />}
               {page === "sectors" && isAdmin && <AdminSectors />}

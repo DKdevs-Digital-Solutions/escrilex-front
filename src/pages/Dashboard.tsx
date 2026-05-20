@@ -771,6 +771,7 @@ function closeModal() {
       {movementChartData.map((item) => (
         <div
           key={item.name}
+          onClick={()=>{openModal("clientes", item.name === 'Novos' ? "entradas" : "saidas");}}
           style={{
             padding: "10px 12px",
             borderRadius: 14,
@@ -780,6 +781,7 @@ function closeModal() {
             alignItems: "center",
             justifyContent: "space-between",
             gap: 10,
+            cursor:"pointer"
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
