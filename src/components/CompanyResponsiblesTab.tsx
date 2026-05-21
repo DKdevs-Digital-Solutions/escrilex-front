@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { SectionCard, Empty } from "../ui";
 import {
   Save,
@@ -19,6 +19,7 @@ import {
   Wrench,
   FolderKanban,
 } from "lucide-react";
+import { toUserIds } from "../pages/CompanyDetail";
 
 
 
@@ -36,10 +37,10 @@ type UserItem = {
 type Props = {
   sectors: SectorItem[];
   users: UserItem[];
-  responsibleMap: Map<string, string>;
+  responsibleMap: Map<string, string[]>;
   savingResp?: boolean;
   onSave: () => void;
-  onChangeResponsible: (sectorId: string, userId: string) => void;
+  onChangeResponsible: (sectorId: string, userIds: string[]) => void;
   primaryButtonStyle: (disabled?: boolean) => React.CSSProperties;
   UI: {
     text: string;
@@ -233,21 +234,32 @@ function getInitials(name?: string) {
 
 
 function RowCard({
+  sectorId,
   sectorName,
-  selectedUserId,
-  selectedUser,
+  selectedUserIds,
+  selectedUsers,
   users,
+  open,
+  onToggleOpen,
+  onClose,
   onChange,
   UI,
+  openUp
 }: {
+  sectorId: string;
   sectorName: string;
-  selectedUserId: string;
-  selectedUser: UserItem | null;
+  selectedUserIds: string[];
+  selectedUsers: UserItem[];
   users: UserItem[];
-  onChange: (userId: string) => void;
+  open: boolean;
+  onToggleOpen: () => void;
+  openUp: boolean;
+  onClose: () => void;
+  onChange: (userIds: string[]) => void;
   UI: Props["UI"];
 }) {
   const sectorVisual = getSectorVisual(sectorName);
+  const [openUsers, setOpenUsers] = useState(false);
 
   return (
     <div
@@ -329,31 +341,131 @@ function RowCard({
           Responsável
         </div>
 
-        <select
-          value={selectedUserId}
-          onChange={(e) => onChange(e.target.value)}
-          style={{
-            width: "100%",
-            minWidth: 0,
-            boxSizing: "border-box",
-            padding: "11px 12px",
-            fontSize: 13,
-            border: `1px solid ${UI.border}`,
-            borderRadius: 12,
-            background: "#fff",
-            color: UI.text,
-            outline: "none",
-            fontFamily: "inherit",
-            boxShadow: "0 1px 2px rgba(15,23,42,0.03)",
-          }}
-        >
-          <option value="">Selecionar responsável</option>
-          {users.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.name}
-            </option>
-          ))}
-        </select>
+       <div style={{ position: "relative" }}>
+    <button
+      type="button"
+      onClick={onToggleOpen}
+      style={{
+        width: "100%",
+        minHeight: 46,
+        padding: "0 14px",
+        border: `1px solid ${UI.border}`,
+        borderRadius: 12,
+        background: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        cursor: "pointer",
+        boxShadow: "0 1px 2px rgba(15,23,42,0.03)",
+      }}
+    >
+    <span
+      style={{
+        fontSize: 13,
+        fontWeight: 700,
+        color: selectedUserIds.length
+          ? UI.text
+          : UI.textMuted,
+
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      }}
+    >
+     Selecionar responsáveis
+    </span>
+
+    <span
+      style={{
+        fontSize: 11,
+        color: UI.textSoft,
+      }}
+    >
+      ▼
+    </span>
+  </button>
+
+  {open && (
+    <div
+      style={{
+        position: "absolute",
+
+        top: openUp ? "auto" : "calc(100% + 8px)",
+        bottom: openUp ? "calc(100% + 8px)" : "auto",
+
+        left: 0,
+        right: 0,
+        zIndex: 50,
+        display: "grid",
+        gap: 6,
+        maxHeight: 240,
+        overflowY: "auto",
+        padding: 8,
+        border: `1px solid ${UI.border}`,
+        borderRadius: 14,
+        background: "#fff",
+        boxShadow: "0 20px 40px rgba(15,23,42,.12)",
+      }}
+    >
+      {users.map((u) => {
+  const currentIds = Array.isArray(selectedUserIds)
+    ? selectedUserIds
+    : selectedUserIds
+    ? [selectedUserIds]
+    : [];
+
+  const checked = currentIds.includes(u.id);
+
+  return (
+    <label
+      key={u.id}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "10px 12px",
+        borderRadius: 10,
+        cursor: "pointer",
+        background: checked ? "rgba(1,41,66,.08)" : "transparent",
+        border: checked
+          ? "1px solid rgba(1,41,66,.16)"
+          : "1px solid transparent",
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => {
+          const nextUserIds = e.target.checked
+            ? [...currentIds, u.id]
+            : currentIds.filter((id) => id !== u.id);
+
+          onChange(nextUserIds);
+        }}
+        style={{
+          width: 16,
+          height: 16,
+          cursor: "pointer",
+
+          accentColor: "#bb9f58",
+        }}
+      />
+
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: UI.text }}>
+          {u.name}
+        </div>
+
+        <div style={{ fontSize: 11.5, color: UI.textSoft, marginTop: 2 }}>
+          {u.email || "Sem e-mail"}
+        </div>
+      </div>
+    </label>
+  );
+})}
+    </div>
+  )}
+</div>
       </div>
 
       <div style={{ minWidth: 0 }}>
@@ -370,84 +482,90 @@ function RowCard({
           Contato
         </div>
 
-        {selectedUser ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              padding: "10px 12px",
-              borderRadius: 12,
-              background: UI.surfaceSoft,
-              border: `1px solid ${UI.border}`,
-              minHeight: 46,
-            }}
-          >
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: 999,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "#fff",
-                border: `1px solid ${UI.border}`,
-                color: UI.textSoft,
-                fontSize: 11.5,
-                fontWeight: 800,
-                flexShrink: 0,
-              }}
-            >
-              {getInitials(selectedUser.name)}
-            </div>
+       {selectedUsers.length ? (
+  <div
+    style={{
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 8,
+      alignItems: "center",
+      padding: "8px 10px",
+      borderRadius: 12,
+      background: UI.surfaceSoft,
+      border: `1px solid ${UI.border}`,
+      minHeight: 46,
+    }}
+  >
+    {selectedUsers.map((user) => (
+      <div
+        key={user.id}
+        title={user.email || user.name}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 7,
+          maxWidth: 210,
+          padding: "6px 9px 6px 6px",
+          borderRadius: 999,
+          background: "#fff",
+          border: `1px solid ${UI.border}`,
+          color: UI.text,
+          boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
+        }}
+      >
+        <span
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 999,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "#bb9f58",
+            color: "#fff",
+            fontSize: 10,
+            fontWeight: 900,
+            flexShrink: 0,
+          }}
+        >
+          {getInitials(user.name)}
+        </span>
 
-            <div style={{ minWidth: 0 }}>
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: UI.text,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {selectedUser.name}
-              </div>
-              <div
-                style={{
-                  fontSize: 12.5,
-                  color: UI.textSoft,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {selectedUser.email || "Sem e-mail cadastrado"}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "10px 12px",
-              borderRadius: 12,
-              background: "#fff",
-              border: `1px dashed ${UI.border}`,
-              minHeight: 46,
-              color: UI.textMuted,
-              fontSize: 13,
-              fontWeight: 600,
-            }}
-          >
-            <Mail size={15} />
-            Nenhum responsável definido
-          </div>
-        )}
+        <span
+          style={{
+            minWidth: 0,
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+            fontSize: 12.5,
+            fontWeight: 800,
+          }}
+        >
+          {user.name}
+        </span>
+      </div>
+    ))}
+  </div>
+) : (
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      padding: "10px 12px",
+      borderRadius: 12,
+      background: "#fff",
+      border: `1px dashed ${UI.border}`,
+      minHeight: 46,
+      color: UI.textMuted,
+      fontSize: 13,
+      fontWeight: 600,
+    }}
+  >
+    <Mail size={15} />
+    Nenhum responsável definido
+  </div>
+)}
       </div>
     </div>
   );
@@ -466,6 +584,7 @@ export function CompanyResponsiblesTab({
   UI,
 }: Props) {
   const assignedCount = sectors.filter((s) => responsibleMap.get(s.id)).length;
+  const [openSectorId, setOpenSectorId] = useState<string | null>(null);
 
  return (
   <div
@@ -551,21 +670,21 @@ export function CompanyResponsiblesTab({
         }}
       >
 
-<div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-  <StatCard
-    label="Setores"
-    value={sectors.length}
-    color="#2563eb"
-    icon={<Building2 size={18} />}
-  />
+    <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+      <StatCard
+        label="Setores"
+        value={sectors.length}
+        color="#2563eb"
+        icon={<Building2 size={18} />}
+      />
 
-  <StatCard
-    label="Vinculados"
-    value={assignedCount}
-    color="#16a34a"
-    icon={<ShieldCheck size={18} />}
-  />
-</div>
+      <StatCard
+        label="Vinculados"
+        value={assignedCount}
+        color="#16a34a"
+        icon={<ShieldCheck size={18} />}
+      />
+    </div>
        
       </div>
     </div>
@@ -598,20 +717,26 @@ export function CompanyResponsiblesTab({
             <div style={headerCellStyle(UI)}>Contato</div>
           </div>
 
-          {sectors.map((s) => {
-            const userId = responsibleMap.get(s.id) || "";
-            const user = userId
-              ? users.find((u) => u.id === userId) || null
-              : null;
+          {sectors.map((s, index) => {
+            const userIds = toUserIds(responsibleMap.get(s.id));
+            const selectedUsers = users.filter((u) => userIds.includes(u.id));
+            const shouldOpenUp = index >= sectors.length - 2;
 
             return (
               <RowCard
                 key={s.id}
+                sectorId={s.id}
                 sectorName={s.name}
-                selectedUserId={userId}
-                selectedUser={user}
+                selectedUserIds={userIds}
+                selectedUsers={selectedUsers}
                 users={users}
-                onChange={(nextUserId) => onChangeResponsible(s.id, nextUserId)}
+                open={openSectorId === s.id}
+                openUp={shouldOpenUp}
+                onToggleOpen={() =>
+                  setOpenSectorId((prev) => (prev === s.id ? null : s.id))
+                }
+                onClose={() => setOpenSectorId(null)}
+                onChange={(nextUserIds) => onChangeResponsible(s.id, nextUserIds)}
                 UI={UI}
               />
             );

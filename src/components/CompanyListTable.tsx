@@ -41,7 +41,7 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
       <Table>
       <Thead>
         <tr>
-          <Th style={{ ...thStyle, width: 90 }}>Cod.</Th>
+          <Th style={{ ...thStyle}}>Cod.</Th>
           <Th style={thStyle}>Empresa</Th>
           <Th style={thStyle}>Situação</Th>
           <Th style={thStyle}>CNPJ</Th>

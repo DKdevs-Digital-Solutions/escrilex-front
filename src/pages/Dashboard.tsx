@@ -397,6 +397,15 @@ function closeModal() {
   clearDrilldown();
 }
 
+const comparisons = data?.comparisons;
+
+const getMovementComparison = (name: string) => {
+  if (name === "Novos") return comparisons?.entries;
+  if (name === "Saíram") return comparisons?.exits;
+
+  return null;
+};
+
   return (
     <div
       style={{
@@ -768,10 +777,20 @@ function closeModal() {
         marginTop: 12,
       }}
     >
-      {movementChartData.map((item) => (
+      {movementChartData.map((item) => {
+      const comparison = getMovementComparison(item.name);
+      const percent = comparison?.growthPercent ?? 0;
+      const isPositive = percent >= 0;
+
+      return (
         <div
           key={item.name}
-          onClick={()=>{openModal("clientes", item.name === 'Novos' ? "entradas" : "saidas");}}
+          onClick={() => {
+            openModal(
+              "clientes",
+              item.name === "Novos" ? "entradas" : "saidas"
+            );
+          }}
           style={{
             padding: "10px 12px",
             borderRadius: 14,
@@ -781,7 +800,7 @@ function closeModal() {
             alignItems: "center",
             justifyContent: "space-between",
             gap: 10,
-            cursor:"pointer"
+            cursor: "pointer",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -805,17 +824,47 @@ function closeModal() {
             </span>
           </div>
 
-          <strong
+          <div
             style={{
-              fontSize: 14,
-              fontWeight: 900,
-              color: "#0f172a",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
             }}
           >
-            {item.value.toLocaleString("pt-BR")}
-          </strong>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 900,
+                color: isPositive ? "#16a34a" : "#dc2626",
+                background: isPositive
+                  ? "rgba(22,163,74,.10)"
+                  : "rgba(220,38,38,.10)",
+                border: `1px solid ${
+                  isPositive
+                    ? "rgba(22,163,74,.18)"
+                    : "rgba(220,38,38,.18)"
+                }`,
+                padding: "3px 7px",
+                borderRadius: 999,
+              }}
+            >
+              {isPositive ? "+" : ""}
+              {percent}%
+            </span>
+
+            <strong
+              style={{
+                fontSize: 14,
+                fontWeight: 900,
+                color: "#0f172a",
+              }}
+            >
+              {item.value.toLocaleString("pt-BR")}
+            </strong>
+          </div>
         </div>
-      ))}
+      );
+    })}
     </div>
     </div>
     </div>

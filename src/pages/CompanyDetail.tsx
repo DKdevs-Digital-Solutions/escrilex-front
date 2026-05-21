@@ -42,6 +42,7 @@ import { CompanyPartnersTab } from "../components/CompanyPartnersTab";
 import { CompanyResponsiblesTab } from "../components/CompanyResponsiblesTab";
 import { CompanyChecklistTab } from "../components/CompanyChecklistTab";
 import { CompanyHistoryTab } from "../components/CompanyHistoryTab";
+import { useCompanyResponsibles } from "../hooks/useCompanyResponsibles";
 
 type ItemStatusFull = "PENDENTE" | "CONCLUIDO" | "EM_ANDAMENTO" | "NA";
 type ChecklistType = "ENTRADA" | "SAIDA";
@@ -111,6 +112,12 @@ function fmtDate(v?: string | null) {
 function isOverdue(dueDate?: string | null, status?: ItemStatus) {
   if (!dueDate || status !== "PENDENTE") return false;
   return new Date(dueDate).getTime() < Date.now();
+}
+
+ export function toUserIds(value: unknown): string[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string" && value) return [value];
+  return [];
 }
 
 function softButtonStyle(active = false): React.CSSProperties {
@@ -469,8 +476,14 @@ export function CompanyDetail({
     deletePartner,
     saveResponsibles,
     setResponsibleLocal,
-    extractObs,
+    extractObs
   } = useCompanyDetail(companyId);
+
+    const {
+    groupedResponsibles,
+    loadResponsibles,
+    loadingResponsibles,
+  } = useCompanyResponsibles(companyId);
 
   const {
     updateItem,
@@ -489,6 +502,10 @@ export function CompanyDetail({
     setHistoricoRuns(r);
     return r;
   }
+
+  useEffect(() => {
+  loadResponsibles();
+  }, [loadResponsibles]);
 
 async function refreshForType(nextType: ChecklistType) {
   setLoadingChecklist(true);
@@ -556,15 +573,13 @@ async function refreshForType(nextType: ChecklistType) {
     else if (activeTab === "historico") loadHistoricoRuns(historicoType);
   }, [activeTab]);
 
-  const responsibleMap = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const r of company?.responsibles || []) m.set(r.sectorId, r.userId);
-    return m;
-  }, [company]);
 
-  function setResponsible(sectorId: string, userId: string) {
-    setResponsibleLocal(sectorId, userId);
-  }
+function setResponsible(
+  sectorId: string,
+  userIds: string[]
+) {
+  setResponsibleLocal(sectorId, userIds);
+}
 
 
   async function ensureRunExists(type: ChecklistType) {
@@ -613,6 +628,33 @@ async function refreshForType(nextType: ChecklistType) {
   };
 }
 
+
+const responsibleMap = useMemo(() => {
+  const map = new Map<string, string[]>();
+
+  (company?.responsibles || []).forEach((r: any) => {
+    const sectorId = r.sectorId || r.sector?.id;
+    if (!sectorId) return;
+
+    const current = map.get(sectorId) || [];
+
+    if (Array.isArray(r.userIds)) {
+      map.set(sectorId, r.userIds);
+      return;
+    }
+
+    if (r.userId) {
+      map.set(sectorId, [...current, r.userId]);
+      return;
+    }
+
+    if (r.user?.id) {
+      map.set(sectorId, [...current, r.user.id]);
+    }
+  });
+
+  return map;
+}, [company?.responsibles]);
 
 
 async function setStatus(
@@ -776,26 +818,29 @@ async function setStatus(
     }
   }
 
-  async function handleSaveResponsibles() {
-    setSavingResp(true);
 
-    try {
-      await saveResponsibles(
-        sectors
-          .map((s) => ({
-            sectorId: s.id,
-            userId: responsibleMap.get(s.id),
-          }))
-          .filter((x) => x.userId)
-      );
 
-      toast("Responsáveis salvos com sucesso", "success");
-    } catch (e: any) {
-      toast(e.message || "Erro ao salvar responsáveis", "error");
-    } finally {
-      setSavingResp(false);
-    }
+async function handleSaveResponsibles() {
+  setSavingResp(true);
+
+  try {
+    await saveResponsibles({
+      reason: "Carteira atualizada",
+      responsibles: sectors
+        .map((s) => ({
+          sectorId: s.id,
+          userIds: toUserIds(responsibleMap.get(s.id)),
+        }))
+        .filter((x) => x.userIds.length > 0),
+    });
+
+    toast("Responsáveis salvos com sucesso", "success");
+  } catch (e: any) {
+    toast(e.message || "Erro ao salvar responsáveis", "error");
+  } finally {
+    setSavingResp(false);
   }
+}
 
   if (loadingDetails) return <Loading message="Carregando empresa..." />;
   if (!company) return <Loading message="Carregando..." />;

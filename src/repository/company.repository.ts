@@ -24,11 +24,20 @@ export const companyRepository = {
   },
 
 
-  updateResponsibles: async (companyId: string, payload: any[]) => {
+updateResponsibles: async (companyId: string, payload: any) => {
   const { data } = await api.put(
     `/api/companies/${companyId}/responsibles`,
-    { responsibles: payload }
+    payload
   );
+
+  return data;
+},
+
+getResponsibles: async (companyId: string) => {
+  const { data } = await api.get(
+    `/api/companies/${companyId}/responsibles`
+  );
+
   return data;
 },
 };
