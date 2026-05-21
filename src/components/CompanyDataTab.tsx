@@ -311,7 +311,7 @@ export function CompanyDataTab({
         }}
       >
         <div style={{ minWidth: 0 }}>
-          
+
 
           <div
             style={{
@@ -337,12 +337,12 @@ export function CompanyDataTab({
 
         {canEdit &&
           (editing ? (
-            <div className="actions" style={{ display: "flex", gap: 8, flexWrap: "wrap",  justifyContent: "flex-end" }}>
-              <button className="btn"  onClick={() => setEditing(false)} style={secondaryBtn}>
+            <div className="actions" style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <button className="btn" onClick={() => setEditing(false)} style={secondaryBtn}>
                 Cancelar
               </button>
               <button
-              className="btn" 
+                className="btn"
                 onClick={onSaveEdit}
                 disabled={savingEdit}
                 style={{
@@ -363,7 +363,7 @@ export function CompanyDataTab({
       </div>
 
       <SectionBlock
-       
+
         title="Identificação"
         subtitle="Informações principais de cadastro e estrutura da empresa."
         icon={<Building2 size={13} strokeWidth={2.3} />}
@@ -467,9 +467,13 @@ export function CompanyDataTab({
             { value: "SAIDA", label: "Saída" },
             { value: "SUSPENSA", label: "Suspensa" },
             { value: "ENCERRADA", label: "Encerrada" },
+            { value: "SEM_MOVIMENTO", label: "Sem Movimento" }, 
+            { value: "EM_SAIDA", label: "Em Saída" }, 
+            { value: "BAIXADA", label: "Baixada" }, 
+            { value: "PENDENTE", label: "Pendente de Documentação" },
           ]}
         />
-        
+
         <DataField
           label="Data da Situação"
           value={fmtDate(company.dataSituacao)}

@@ -5,11 +5,15 @@ import {
   ArrowUpRight,
   Building2,
   CalendarDays,
+  Maximize2,
+  RefreshCcw,
   RefreshCw,
   ShieldCheck,
   Sparkles,
+  UserCog,
   Users,
   UserX,
+  X,
 } from "lucide-react";
 
 import {
@@ -24,6 +28,8 @@ import {
   Pie,
 } from "recharts";
 import { useDashboardSummary } from "../hooks/useDashboardSummary";
+import { useDashboardDrilldown } from "../hooks/useDashboardDrilldown";
+import { useCompanies } from "../hooks/useCompanies";
 
 export type DashboardSummary = {
   period: {
@@ -43,9 +49,10 @@ export type DashboardSummaryParams = {
   endDate?: string;
 };
 
-
-
-const API_URL = "https://escrilex-back.onrender.com";
+type PremiumChartItem = {
+  name: string;
+  value: number;
+};
 
 export function DashboardPage() {
   
@@ -63,22 +70,168 @@ export function DashboardPage() {
   
 } = useDashboardSummary();
 
+const [modalChart, setModalChart] = useState<
+  null | "movimento" | "clientes" | "responsibles" | "alterations" | "responsibleChanges"
+>(null);
+const [modalTab, setModalTab] = useState<"ativos" | "inativos" | "entradas" | "saidas" | "responsibles">("ativos");
+
+type ModalTab = "ativos" | "inativos" | "entradas" | "saidas" | "responsibles";
+
+const {
+  items: companies = [],
+  load,
+} = useCompanies();
+
+type DrilldownType = "entries" | "exits" | "tributacao" | "ramo" | "perfil" | "responsibles" | "changes";
+
+const [selectedDrilldownType, setSelectedDrilldownType] =
+  useState<DrilldownType>("entries");
 
 
 
+const {
+  data: drilldownData,
+  loading: drilldownLoading,
+  error: drilldownError,
+  loadDrilldown,
+  clearDrilldown
+} = useDashboardDrilldown({
+  type: selectedDrilldownType,
+  startDate,
+  endDate,
+});
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
 
-  const periodLabel = useMemo(() => {
-    if (!data) return "Período atual";
+function openModal(
+  chart: "movimento" | "clientes" | "responsibles",
+  tab: ModalTab
+) {
+  clearDrilldown();
 
-    const start = new Date(data.period.startDate).toLocaleDateString("pt-BR");
-    const end = new Date(data.period.endDate).toLocaleDateString("pt-BR");
+  setSelectedDrilldownLabel("");
+  setSelectedDrilldownKey("");
 
-    return `${start} até ${end}`;
-  }, [data]);
+  setModalChart(chart);
+  setModalTab(tab);
+
+  if (tab === "entradas") {
+    setSelectedDrilldownType("entries");
+  }
+
+  if (tab === "saidas") {
+    setSelectedDrilldownType("exits");
+  }
+
+  if (tab === "responsibles") {
+    setSelectedDrilldownType("responsibles");
+  }
+}
+
+useEffect(() => {
+  if (!modalChart) return;
+  if (modalTab === "ativos" || modalTab === "inativos") return;
+
+  loadDrilldown();
+}, [modalChart, modalTab, selectedDrilldownType, startDate, endDate]);
+
+
+const activeCompanies = companies.filter((item: any) => item.active);
+
+const inactiveCompanies = companies.filter((item: any) => !item.active);
+
+const drilldownRows = drilldownData?.items || drilldownData?.data || [];
+
+const normalizedDrilldownRows = drilldownRows.map((item: any) => {
+  const company = item.company || item;
+
+  return {
+    ...company,
+    department: item.department,
+    newResponsible: item.newResponsible,
+    changedBy: item.changedBy,
+    date: item.date,
+  };
+});
+
+const getModalRows = () => {
+  if (modalTab === "ativos") return activeCompanies;
+  if (modalTab === "inativos") return inactiveCompanies;
+
+  return normalizedDrilldownRows;
+};
+
+
+function getStatusStyle(status?: string) {
+  const normalized = status?.toUpperCase();
+
+  switch (normalized) {
+    case "ATIVA":
+      return {
+        bg: "rgba(34,197,94,.12)",
+        border: "rgba(34,197,94,.22)",
+        color: "#15803d",
+        dot: "#22c55e",
+        label: "Ativa",
+      };
+
+    case "SAIDA":
+      return {
+        bg: "rgba(239,68,68,.12)",
+        border: "rgba(239,68,68,.18)",
+        color: "#dc2626",
+        dot: "#ef4444",
+        label: "Saída",
+      };
+
+    case "ENCERRADA":
+      return {
+        bg: "rgba(100,116,139,.14)",
+        border: "rgba(100,116,139,.18)",
+        color: "#475569",
+        dot: "#64748b",
+        label: "Encerrada",
+      };
+
+    case "SUSPENSA":
+      return {
+        bg: "rgba(245,158,11,.12)",
+        border: "rgba(245,158,11,.18)",
+        color: "#d97706",
+        dot: "#f59e0b",
+        label: "Suspensa",
+      };
+
+    default:
+      return {
+        bg: "rgba(59,130,246,.10)",
+        border: "rgba(59,130,246,.16)",
+        color: "#2563eb",
+        dot: "#3b82f6",
+        label: status || "Sem status",
+      };
+  }
+}
+
+useEffect(() => {
+  loadDashboard();
+  load();
+}, []);
+
+ 
+
+  function formatDateBR(date: string) {
+  const [year, month, day] = date.split("-");
+
+  return `${day}/${month}/${year}`;
+}
+
+const periodLabel = useMemo(() => {
+  if (!startDate || !endDate) {
+    return "Período atual";
+  }
+
+  return `${formatDateBR(startDate)} até ${formatDateBR(endDate)}`;
+}, [startDate, endDate]);
 
   const totalClients =
     (data?.cards.totalActive ?? 0) + (data?.cards.totalInactive ?? 0);
@@ -89,9 +242,9 @@ export function DashboardPage() {
       : 0;
 
   const insightText =
-  (data?.cards.inactiveClients ?? 0) === 0
+  (data?.cards?.inactiveClients ?? 0) === 0
     ? "Nenhum cliente foi inativado neste período."
-    : `${data?.cards.inactiveClients} cliente(s) foram inativados neste período.`;
+    : `${data?.cards?.inactiveClients} cliente(s) foram inativados neste período.`;
 
   const chartData = [
     {
@@ -109,58 +262,149 @@ export function DashboardPage() {
   const movementChartData = [
   {
     name: "Novos",
-    value: data?.cards.newClients ?? 0,
+    value: data?.cards?.newClients?? 0,
     color: "#2563eb",
   },
   {
     name: "Saíram",
-    value: data?.cards.inactiveClients ?? 0,
+    value: data?.cards?.inactiveClients ?? 0,
     color: "#dc2626",
   },
 ];
 
-  const cards = [
-    {
-      title: "Clientes novos",
-      value: data?.cards.newClients ?? 0,
-      description: "Novos cadastros no período",
-      icon: <Users size={22} />,
-      bg: "linear-gradient(135deg, #eff6ff, #dbeafe)",
-      color: "#2563eb",
-      badge: "Entrada",
-      badgeBg: "#dbeafe",
-    },
-    {
-      title: "Clientes ativos",
-      value: data?.cards.totalActive ?? 0,
-      description: "Empresas atualmente ativas",
-      icon: <Building2 size={22} />,
-      bg: "linear-gradient(135deg, #ecfdf5, #d1fae5)",
-      color: "#059669",
-      badge: "Ativos",
-      badgeBg: "#d1fae5",
-    },
-    {
-      title: "Clientes inativos",
-      value: data?.cards.totalInactive ?? 0,
-      description: "Empresas desativadas",
-      icon: <UserX size={22} />,
-      bg: "linear-gradient(135deg, #fff7ed, #ffedd5)",
-      color: "#ea580c",
-      badge: "Inativos",
-      badgeBg: "#ffedd5",
-    },
-    {
-      title: "Saíram no período",
-      value: data?.cards.inactiveClients ?? 0,
-      description: "Clientes inativados no filtro",
-      icon: <ArrowDownRight size={22} />,
-      bg: "linear-gradient(135deg, #fef2f2, #fee2e2)",
-      color: "#dc2626",
-      badge: "Saída",
-      badgeBg: "#fee2e2",
-    },
-  ];
+ const cards = [
+  {
+    title: "Clientes novos",
+    value: data?.cards?.newClients ?? 0,
+    description: "Novos cadastros no período",
+    icon: <Users size={22} />,
+    bg: "linear-gradient(135deg, #eff6ff, #dbeafe)",
+    color: "#2563eb",
+    badge: "Entrada",
+    badgeBg: "#dbeafe",
+    onClick: () => { setModalChart("clientes"); setModalTab("entradas");}
+
+  },
+  {
+    title: "Saíram no período",
+    value: data?.cards?.inactiveClients ?? 0,
+    description: "Clientes inativados no filtro",
+    icon: <ArrowDownRight size={22} />,
+    bg: "linear-gradient(135deg, #fef2f2, #fee2e2)",
+    color: "#dc2626",
+    badge: "Saída",
+    badgeBg: "#fee2e2",
+    onClick: () => { setModalChart("clientes"); setModalTab("saidas") }
+
+  },
+  {
+    title: "Clientes ativos",
+    value: data?.cards?.totalActive ?? 0,
+    description: "Empresas atualmente ativas",
+    icon: <Building2 size={22} />,
+    bg: "linear-gradient(135deg, #ecfdf5, #d1fae5)",
+    color: "#059669",
+    badge: "Ativos",
+    badgeBg: "#d1fae5",
+    onClick: () => { setModalChart("movimento"); setModalTab("ativos") }
+
+  },
+  {
+    title: "Clientes inativos",
+    value: data?.cards?.totalInactive ?? 0,
+    description: "Empresas desativadas",
+    icon: <UserX size={22} />,
+    bg: "linear-gradient(135deg, #fff7ed, #ffedd5)",
+    color: "#ea580c",
+    badge: "Inativos",
+    badgeBg: "#ffedd5",
+    onClick: () => { setModalChart("movimento"); setModalTab("inativos") }
+
+  },
+  {
+    title: "Alterações",
+    value: data?.cards?.alterations ?? 0,
+    description: "Alterações realizadas no período",
+    icon: <RefreshCcw size={22} />,
+    bg: "linear-gradient(135deg, #f5f3ff, #ede9fe)",
+    color: "#7c3aed",
+    badge: "Mudanças",
+    badgeBg: "#ede9fe",
+    onClick: () => setModalChart("alterations"),
+  },
+  {
+    title: "Trocas de responsável",
+    value: data?.cards?.responsibleChanges ?? 0,
+    description: "Clientes com responsável alterado",
+    icon: <UserCog size={22} />,
+    bg: "linear-gradient(135deg, #f0fdfa, #ccfbf1)",
+    color: "#0f766e",
+    badge: "Responsável",
+    badgeBg: "#ccfbf1",
+    onClick: () => setModalChart("responsibleChanges"),
+  },
+];
+
+
+  type DashboardChartType =
+  | "tributacao"
+  | "ramo"
+  | "perfil"
+  | "exitReasons"
+  | "responsibleByDepartment";
+
+const [selectedChartType, setSelectedChartType] =
+  useState<DashboardChartType>("tributacao");
+
+const chartTypeLabels: Record<DashboardChartType, string> = {
+  tributacao: "Tributação",
+  ramo: "Ramo",
+  perfil: "Perfil",
+  exitReasons: "Motivos de saída",
+  responsibleByDepartment: "Responsáveis por departamento",
+};
+
+const drilldownTypeByChartType: Record<DashboardChartType, DrilldownType> = {
+  tributacao: "tributacao",
+  ramo: "ramo",
+  perfil: "perfil",
+  responsibleByDepartment: "responsibles",
+  exitReasons: "changes",
+};
+
+
+
+
+    
+
+const [selectedDrilldownLabel, setSelectedDrilldownLabel] = useState("");
+const [selectedDrilldownKey, setSelectedDrilldownKey] = useState("");
+
+      
+
+
+const isResponsibleModal = selectedDrilldownType === "responsibles";
+
+
+
+function closeModal() {
+  setModalChart(null);
+  setModalTab("ativos");
+  setSelectedDrilldownType("entries");
+  setSelectedDrilldownLabel("");
+  setSelectedDrilldownKey("");
+
+  clearDrilldown();
+}
+
+const comparisons = data?.comparisons;
+
+const getMovementComparison = (name: string) => {
+  if (name === "Novos") return comparisons?.entries;
+  if (name === "Saíram") return comparisons?.exits;
+
+  return null;
+};
 
   return (
     <div
@@ -171,30 +415,47 @@ export function DashboardPage() {
         borderRadius: 8,
       }}
     >
-      <style>
-        {`
-          @media (max-width: 900px) {
-            .dashboard-header {
-              flex-direction: column !important;
-              align-items: flex-start !important;
-            }
-
-            .dashboard-filters {
-              width: 100% !important;
-              grid-template-columns: 1fr !important;
-            }
-
-            .dashboard-cards {
-              grid-template-columns: 1fr !important;
-            }
-
-            .dashboard-main {
-              grid-template-columns: 1fr !important;
-            }
+    <style>
+      {`
+        @media (max-width: 900px) {
+          .dashboard-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
           }
-        `}
-      </style>
 
+          .dashboard-filters {
+            width: 100% !important;
+            grid-template-columns: 1fr !important;
+          }
+
+          .dashboard-filters button {
+            width: 100% !important;
+          }
+
+          .dashboard-cards {
+            grid-template-columns: 1fr !important;
+          }
+
+          .dashboard-main {
+            grid-template-columns: 1fr !important;
+          }
+
+          .dashboard-charts-grid {
+            grid-template-columns: 1fr !important;
+          }
+
+          .chart{
+           bottom: 40px !important;
+          }
+
+          .dashboard-main > *,
+          .dashboard-charts-grid > * {
+            min-width: 0 !important;
+            width: 100% !important;
+          }
+        }
+      `}
+    </style>
       <div
         style={{
           borderRadius: 8,
@@ -337,7 +598,6 @@ export function DashboardPage() {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 8,
-                boxShadow: "0 12px 22px rgba(1,41,66,.22)",
                 width:"300px"
               }}
             >
@@ -367,7 +627,7 @@ export function DashboardPage() {
             className="dashboard-cards"
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
               gap: 16,
               marginBottom: 20,
             }}
@@ -399,6 +659,7 @@ export function DashboardPage() {
         >
           {/* GRÁFICO 1 */}
           <div
+            
             style={{
               borderRadius: 20,
               padding: 22,
@@ -407,7 +668,9 @@ export function DashboardPage() {
               boxShadow: "0 12px 28px rgba(15,23,42,.06)",
             }}
           >
-          <div style={{ marginBottom: 18 }}>
+          <div style={{ marginBottom: 18, justifyContent:"space-between", display:"flex" }}>
+
+             
             <h3
               style={{
                 margin: 0,
@@ -428,13 +691,16 @@ export function DashboardPage() {
         >
           {periodLabel}
         </p>
-
-            
          </div>
+         
 
-      <div style={{ width: "100%", height: 260, position: "relative" }}>
+      <div 
+       onClick={() => {
+        setModalChart("clientes");
+      }}
+      className="chart" style={{ width: "100%", height: 260, position: "relative" }}>
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
+        <PieChart style={{cursor:"pointer"}}>
           <Pie
             data={movementChartData}
             dataKey="value"
@@ -444,6 +710,16 @@ export function DashboardPage() {
             paddingAngle={5}
             stroke="#fff"
             strokeWidth={1}
+            onClick={(entry: any) => {
+              if (entry.name === "Novos") {
+                openModal("clientes", "entradas");
+              }
+
+              if (entry.name === "Saíram") {
+                openModal("clientes", "saidas");
+              }
+            }}
+            
           >
             {movementChartData.map((entry) => (
               <Cell key={entry.name} fill={entry.color} />
@@ -501,9 +777,20 @@ export function DashboardPage() {
         marginTop: 12,
       }}
     >
-      {movementChartData.map((item) => (
+      {movementChartData.map((item) => {
+      const comparison = getMovementComparison(item.name);
+      const percent = comparison?.growthPercent ?? 0;
+      const isPositive = percent >= 0;
+
+      return (
         <div
           key={item.name}
+          onClick={() => {
+            openModal(
+              "clientes",
+              item.name === "Novos" ? "entradas" : "saidas"
+            );
+          }}
           style={{
             padding: "10px 12px",
             borderRadius: 14,
@@ -513,6 +800,7 @@ export function DashboardPage() {
             alignItems: "center",
             justifyContent: "space-between",
             gap: 10,
+            cursor: "pointer",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -536,17 +824,47 @@ export function DashboardPage() {
             </span>
           </div>
 
-          <strong
+          <div
             style={{
-              fontSize: 14,
-              fontWeight: 900,
-              color: "#0f172a",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
             }}
           >
-            {item.value.toLocaleString("pt-BR")}
-          </strong>
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 900,
+                color: isPositive ? "#16a34a" : "#dc2626",
+                background: isPositive
+                  ? "rgba(22,163,74,.10)"
+                  : "rgba(220,38,38,.10)",
+                border: `1px solid ${
+                  isPositive
+                    ? "rgba(22,163,74,.18)"
+                    : "rgba(220,38,38,.18)"
+                }`,
+                padding: "3px 7px",
+                borderRadius: 999,
+              }}
+            >
+              {isPositive ? "+" : ""}
+              {percent}%
+            </span>
+
+            <strong
+              style={{
+                fontSize: 14,
+                fontWeight: 900,
+                color: "#0f172a",
+              }}
+            >
+              {item.value.toLocaleString("pt-BR")}
+            </strong>
+          </div>
         </div>
-      ))}
+      );
+    })}
     </div>
     </div>
     </div>
@@ -586,9 +904,16 @@ export function DashboardPage() {
         
       </div>
 
-      <div style={{ width: "100%", height: 300 }}>
+      <div 
+       
+      style={{ width: "100%", height: 300 }}>
         <ResponsiveContainer>
-          <BarChart data={chartData} barSize="70%">
+          <BarChart
+          onClick={(state: any) => {
+          const name = state?.activePayload?.[0]?.payload?.name;
+          setModalChart("movimento");
+        }}
+          data={chartData} barSize="70%" style={{cursor:"pointer"}}>
             <XAxis
               dataKey="name"
               axisLine={false}
@@ -612,9 +937,21 @@ export function DashboardPage() {
 
             <Tooltip content={<CustomTooltip />} />
 
-            <Bar dataKey="value" radius={[12, 12, 6, 6]}>
+            <Bar
+              dataKey="value"
+              radius={[12, 12, 6, 6]}
+              onClick={(entry: any) => {
+                if (entry.name === "Ativos") {
+                  openModal("movimento", "ativos");
+                }
+
+                if (entry.name === "Inativos") {
+                  openModal("movimento", "inativos");
+                }
+              }}
+            >
               {chartData.map((entry) => (
-                <Cell key={entry.name} fill={entry.color} />
+                <Cell key={entry.name} fill={entry.color} cursor="pointer" />
               ))}
             </Bar>
           </BarChart>
@@ -622,6 +959,8 @@ export function DashboardPage() {
       </div>
     </div>
   </div>
+
+  
 
   {/* DIREITA: resumo */}
   <div
@@ -732,17 +1071,457 @@ export function DashboardPage() {
         <MiniInfo label="Total de clientes" value={totalClients} />
         <MiniInfo
           label="Novos no período"
-          value={data?.cards.newClients ?? 0}
+          value={data?.cards?.newClients ?? 0}
         />
         <MiniInfo
           label="Saídas no período"
-          value={data?.cards.inactiveClients ?? 0}
+          value={data?.cards?.inactiveClients ?? 0}
         />
       </div>
     </div>
   </div>
-</div>
+  </div>
 
+
+
+
+
+
+
+
+
+{modalChart && (
+  <div
+    onClick={closeModal}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(15,23,42,.55)",
+      backdropFilter: "blur(6px)",
+      zIndex: 9999,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 20,
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        width: "100%",
+        maxWidth: 900,
+        maxHeight: "90vh",
+        overflow: "auto",
+        borderRadius: 24,
+        background: "#fff",
+        padding: 24,
+        boxShadow: "0 30px 80px rgba(15,23,42,.35)",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
+        <div>
+  <h2
+    style={{
+      margin: 0,
+      fontSize: 22,
+      fontWeight: 950,
+      color: "#0f172a",
+      letterSpacing: "-0.02em",
+    }}
+  >
+    {modalChart === "alterations"
+      ? "Alterações no período"
+      : modalChart === "responsibleChanges"
+        ? "Trocas de responsável"
+        : modalChart === "clientes" && selectedDrilldownLabel
+          ? `${chartTypeLabels[selectedChartType]}: ${selectedDrilldownLabel}`
+          : modalChart === "movimento"
+            ? "Movimento de clientes"
+            : "Entradas x Saídas"}
+        </h2>
+
+        <p
+          style={{
+            margin: "6px 0 0",
+            color: "#64748b",
+            fontSize: 13,
+            lineHeight: 1.5,
+            fontWeight: 500,
+            maxWidth: 520,
+          }}
+        >
+          {modalChart === "alterations"
+            ? "Visualize os tipos de alterações realizadas nas empresas durante o período selecionado."
+            : modalChart === "responsibleChanges"
+              ? "Acompanhe as movimentações de responsáveis por departamento e quantidade de empresas impactadas."
+              : modalChart === "movimento"
+                ? "Consulte empresas ativas, inativas e movimentações registradas no período."
+                : "Detalhamento completo das entradas e saídas registradas no dashboard."}
+        </p>
+
+        <div
+          style={{
+            marginTop: 10,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "6px 10px",
+            borderRadius: 999,
+            background: "#f8fafc",
+            border: "1px solid #e2e8f0",
+            color: "#475569",
+            fontSize: 11,
+            fontWeight: 900,
+            textTransform: "uppercase",
+            letterSpacing: ".04em",
+          }}
+        >
+          <CalendarDays size={13} />
+          {periodLabel}
+        </div>
+      </div>
+
+        <button
+          onClick={closeModal}
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 12,
+            border: "1px solid #e2e8f0",
+            background: "#f8fafc",
+            cursor: "pointer",
+            fontWeight: 900,
+          }}
+        >
+          <X size={20} style={{ top: "2px", position: "relative" }} />
+        </button>
+      </div>
+
+      {modalChart !== "alterations" && modalChart !== "responsibleChanges" && !selectedDrilldownLabel && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gap: 12,
+            marginTop: 22,
+            marginBottom: 18,
+          }}
+        >
+          {modalChart === "movimento" ? (
+            <>
+              <ModalOption
+                active={modalTab === "ativos"}
+                label="Ativos"
+                value={data?.cards.totalActive ?? 0}
+                color="#059669"
+                onClick={() => openModal("movimento", "ativos")}
+              />
+
+              <ModalOption
+                active={modalTab === "inativos"}
+                label="Inativos"
+                value={data?.cards.totalInactive ?? 0}
+                color="#ea580c"
+                onClick={() => openModal("movimento", "inativos")}
+              />
+            </>
+          ) : (
+            <>
+              <ModalOption
+                active={modalTab === "entradas"}
+                label="Entradas"
+                value={data?.cards?.newClients ?? 0}
+                color="#2563eb"
+                onClick={() => openModal("clientes", "entradas")}
+              />
+
+              <ModalOption
+                active={modalTab === "saidas"}
+                label="Saídas"
+                value={data?.cards?.inactiveClients ?? 0}
+                color="#dc2626"
+                onClick={() => openModal("clientes", "saidas")}
+              />
+            </>
+          )}
+        </div>
+      )}
+
+      <div
+        style={{
+          border: "1px solid #e2e8f0",
+          borderRadius: !selectedDrilldownLabel ? 15 : 10,
+          top: !selectedDrilldownLabel ? 0 : 10,
+          overflow: "hidden",
+          position: "relative",
+          marginTop:
+            modalChart === "alterations" || modalChart === "responsibleChanges"
+              ? 22
+              : 0,
+        }}
+      >
+        {modalChart === "alterations" ? (
+          <table style={tableStyle}>
+            <thead>
+              <tr style={{ background: "#f8fafc" }}>
+                <th style={thStyle}>Tipo de alteração</th>
+                <th style={thStyle}>Total</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {(data?.charts?.alterations ?? []).map((item: any) => (
+                <tr key={item.label}>
+                  <td style={tdStyle}>
+                    <strong>{item.label || "--"}</strong>
+                  </td>
+
+                  <td style={tdStyle}>
+                    {item.total?.toLocaleString("pt-BR") ?? 0}
+                  </td>
+                </tr>
+              ))}
+
+              {(data?.charts?.alterations ?? []).length === 0 && (
+                <tr>
+                  <td
+                    colSpan={2}
+                    style={{
+                      padding: 24,
+                      textAlign: "center",
+                      color: "#64748b",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Nenhuma alteração encontrada.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        ) : modalChart === "responsibleChanges" ? (
+          <table style={tableStyle}>
+            <thead>
+              <tr style={{ background: "#f8fafc" }}>
+                <th style={thStyle}>Departamento</th>
+                <th style={thStyle}>Trocas</th>
+                <th style={thStyle}>Empresas</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {(data?.charts?.responsibleChanges?.byDepartment ?? []).map(
+                (item: any) => (
+                  <tr key={item.label}>
+                    <td style={tdStyle}>
+                      <strong>{item.label || "--"}</strong>
+                    </td>
+
+                    <td style={tdStyle}>
+                      {item.total?.toLocaleString("pt-BR") ?? 0}
+                    </td>
+
+                    <td style={tdStyle}>
+                      {item.companiesTotal?.toLocaleString("pt-BR") ?? 0}
+                    </td>
+                  </tr>
+                )
+              )}
+
+              {(data?.charts?.responsibleChanges?.byDepartment ?? []).length === 0 && (
+                <tr>
+                  <td
+                    colSpan={3}
+                    style={{
+                      padding: 24,
+                      textAlign: "center",
+                      color: "#64748b",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Nenhuma troca de responsável encontrada.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        ) : drilldownLoading ? (
+          <div
+            style={{
+              minHeight: 280,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              gap: 14,
+            }}
+          >
+            <div
+              style={{
+                width: 46,
+                height: 46,
+                borderRadius: "50%",
+                border: "3px solid #dbeafe",
+                borderTopColor: "#2563eb",
+                animation: "spin 0.9s linear infinite",
+              }}
+            />
+
+            <div
+              style={{
+                color: "#64748b",
+                fontSize: 13,
+                fontWeight: 800,
+              }}
+            >
+              Carregando detalhamento...
+            </div>
+          </div>
+        ) : (
+          <table style={tableStyle}>
+            <thead>
+              {isResponsibleModal ? (
+                <tr style={{ background: "#f8fafc" }}>
+                  <th style={thStyle}>Empresa</th>
+                  <th style={thStyle}>CNPJ</th>
+                  <th style={thStyle}>Departamento</th>
+                  <th style={thStyle}>Responsável</th>
+                  <th style={thStyle}>Data</th>
+                </tr>
+              ) : (
+                <tr style={{ background: "#f8fafc" }}>
+                  <th style={thStyle}>Código</th>
+                  <th style={thStyle}>Empresa</th>
+                  <th style={thStyle}>CNPJ</th>
+                  <th style={thStyle}>Grupo</th>
+                  <th style={thStyle}>Situação</th>
+                </tr>
+              )}
+            </thead>
+
+            <tbody>
+              {getModalRows().map((item: any) => {
+                if (isResponsibleModal) {
+                  return (
+                    <tr key={`${item.id}-${item.date}`}>
+                      <td style={tdStyle}>
+                        <strong>{item.razaoSocial || "--"}</strong>
+                        {item.nomeFantasia && (
+                          <div style={{ fontSize: 11, color: "#64748b", marginTop: 3 }}>
+                            {item.nomeFantasia}
+                          </div>
+                        )}
+                      </td>
+
+                      <td style={tdStyle}>
+                        <span style={{ fontFamily: "monospace", fontSize: 12 }}>
+                          {item.cnpj || "--"}
+                        </span>
+                      </td>
+
+                      <td style={tdStyle}>{item.department || "--"}</td>
+
+                      <td style={tdStyle}>
+                        <strong>{item.newResponsible?.name || "--"}</strong>
+                        {item.newResponsible?.email && (
+                          <div style={{ fontSize: 11, color: "#64748b", marginTop: 3 }}>
+                            {item.newResponsible.email}
+                          </div>
+                        )}
+                      </td>
+
+                      <td style={tdStyle}>
+                        {item.date
+                          ? new Date(item.date).toLocaleDateString("pt-BR")
+                          : "--"}
+                      </td>
+                    </tr>
+                  );
+                }
+
+                return (
+                  <tr key={item.id}>
+                    <td style={tdStyle}>{item.cod || "--"}</td>
+
+                    <td style={tdStyle}>
+                      <strong>{item.razaoSocial || "--"}</strong>
+                      {item.nomeFantasia && (
+                        <div style={{ fontSize: 11, color: "#64748b", marginTop: 3 }}>
+                          {item.nomeFantasia}
+                        </div>
+                      )}
+                    </td>
+
+                    <td style={tdStyle}>
+                      <span style={{ fontFamily: "monospace", fontSize: 12 }}>
+                        {item.cnpj || "--"}
+                      </span>
+                    </td>
+
+                    <td style={tdStyle}>
+                      {item.grupo || item.department || item.newResponsible?.name || "--"}
+                    </td>
+
+                    <td style={tdStyle}>
+                      {(() => {
+                        const statusStyle = getStatusStyle(item.situacao);
+
+                        return (
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 8,
+                              padding: "7px 8px",
+                              borderRadius: 999,
+                              background: statusStyle.bg,
+                              border: `1px solid ${statusStyle.border}`,
+                              color: statusStyle.color,
+                              fontWeight: 900,
+                              fontSize: 11,
+                              width: "110px",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <span
+                              style={{
+                                width: 7,
+                                height: 7,
+                                borderRadius: 999,
+                                background: statusStyle.dot,
+                              }}
+                            />
+                            {statusStyle.label}
+                          </span>
+                        );
+                      })()}
+                    </td>
+                  </tr>
+                );
+              })}
+
+              {getModalRows().length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    style={{
+                      padding: 24,
+                      textAlign: "center",
+                      color: "#64748b",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Nenhum registro encontrado.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  </div>
+)}
           
 
           {loading && (
@@ -758,8 +1537,10 @@ export function DashboardPage() {
             </p>
           )}
         </div>
+        
       </div>
     </div>
+    
   );
 }
 
@@ -773,14 +1554,37 @@ function DashboardCard({
   badge,
   badgeBg,
   loading,
+  onClick
 }: any) {
   return (
     <div
+      onClick={onClick}
       style={{
         borderRadius: 20,
         padding: 18,
         background: "#fff",
         border: "1px solid #e2e8f0",
+        cursor: "pointer",
+        transition:
+          "all 0.18s ease, transform 0.15s ease, box-shadow 0.18s ease",
+        boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.border = `1px solid ${color}`;
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow =
+          "0 10px 30px rgba(59,130,246,0.12)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.border = "1px solid #e2e8f0";
+        e.currentTarget.style.boxShadow =
+          "0 1px 2px rgba(15,23,42,0.04)";
+      }}
+      onMouseDown={(e) => {
+        e.currentTarget.style.transform = "scale(0.985)";
+      }}
+      onMouseUp={(e) => {
+        e.currentTarget.style.transform = "translateY(-2px)";
       }}
     >
       <div
@@ -998,3 +1802,79 @@ function CustomTooltip({ active, payload, label }: any) {
     </div>
   );
 }
+
+
+const thStyle: React.CSSProperties = {
+  padding: "12px 14px",
+  textAlign: "center",
+  color: "#475569",
+  fontSize: 12,
+  fontWeight: 900,
+  borderBottom: "1px solid #e2e8f0",
+
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: "12px 14px",
+  color: "#0f172a",
+  fontWeight: 700,
+  borderBottom: "1px solid #f1f5f9",
+  textAlign:"center"
+};
+
+function ModalOption({
+  active,
+  label,
+  value,
+  color,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  value: number;
+  color: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        border: active ? `2px solid ${color}` : "1px solid #e2e8f0",
+        background: active ? "#f8fafc" : "#fff",
+        borderRadius: 18,
+        padding: 16,
+        cursor: "pointer",
+        textAlign: "left",
+      }}
+    >
+      <span
+        style={{
+          display: "block",
+          color: "#64748b",
+          fontSize: 12,
+          fontWeight: 900,
+          marginBottom: 6,
+        }}
+      >
+        {label}
+      </span>
+
+      <strong
+        style={{
+          color,
+          fontSize: 26,
+          fontWeight: 950,
+        }}
+      >
+        {value.toLocaleString("pt-BR")}
+      </strong>
+    </button>
+  );
+}
+
+const tableStyle: React.CSSProperties = {
+  width: "100%",
+  borderCollapse: "collapse",
+  fontSize: 13,
+  tableLayout: "fixed",
+};

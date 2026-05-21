@@ -264,6 +264,8 @@ export function UserList({
   const activePercent = totalCount ? (activeCount / totalCount) * 100 : 0;
   const inactivePercent = totalCount ? (inactiveCount / totalCount) * 100 : 0;
 
+  const [hoveredRoles, setHoveredRoles] = React.useState<string | null>(null);
+
   const filteredUsers =
     statusFilter === null
       ? users
@@ -364,6 +366,7 @@ export function UserList({
                 width: "100%",
                 borderCollapse: "separate",
                 borderSpacing: "0 10px",
+                tableLayout: "fixed",
               }}
             >
               <thead>
@@ -550,11 +553,60 @@ export function UserList({
                         borderBottom: "1px solid #edf2f7",
                       }}
                     >
-                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                        {(u.roles || []).map((r: string) => (
-                          <Badge key={r} label={r} variant={ROLE_BADGES[r] || "gray"} />
-                        ))}
-                      </div>
+                      {(() => {
+                        const roles = u.roles || [];
+
+                        const visibleRoles = roles.slice(0, 1);
+
+                        const hiddenCount = Math.max(roles.length - 1, 0);
+
+                        return (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {visibleRoles.map((r: string) => (
+                              <div key={r} style={{ flexShrink: 0 }}>
+                                <Badge
+                                  label={r}
+                                  variant={ROLE_BADGES[r] || "gray"}
+                                />
+                              </div>
+                            ))}
+
+                           {hiddenCount > 0 && (
+                            <div
+                              title={roles.slice(1).join(", ")}
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                height: 28,
+                                minWidth: 28,
+                                padding: "0 10px",
+                                borderRadius: 999,
+                                background: "rgba(37,99,235,.08)",
+                                border: "1px solid rgba(37,99,235,.16)",
+                                color: "#2563eb",
+                                fontSize: 11,
+                                fontWeight: 900,
+                                cursor: "help",
+                                flexShrink: 0,
+                                position: "relative",
+                                zIndex: 10,
+                                
+                              }}
+                            >
+                              +{hiddenCount}
+                            </div>
+                          )}
+                          </div>
+                        );
+                      })()}
                     </td>
 
                     <td

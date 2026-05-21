@@ -324,7 +324,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar razão social, CNPJ, código, grupo..."
+            placeholder="Buscar razão pelo CNPJ..."
             style={{
               ...iStyle,
               width: "100%",
@@ -372,6 +372,10 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
             { value: "SAIDA", label: "Saída" },
             { value: "SUSPENSA", label: "Suspensa" },
             { value: "ENCERRADA", label: "Encerrada" },
+            { value: "SEM_MOVIMENTO", label: "Sem Movimento" },
+            { value: "EM_SAIDA", label: "Em Saída" },
+            { value: "BAIXADA", label: "Baixada" },
+            { value: "PENDENTE", label: "Pendente de Documentação" },
           ]}
         />
 

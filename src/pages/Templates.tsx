@@ -232,7 +232,7 @@ export function Templates() {
 
     const ok = await confirm({
       title: "Excluir item",
-      message: "Este item será excluído permanentemente do template.",
+      message: "Este item será excluído permanentemente do processo.",
       confirmLabel: "Excluir",
       variant: "danger",
     });
@@ -294,11 +294,11 @@ export function Templates() {
               padding: 24,
             }}
           >
-            <Empty message="Selecione um template para editar." />
+            <Empty message="Selecione um processo para editar." />
           </div>
         )}
 
-        {selectedId && loadingDetail && <Loading message="Carregando template..." />}
+        {selectedId && loadingDetail && <Loading message="Carregando processo..." />}
 
         {selectedTemplate && !loadingDetail && (
           <>
@@ -340,7 +340,7 @@ export function Templates() {
       <Modal
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        title="Novo template"
+        title="Novo Processo"
         footer={
           <>
             <button style={secondaryBtn} onClick={() => setCreateOpen(false)}>

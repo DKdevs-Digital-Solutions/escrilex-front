@@ -478,6 +478,7 @@ export function AuditList({ items }: AuditListProps) {
                   width: "100%",
                   borderCollapse: "separate",
                   borderSpacing: "0 10px",
+                  tableLayout: "fixed",
                 }}
               >
                 <thead>

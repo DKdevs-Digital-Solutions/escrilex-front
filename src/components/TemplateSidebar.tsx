@@ -102,7 +102,7 @@ export function TemplateSidebar({
                   letterSpacing: "-0.03em",
                 }}
               >
-                Templates
+                Processos
               </div>
               <div
                 style={{
@@ -137,17 +137,17 @@ export function TemplateSidebar({
           <div style={{ marginTop: 14, width: "100%" }}>
             <ActionBtn onClick={onCreate}>
               <Plus size={14} strokeWidth={3} />
-              Novo template
+              Novo processo
             </ActionBtn>
           </div>
         </div>
 
         <div style={{ padding: 10, maxHeight: "75vh", overflowY: "auto" }}>
           {loading ? (
-            <Loading message="Carregando templates..." />
+            <Loading message="Carregando processos..." />
           ) : !templates.length ? (
             <div style={{ padding: 18 }}>
-              <Empty message="Nenhum template cadastrado." />
+              <Empty message="Nenhum processo cadastrado." />
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>

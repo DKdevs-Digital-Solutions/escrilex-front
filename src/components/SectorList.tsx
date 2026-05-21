@@ -292,6 +292,7 @@ const filteredItems = items.filter((item) => {
                 width: "100%",
                 borderCollapse: "separate",
                 borderSpacing: "0 10px",
+                tableLayout: "fixed",
               }}
             >
               <thead>

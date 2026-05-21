@@ -150,8 +150,10 @@ export function EmailNotificationsSettings({
                 height: 56,
                 borderRadius: 8,
                 background:
-                  "linear-gradient(135deg, rgba(56,189,248,.30), rgba(34,197,94,.20))",
+                  "linear-gradient(135deg, rgba(56,189,248,.28), rgba(34,197,94,.18))",
                 border: "1px solid rgba(255,255,255,.28)",
+                boxShadow:
+                  "inset 0 1px 0 rgba(255,255,255,.18), 0 14px 30px rgba(56,189,248,.18)",
                 display: "grid",
                 placeItems: "center",
                 

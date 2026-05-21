@@ -79,24 +79,37 @@ export function useCompanyDetail(companyId: string) {
   // ─────────────────────────────
 // RESPONSÁVEIS
 // ─────────────────────────────
-async function saveResponsibles(responsibles: any[]) {
-  await companyRepository.updateResponsibles(companyId, responsibles);
+async function saveResponsibles(payload: any) {
+  await companyRepository.updateResponsibles(companyId, payload);
 
-  // atualiza empresa após salvar
-  const updated = await companyRepository.getById(companyId);
-  setCompany(updated);
+  const updatedResponsibles =
+    await companyRepository.getResponsibles(companyId);
+
+  setCompany((prev: any) => ({
+    ...prev,
+    responsibles: updatedResponsibles.responsibles,
+    groupedResponsibles: updatedResponsibles.grouped,
+  }));
 }
 
-function setResponsibleLocal(sectorId: string, userId: string) {
+function setResponsibleLocal(sectorId: string, userIds: string[]) {
   setCompany((prev: any) => {
     const current = [...(prev?.responsibles || [])];
 
-    const idx = current.findIndex((r: any) => r.sectorId === sectorId);
+    const others = current.filter((r: any) => {
+      const currentSectorId = r.sectorId || r.sector?.id;
+      return currentSectorId !== sectorId;
+    });
 
-    if (idx >= 0) current[idx] = { ...current[idx], userId };
-    else current.push({ sectorId, userId });
+    const nextForSector = userIds.map((userId) => ({
+      sectorId,
+      userId,
+    }));
 
-    return { ...prev, responsibles: current };
+    return {
+      ...prev,
+      responsibles: [...others, ...nextForSector],
+    };
   });
 }
 

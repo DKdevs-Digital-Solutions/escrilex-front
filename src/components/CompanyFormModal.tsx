@@ -175,11 +175,32 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
         {/* 🔷 SITUAÇÃO */}
         <Section title="Situação">
           <FormGrid cols={3}>
-            <Select style={{ height: 48 }} label="Situação" value={form.situacao} onChange={set("situacao")}>
+            <Select
+              style={{ height: 48 }}
+              label="Situação"
+              value={form.situacao}
+              onChange={set("situacao")}
+            >
               <option value="">Selecione...</option>
+
               <option value="ATIVA">Ativa</option>
+
               <option value="SAIDA">Saída</option>
+
+              <option value="EM_SAIDA">Em Saída</option>
+
               <option value="SUSPENSA">Suspensa</option>
+
+              <option value="SEM_MOVIMENTO">
+                Sem Movimento
+              </option>
+
+              <option value="PENDENTE">
+                Pendente de Documentação
+              </option>
+
+              <option value="BAIXADA">Baixada</option>
+
               <option value="ENCERRADA">Encerrada</option>
             </Select>
 
