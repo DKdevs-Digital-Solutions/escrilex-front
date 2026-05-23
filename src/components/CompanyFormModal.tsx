@@ -134,9 +134,7 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
         {/* 🔷 IDENTIFICAÇÃO */}
         <Section title="Dados da empresa">
           <FormGrid cols={3}>
-            <div style={{ gridColumn: "span 2" }}>
-              <Input label="Razão social" style={{ height: 48 }} value={form.razaoSocial} onChange={set("razaoSocial")} />
-            </div>
+            <Input label="Razão social" style={{ height: 48 }} value={form.razaoSocial} onChange={set("razaoSocial")} />
             <Input label="Código" style={{ height: 48 }} value={form.cod} onChange={set("cod")} />
           </FormGrid>
 
@@ -221,9 +219,7 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
             <Input style={{ height: 48 }} label="Ramo" value={form.ramo} onChange={set("ramo")} />
             <Input style={{ height: 48 }} label="Consultoria" value={form.consultoria} onChange={set("consultoria")} />
             <Input style={{ height: 48 }} label="Qtde folha" value={form.qtdeFolha} onChange={set("qtdeFolha")} />
-          </FormGrid>
-
-          <FormGrid cols={3}>
+          
             <Select style={{ height: 48 }} label="Banco" value={form.banco} onChange={set("banco")}>
               <option value="">Selecione...</option>
               <option value="SIM">Sim</option>

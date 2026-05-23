@@ -254,8 +254,10 @@ const {
         setViewMode={setViewMode}
         onOpenColumns={() => setColumnsOpen(true)}
         onSelectRow={setSelectedRow}
+        saveMatrix={saveMatrix}
       />
 
+      
       {columnsOpen && (
         <ColumnsPanel
           columns={columns}
@@ -421,7 +423,8 @@ function MatrixDrawer({
   const [form, setForm] = React.useState<any>(row);
   const [editing, setEditing] = React.useState(false);
 
-  const companyColumns = columns.filter((c: any) =>
+const companyColumns = columns
+  .filter((c: any) =>
     [
       "codigo",
       "empresa",
@@ -433,7 +436,14 @@ function MatrixDrawer({
       "perfilComercial",
       "status",
     ].includes(c.key)
-  );
+  )
+  .map((column: any) => ({
+    ...column,
+    label:
+      column.key === "status"
+        ? "Situação"
+        : column.label,
+  }));
 
   const responsibleColumns = columns.filter((c: any) => c.type === "user");
 
@@ -526,7 +536,7 @@ function MatrixDrawer({
           editing={editing}
           onChange={updateField}
         />
-        <div style={drawerActionBarStyle}>
+        {/* <div style={drawerActionBarStyle}>
         {!editing ? (
             <button
             onClick={() => setEditing(true)}
@@ -556,7 +566,7 @@ function MatrixDrawer({
             </button>
             </>
         )}
-        </div>
+        </div> */}
       </div>
       
     </div>

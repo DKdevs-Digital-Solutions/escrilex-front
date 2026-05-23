@@ -339,9 +339,29 @@ export const columnsButtonStyle: React.CSSProperties = {
 
 
 export const tableScrollStyle: React.CSSProperties = {
-  overflow: "auto",
-  maxHeight: "68vh",
+  width: "100%",
+  overflowX: "auto",
+  overflowY: "hidden",
   position: "relative",
+  borderRadius: 0,
+  border: "1px solid #e2e8f0",
+  background: "#fff",
+
+  scrollbarWidth: "thin",
+  scrollbarColor: "#94a3b8 transparent",
+};
+
+export const stickyActionColumnStyle: React.CSSProperties = {
+  position: "sticky",
+  right: 0,
+  zIndex: 12,
+
+  background: "#fff",
+
+  boxShadow:
+    "-8px 0 20px rgba(15,23,42,.04)",
+
+  borderLeft: "1px solid #e2e8f0",
 };
 
 export const thStyle: React.CSSProperties = {
@@ -350,15 +370,15 @@ export const thStyle: React.CSSProperties = {
   zIndex: 6,
   padding: "12px 14px",
   textAlign: "left",
-  color: "#475569",
+  color: "#fff",
   fontSize: 11,
   fontWeight: 950,
-  borderBottom: "1px solid #e2e8f0",
-  borderRight: "1px solid #eef2f7",
+  borderRight: "1px solid #ccc",
   textTransform: "uppercase",
   letterSpacing: ".04em",
   whiteSpace: "nowrap",
-  background: "#f8fafc",
+  background: "#012942cd",
+  borderRadius:'0px'
 };
 
 export const columnHeaderInnerStyle: React.CSSProperties = {
@@ -376,11 +396,12 @@ export const actionThStyle: React.CSSProperties = {
 export const tdStyle: React.CSSProperties = {
   color: "#0f172a",
   fontWeight: 700,
-  borderBottom: "1px solid #f1f5f9",
-  borderRight: "1px solid #f1f5f9",
+  borderBottom: "1px solid #ccc",
+  borderRight: "1px solid #ccc",
   verticalAlign: "middle",
   whiteSpace: "nowrap",
   background: "inherit",
+
 };
 
 export const stickyHeaderFirstColumnStyle: React.CSSProperties = {
@@ -395,7 +416,7 @@ export const stickyFirstColumnStyle: React.CSSProperties = {
   left: 0,
   zIndex: 4,
   minWidth: 150,
-  boxShadow: "8px 0 18px rgba(15,23,42,.04)",
+ 
 };
 
 export const emptyStyle: React.CSSProperties = {
@@ -409,7 +430,7 @@ export const eyeButtonStyle: React.CSSProperties = {
   width: 34,
   height: 34,
   borderRadius: 12,
-  border: "1px solid #e2e8f0",
+  border: "1px solid #ccc",
   background: "#fff",
   color: "#334155",
   cursor: "pointer",

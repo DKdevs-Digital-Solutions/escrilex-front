@@ -829,9 +829,11 @@ const getMovementComparison = (name: string) => {
               display: "flex",
               alignItems: "center",
               gap: 8,
+
+              flexWrap: "wrap",
             }}
           >
-            <span
+            {/* <span
               style={{
                 fontSize: 11,
                 fontWeight: 900,
@@ -839,24 +841,34 @@ const getMovementComparison = (name: string) => {
                 background: isPositive
                   ? "rgba(22,163,74,.10)"
                   : "rgba(220,38,38,.10)",
+
                 border: `1px solid ${
                   isPositive
                     ? "rgba(22,163,74,.18)"
                     : "rgba(220,38,38,.18)"
                 }`,
+
                 padding: "3px 7px",
                 borderRadius: 999,
+
+                flexShrink: 0,
+                whiteSpace: "nowrap",
               }}
             >
               {isPositive ? "+" : ""}
               {percent}%
-            </span>
+            </span> */}
 
             <strong
               style={{
                 fontSize: 14,
                 fontWeight: 900,
                 color: "#0f172a",
+
+                minWidth: 0,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
               {item.value.toLocaleString("pt-BR")}
