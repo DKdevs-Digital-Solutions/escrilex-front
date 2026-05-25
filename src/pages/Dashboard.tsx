@@ -406,6 +406,22 @@ const getMovementComparison = (name: string) => {
   return null;
 };
 
+const [isMobile, setIsMobile] = React.useState(false);
+
+React.useEffect(() => {
+  const checkMobile = () => {
+    setIsMobile(window.innerWidth <= 999);
+  };
+
+  checkMobile();
+
+  window.addEventListener("resize", checkMobile);
+
+  return () => {
+    window.removeEventListener("resize", checkMobile);
+  };
+}, []);
+
   return (
     <div
       style={{
@@ -829,9 +845,11 @@ const getMovementComparison = (name: string) => {
               display: "flex",
               alignItems: "center",
               gap: 8,
+
+              flexWrap: "wrap",
             }}
           >
-            <span
+            {/* <span
               style={{
                 fontSize: 11,
                 fontWeight: 900,
@@ -839,24 +857,34 @@ const getMovementComparison = (name: string) => {
                 background: isPositive
                   ? "rgba(22,163,74,.10)"
                   : "rgba(220,38,38,.10)",
+
                 border: `1px solid ${
                   isPositive
                     ? "rgba(22,163,74,.18)"
                     : "rgba(220,38,38,.18)"
                 }`,
+
                 padding: "3px 7px",
                 borderRadius: 999,
+
+                flexShrink: 0,
+                whiteSpace: "nowrap",
               }}
             >
               {isPositive ? "+" : ""}
               {percent}%
-            </span>
+            </span> */}
 
             <strong
               style={{
                 fontSize: 14,
                 fontWeight: 900,
                 color: "#0f172a",
+
+                minWidth: 0,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
               {item.value.toLocaleString("pt-BR")}
@@ -1100,30 +1128,37 @@ const getMovementComparison = (name: string) => {
       backdropFilter: "blur(6px)",
       zIndex: 9999,
       display: "flex",
+      padding: isMobile ? 10 : 20,
       alignItems: "center",
       justifyContent: "center",
-      padding: 20,
     }}
   >
     <div
-      onClick={(e) => e.stopPropagation()}
+    onClick={(e) => e.stopPropagation()}
+    style={{
+      width: "100%",
+      maxWidth: isMobile ? "95%" : 900,
+      maxHeight: "90vh",
+      overflow: "auto",
+      borderRadius: 24,
+      background: "#fff",
+      padding: isMobile ? 16 : 24,
+      boxShadow: "0 30px 80px rgba(15,23,42,.35)",
+    }}
+  >
+      <div
       style={{
-        width: "100%",
-        maxWidth: 900,
-        maxHeight: "90vh",
-        overflow: "auto",
-        borderRadius: 24,
-        background: "#fff",
-        padding: 24,
-        boxShadow: "0 30px 80px rgba(15,23,42,.35)",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 16 }}>
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        gap: 12,
+      }}>
         <div>
   <h2
     style={{
       margin: 0,
-      fontSize: 22,
+      fontSize: isMobile ? 18 : 22,
+      lineHeight: 1.2,  
       fontWeight: 950,
       color: "#0f172a",
       letterSpacing: "-0.02em",
@@ -1201,7 +1236,7 @@ const getMovementComparison = (name: string) => {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))",
             gap: 12,
             marginTop: 22,
             marginBottom: 18,
@@ -1252,7 +1287,9 @@ const getMovementComparison = (name: string) => {
           border: "1px solid #e2e8f0",
           borderRadius: !selectedDrilldownLabel ? 15 : 10,
           top: !selectedDrilldownLabel ? 0 : 10,
-          overflow: "hidden",
+          overflowX: "auto",
+          overflowY: "hidden",
+          WebkitOverflowScrolling: "touch",
           position: "relative",
           marginTop:
             modalChart === "alterations" || modalChart === "responsibleChanges"
@@ -1441,25 +1478,68 @@ const getMovementComparison = (name: string) => {
 
                 return (
                   <tr key={item.id}>
-                    <td style={tdStyle}>{item.cod || "--"}</td>
+                    <td style={tdStyle}>
+                      <span style={{
+                         fontSize: "13px",
+                            display: "block",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            maxWidth: "100%",
+                      }}>
+                        {item.cod || "--"}
+                      </span>
+                      </td>
 
                     <td style={tdStyle}>
-                      <strong>{item.razaoSocial || "--"}</strong>
+                      <strong
+                        style={{
+                            fontSize: "13px",
+                            display: "block",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            maxWidth: "100%",
+                          }}
+                          title={item.razaoSocial}
+                        >
+                          {item.razaoSocial || "--"}
+                        </strong>
                       {item.nomeFantasia && (
-                        <div style={{ fontSize: 11, color: "#64748b", marginTop: 3 }}>
-                          {item.nomeFantasia}
+                        <div style={{  color: "#64748b", marginTop: 3, fontSize: "11px",
+                            display: "block",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            maxWidth: "100%",}}>
+                          {item.nomeFantasia} 
                         </div>
                       )}
                     </td>
 
                     <td style={tdStyle}>
-                      <span style={{ fontFamily: "monospace", fontSize: 12 }}>
+                      <span style={{ fontFamily: "monospace",  fontSize: "13px",
+                            display: "block",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            maxWidth: "100%",}}>
                         {item.cnpj || "--"}
                       </span>
                     </td>
 
                     <td style={tdStyle}>
+                      <span style={{
+                         fontSize: "13px",
+                            display: "block",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            maxWidth: "100%",
+                      }}>
                       {item.grupo || item.department || item.newResponsible?.name || "--"}
+
+                      </span>
                     </td>
 
                     <td style={tdStyle}>
@@ -1874,7 +1954,6 @@ function ModalOption({
 
 const tableStyle: React.CSSProperties = {
   width: "100%",
+  minWidth: "100%",
   borderCollapse: "collapse",
-  fontSize: 13,
-  tableLayout: "fixed",
 };

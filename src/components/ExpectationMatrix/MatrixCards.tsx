@@ -47,15 +47,35 @@ export function MatrixCards({
                 </div>
               </div>
 
-              {renderCell(
-                item,
-                {
-                  key: "status",
-                  type: "select",
-                  label: "STATUS",
-                },
-                users
-              )}
+             <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 6,
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 800,
+                    letterSpacing: ".08em",
+                    textTransform: "uppercase",
+                    color: "#94a3b8",
+                  }}
+                >
+                  Situação
+                </span>
+
+                {renderCell(
+                  item,
+                  {
+                    key: "status",
+                    type: "select",
+                    label: "STATUS",
+                  },
+                  users
+                )}
+              </div>
             </div>
 
             <div style={cardFieldsGridStyle}>

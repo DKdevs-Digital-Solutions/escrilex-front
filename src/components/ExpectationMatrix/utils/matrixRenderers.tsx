@@ -38,7 +38,7 @@ export function renderCell(item: any, column: any, users: any[]) {
   }
 
   if (column.key === "status") {
-    return <StatusBadge status={value} />;
+    return <StatusBadge status={value} active={item.active} />;
   }
 
   if (column.type === "select") {
@@ -58,31 +58,36 @@ function SelectPill({ value }: { value: string }) {
   return <span style={selectPillStyle}>{value}</span>;
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const normalized = status?.toUpperCase();
-  const isActive = normalized === "ATIVA" || normalized === "ATIVO";
+function StatusBadge({
+  status,
+  active,
+}: {
+  status: string;
+  active: boolean;
+}) {
+  const isActive = active === true;
 
   return (
-    <span
-      style={{
-        ...statusBadgeStyle,
-        background: isActive ? "rgba(34,197,94,.12)" : "rgba(239,68,68,.10)",
-        border: isActive
-          ? "1px solid rgba(34,197,94,.20)"
-          : "1px solid rgba(239,68,68,.18)",
-        color: isActive ? "#15803d" : "#dc2626",
-      }}
-    >
-      <span
-        style={{
-          width: 7,
-          height: 7,
-          borderRadius: 999,
-          background: isActive ? "#22c55e" : "#ef4444",
-        }}
-      />
+   <span
+  style={{
+    ...statusBadgeStyle,
 
-      {status || "—"}
-    </span>
+    background: "rgba(245,158,11,.12)",
+    border: "1px solid rgba(245,158,11,.22)",
+    color: "#b45309",
+  }}
+>
+  <span
+    style={{
+      width: 7,
+      height: 7,
+      borderRadius: 999,
+      background: "#f59e0b",
+      boxShadow: "0 0 0 4px rgba(245,158,11,.16)",
+    }}
+  />
+
+  {status || "—"}
+</span>
   );
 }

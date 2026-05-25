@@ -15,10 +15,9 @@ type Props = {
 };
 
 export function MatrixStats({ items, total, visibleColumnsCount }: Props) {
-  const activeCount = items.filter((item: any) => {
-    const value = String(item.status || "").toUpperCase();
-    return value === "ATIVA" || value === "ATIVO";
-  }).length;
+  const activeCount = items.filter(
+  (item: any) => item.active === true
+).length;
 
   const inactiveCount = items.length - activeCount;
 

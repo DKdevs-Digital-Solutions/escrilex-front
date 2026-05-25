@@ -58,11 +58,8 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
         icon: <ClipboardList size={15} strokeWidth={1.8} />,
         roles: ["ADMIN", "GESTOR_EMPRESA"],
       },
-      { id: "companies", label: "Empresas", icon: <Briefcase size={15} strokeWidth={1.8} />, roles: [] },
-      {
-        id: "audit", label: "Auditoria", icon: <Search size={15} strokeWidth={1.8} />, roles: ["ADMIN"],
-        badge: { text: "LOG", color: "#2563eb" }
-      },
+      { id: "companies", label: "Empresas", icon: <Briefcase size={15} strokeWidth={1.8} />, roles: [] }
+      
     ],
   },
   {
@@ -77,6 +74,10 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
         label: "E-mail",
         icon: <Mail size={15} strokeWidth={1.8} />,
         roles: ["ADMIN","GESTOR_EMPRESA"],
+      },
+       {
+        id: "audit", label: "Auditoria", icon: <Search size={15} strokeWidth={1.8} />, roles: ["ADMIN"],
+        badge: { text: "LOG", color: "#2563eb" }
       },
      
     ],
@@ -473,11 +474,13 @@ const topIconBtn: React.CSSProperties = {
           <aside
           className="sidebar-transition"
           style={{
-            width: isMobile ? 240 : SW,
+            width: isMobile ? 340 : SW,
             position: isMobile ? "fixed" : "relative",
-            left: isMobile ? (mobileMenuOpen ? 0 : -260) : 0,
+            left: isMobile ? (mobileMenuOpen ? 0 : -340) : 0,
             top: 0,
-            height: "100vh",
+            height: "100dvh",
+            maxHeight: "100dvh",
+            overflow: "hidden",
             background: "#012942",
             zIndex: 999,
             transition: "left 0.25s ease",
@@ -589,7 +592,7 @@ const topIconBtn: React.CSSProperties = {
                     {group.label && !collapsed && (
                     <div
                       style={{
-                        fontSize: 10.5,
+                        fontSize: isMobile ? 12.5 : 11.5,
                         fontWeight: 800,
                         color: "#ccc",
                         letterSpacing: "0.12em",
@@ -629,11 +632,17 @@ const topIconBtn: React.CSSProperties = {
                           <span className="nav-icon-box" style={iconBoxStyle(active)}>{item.icon}</span>
                           {!collapsed && (
                             <>
-                              <span style={{ flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.label}</span>
+                              <span style={{ flex: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontSize: isMobile ? 14.5 : 13.5 }}>{item.label}</span>
                               {item.badge && (
                                 <span style={{
-                                  fontSize: 9.5, fontWeight: 800, padding: "2px 6px", borderRadius: 4,
-                                  background: '#BB9F58', color: "#fff", letterSpacing: "0.04em", flexShrink: 0,
+                                  fontSize: isMobile ? 10.5 : 9.5,
+                                  fontWeight: 800,
+                                  padding: "2px 6px",
+                                  borderRadius: 4,
+                                  background: '#BB9F58',
+                                  color: "#fff",
+                                  letterSpacing: "0.04em",
+                                  flexShrink: 0,
                                 }}>{item.badge.text}</span>
                               )}
                             </>
@@ -675,7 +684,7 @@ const topIconBtn: React.CSSProperties = {
                 boxShadow: "0 8px 18px rgba(37,99,235,0.28)",
               }}
             >
-              {initials}
+              {initials} 
             </div>
               {!collapsed && (
                 <>

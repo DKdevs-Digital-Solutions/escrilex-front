@@ -56,6 +56,29 @@ export function AdvancedFiltersModal({
   loadMatrix,
   onClose,
 }: Props) {
+
+
+function formatStatusLabel(value: string) {
+  const key = String(value || "")
+    .trim()
+    .toUpperCase();
+
+  const labels: Record<string, string> = {
+    ATIVA: "Ativa",
+    SAIDA: "Saída",
+    EM_SAIDA: "Em Saída",
+    SUSPENSA: "Suspensa",
+    SEM_MOVIMENTO: "Sem Movimento",
+    PENDENTE: "Pendente de Documentação",
+    BAIXADA: "Baixada",
+    ENCERRADA: "Encerrada",
+  };
+
+  return labels[key] ?? value;
+}
+
+
+
   return (
     <div style={filterModalOverlayStyle} onClick={onClose}>
       <div style={filterModalStyle} onClick={(e) => e.stopPropagation()}>
@@ -77,22 +100,40 @@ export function AdvancedFiltersModal({
 
         <div style={filterModalGridStyle}>
           <label style={fieldStyle}>
-            <span style={fieldLabelStyle}>Status</span>
+          <span style={fieldLabelStyle}>Situação</span>
 
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              style={inputStyle}
-            >
-              <option value="">Todos</option>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            style={inputStyle}
+          >
+            <option value="">Todas situações</option>
 
-              {(options?.status ?? []).map((item: string) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
+            <option value="ATIVA">Ativa</option>
+
+            <option value="SAIDA">Saída</option>
+
+            <option value="SUSPENSA">Suspensa</option>
+
+            <option value="ENCERRADA">Encerrada</option>
+
+            <option value="SEM_MOVIMENTO">
+              Sem Movimento
+            </option>
+
+            <option value="EM_SAIDA">
+              Em Saída
+            </option>
+
+            <option value="BAIXADA">
+              Baixada
+            </option>
+
+            <option value="PENDENTE">
+              Pendente de Documentação
+            </option>
+          </select>
+        </label>
 
           <label style={fieldStyle}>
             <span style={fieldLabelStyle}>Grupo</span>
@@ -123,7 +164,7 @@ export function AdvancedFiltersModal({
             </select>
           </label>
 
-          <label style={fieldStyle}>
+          {/* <label style={fieldStyle}>
             <span style={fieldLabelStyle}>Ramo</span>
 
             <select
@@ -139,7 +180,7 @@ export function AdvancedFiltersModal({
                 </option>
               ))}
             </select>
-          </label>
+          </label> */}
 
           <label style={fieldStyle}>
             <span style={fieldLabelStyle}>Perfil comercial</span>

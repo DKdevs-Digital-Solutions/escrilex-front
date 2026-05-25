@@ -30,14 +30,226 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
     return <Empty message="Nenhuma empresa encontrada." />;
   }
 
-  return (
+
+
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 999);
+
+    check();
+
+    window.addEventListener("resize", check);
+
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+
+
+
+  return isMobile ? (
+  <div style={{ display: "grid", gap: 12 }}>
+    {items.map((c) => (
+      <div
+        key={c.id}
+        onClick={() => onOpenCompany(c.id)}
+        style={{
+          background: "#fff",
+          border: "1px solid #eef2f7",
+          borderRadius: 20,
+          padding: 14,
+          boxShadow: "0 8px 22px rgba(15,23,42,0.06)",
+          cursor: "pointer",
+        }}
+      >
+        <div
+  style={{
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 12,
+    alignItems: "flex-start",
+  }}
+>
+  <div style={{ minWidth: 0, flex: 1 }}>
+    {/* topo */}
     <div
       style={{
-        width: "100%",
-        borderCollapse: "separate",
-        borderSpacing: "0 10px",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        flexWrap: "wrap",
       }}
     >
+      <div
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "6px 10px",
+          borderRadius: 10,
+          background: "#f8fafc",
+          border: "1px solid #e2e8f0",
+        }}
+      >
+        <Hash size={12} strokeWidth={2.2} color="#94a3b8" />
+
+        <span
+          style={{
+            fontFamily: "monospace",
+            fontSize: 12,
+            color: "#64748b",
+            fontWeight: 700,
+          }}
+        >
+          {c.cod || "—"}
+        </span>
+      </div>
+
+      {c.situacao ? (
+        <Badge
+          label={c.situacao}
+          variant={
+            c.situacao === "ATIVA"
+              ? "green"
+              : c.situacao === "ENCERRADA"
+              ? "red"
+              : "yellow"
+          }
+        />
+      ) : null}
+    </div>
+
+    {/* empresa */}
+    <div
+      style={{
+        marginTop: 12,
+        fontWeight: 900,
+        color: "#0f172a",
+        fontSize: 14,
+        lineHeight: 1.3,
+      }}
+    >
+      {c.razaoSocial || "—"}
+    </div>
+
+    <div
+      style={{
+        marginTop: 4,
+        fontSize: 12.5,
+        color: "#94a3b8",
+      }}
+    >
+      {c.nomeFantasia || "Sem nome fantasia"}
+    </div>
+
+    {/* infos */}
+    <div
+      style={{
+        marginTop: 14,
+        display: "grid",
+        gap: 10,
+      }}
+    >
+      {/* cnpj */}
+      <div
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          padding: "6px 10px",
+          borderRadius: 10,
+          background: "#fcfcfd",
+          border: "1px solid #eef2f7",
+          width: "fit-content",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "monospace",
+            fontSize: 12.5,
+            color: "#334155",
+            fontWeight: 700,
+          }}
+        >
+          {c.cnpj || "—"}
+        </span>
+      </div>
+
+      {/* grupo */}
+      {c.grupo && (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 7,
+            fontSize: 12.5,
+            color: "#475569",
+            background: "#f8fafc",
+            padding: "6px 10px",
+            borderRadius: 999,
+            fontWeight: 700,
+            border: "1px solid #e2e8f0",
+            width: "fit-content",
+          }}
+        >
+          <FolderTree size={13} strokeWidth={2.2} />
+          {c.grupo}
+        </span>
+      )}
+
+      {/* status */}
+      <span className={`status-badge ${c.active ? "on" : "off"}`}>
+        <span className="status-dot" />
+        {c.active ? "Ativo" : "Desativado"}
+      </span>
+    </div>
+  </div>
+
+  {/* ações */}
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
+      flexShrink: 0,
+    }}
+  >
+    <button
+      title="Abrir empresa"
+      onClick={(e) => {
+        e.stopPropagation();
+        onOpenCompany(c.id);
+      }}
+      style={actionBtnStyle("#828080")}
+    >
+      <Eye size={17} strokeWidth={2.2} />
+    </button>
+
+    <button
+      title={c.active ? "Desativar empresa" : "Ativar empresa"}
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggleActive(c.id, !c.active);
+      }}
+      style={actionBtnStyle(c.active ? "#ef4444" : "#16a34a")}
+    >
+      {c.active ? (
+        <PowerOff size={17} strokeWidth={2.2} />
+      ) : (
+        <Power size={17} strokeWidth={2.2} />
+      )}
+    </button>
+  </div>
+</div>
+      </div>
+    ))}
+  </div>
+) : (
+  <div
+    style={{
+      width: "100%",
+      overflowX: "auto",
+    }}
+  >
       <Table>
       <Thead>
         <tr>
@@ -319,8 +531,8 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
         ))}
       </tbody>
       </Table>
-    </div>
-  );
+  </div>
+);
 }
 
 function actionBtnStyle(color: string): React.CSSProperties {
