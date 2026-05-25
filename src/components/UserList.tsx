@@ -271,6 +271,16 @@ export function UserList({
       ? users
       : users.filter((u) => (statusFilter === "active" ? u.active : !u.active));
 
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 999);
+    check();
+
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);    
+
   return (
     <Card
       style={{
@@ -284,7 +294,7 @@ export function UserList({
     >
       <div
         style={{
-          padding: "18px 22px",
+          padding: isMobile ? "18px 10px" : "18px 22px",
           borderBottom: "1px solid #eef2f7",
           background:
             "linear-gradient(180deg, rgba(248,250,252,0.95) 0%, rgba(255,255,255,1) 100%)",
@@ -296,7 +306,9 @@ export function UserList({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gridTemplateColumns: isMobile
+                ? "1fr"
+                : "repeat(auto-fit, minmax(180px, 1fr))",
               gap: 12,
             }}
           >
@@ -357,10 +369,185 @@ export function UserList({
           />
         </div>
       ) : (
-        <div style={{ padding: 14 }}>
-          
 
-          <div style={{ width: "100%", overflowX: "auto" }}>
+        <>
+        
+        {isMobile ? (
+  <div
+    style={{
+      padding: 14,
+      display: "grid",
+      gap: 12,
+    }}
+  >
+    
+    {filteredUsers.map((u) => {
+      const roles = u.roles || [];
+      const visibleRoles = roles.slice(0, 2);
+      const hiddenCount = Math.max(roles.length - 2, 0);
+
+      return (
+        <div
+          key={u.id}
+          style={{
+            padding: 14,
+            borderRadius: 18,
+            background: "#fff",
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 8px 22px rgba(15,23,42,0.06)",
+          }}
+        >
+          <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 14,
+                background: u.active
+                  ? "#BB9F58"
+                  : "linear-gradient(135deg, #94a3b8 0%, #64748b 100%)",
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <Users size={18} strokeWidth={2.2} />
+            </div>
+
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div
+                style={{
+                  fontSize: 14.5,
+                  fontWeight: 900,
+                  color: "#0f172a",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {u.name}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 4,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  fontSize: 12.5,
+                  color: "#64748b",
+                  minWidth: 0,
+                }}
+              >
+                <Mail size={13} strokeWidth={2.2} style={{ flexShrink: 0 }} />
+
+                <span
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {u.email}
+                </span>
+              </div>
+            </div>
+
+            <Badge
+              label={u.active ? "Ativo" : "Inativo"}
+              variant={u.active ? "green" : "red"}
+            />
+          </div>
+
+          <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 10px",
+                borderRadius: 999,
+                background: "#f8fafc",
+                border: "1px solid #e2e8f0",
+                fontSize: 12.5,
+                color: "#334155",
+                fontWeight: 800,
+                maxWidth: "100%",
+              }}
+            >
+              <Briefcase size={13} strokeWidth={2.2} />
+
+              <span
+                style={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {u.sector?.name ?? "Sem setor"}
+              </span>
+            </div>
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {visibleRoles.map((r: string) => (
+                <Badge key={r} label={r} variant={ROLE_BADGES[r] || "gray"} />
+              ))}
+
+              {hiddenCount > 0 && (
+                <span
+                  title={roles.slice(2).join(", ")}
+                  style={{
+                    height: 28,
+                    padding: "0 10px",
+                    borderRadius: 999,
+                    background: "rgba(37,99,235,.08)",
+                    border: "1px solid rgba(37,99,235,.16)",
+                    color: "#2563eb",
+                    fontSize: 11,
+                    fontWeight: 900,
+                    display: "inline-flex",
+                    alignItems: "center",
+                  }}
+                >
+                  +{hiddenCount}
+                </span>
+              )}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 8,
+                paddingTop: 4,
+              }}
+            >
+              <IconBtn
+                icon={<Pencil size={17} strokeWidth={3} />}
+                title="Editar"
+                onClick={() => onEdit(u)}
+              />
+
+              {u.active && (
+                <IconBtn
+                  icon={<PowerOff size={17} strokeWidth={2.5} />}
+                  title="Desativar"
+                  onClick={() => onDisable(u.id)}
+                  variant="danger"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+) : (
+  <div style={{ padding: 14 }}>
+    <div style={{ width: "100%", overflowX: "auto" }}>
+     
             <table
               style={{
                 width: "100%",
@@ -660,8 +847,13 @@ export function UserList({
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
+         
+    </div>
+  </div>
+)}
+        
+        </>
+       
       )}
     </Card>
   );

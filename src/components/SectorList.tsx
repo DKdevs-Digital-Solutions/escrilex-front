@@ -189,6 +189,17 @@ const filteredItems = items.filter((item) => {
 });
 
 
+const [isMobile, setIsMobile] = React.useState(false);
+
+React.useEffect(() => {
+  const check = () => setIsMobile(window.innerWidth <= 999);
+  check();
+
+  window.addEventListener("resize", check);
+  return () => window.removeEventListener("resize", check);
+}, []);
+
+
   return (
     <Card
       style={{
@@ -204,7 +215,7 @@ const filteredItems = items.filter((item) => {
       {/* topo */}
       <div
         style={{
-          padding: "18px 22px",
+          padding: isMobile ? "18px 10px" : "18px 22px",
           borderBottom: "1px solid #eef2f7",
           background:
             "linear-gradient(180deg, rgba(248,250,252,0.95) 0%, rgba(255,255,255,1) 100%)",
@@ -215,7 +226,9 @@ const filteredItems = items.filter((item) => {
           <div
     style={{
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+      gridTemplateColumns: isMobile
+      ? "1fr"
+      : "repeat(auto-fit, minmax(180px, 1fr))",
       gap: 20,
     }}
   >
@@ -278,16 +291,148 @@ const filteredItems = items.filter((item) => {
             />
         </div>
         ) : (
-        <div style={{ padding: 14 }}>
+
+          <>
+          
+          {isMobile ? (
+  <div
+    style={{
+      padding: 14,
+      display: "grid",
+      gap: 12,
+    }}
+  >
+    {filteredItems.map((s) => {
+      const visual = getSectorVisual(s.name);
+
+      return (
+        <div
+          key={s.id}
+          style={{
+            padding: 14,
+            borderRadius: 18,
+            background: "#fff",
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 8px 22px rgba(15,23,42,0.06)",
+          }}
+        >
           <div
             style={{
-              width: "100%",
-              overflowX: "auto",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: 12,
             }}
           >
-            
+            <div
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 14,
+                background: visual.gradient,
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: visual.shadow,
+                flexShrink: 0,
+                fontWeight: 900,
+                fontSize: 16,
+              }}
+            >
+              {visual.initial}
+            </div>
 
-            <table
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div
+                style={{
+                  fontSize: 14.5,
+                  fontWeight: 900,
+                  color: "#0f172a",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {s.name}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 3,
+                  fontSize: 12.5,
+                  color: visual.accent,
+                  fontWeight: 700,
+                }}
+              >
+                Setor registrado no sistema
+              </div>
+            </div>
+
+            <Badge
+              label={s.active ? "Ativo" : "Inativo"}
+              variant={s.active ? "green" : "red"}
+            />
+          </div>
+
+          <div
+            style={{
+              marginTop: 14,
+              padding: "10px 12px",
+              borderRadius: 14,
+              background: s.active ? "rgba(22,163,74,.08)" : "#f8fafc",
+              border: `1px solid ${
+                s.active ? "rgba(22,163,74,.16)" : "#e2e8f0"
+              }`,
+              color: s.active ? "#166534" : "#6b7280",
+              fontSize: 12.5,
+              fontWeight: 800,
+            }}
+          >
+            {s.active
+              ? "Disponível para uso"
+              : "Temporariamente desativado"}
+          </div>
+
+          <div
+            style={{
+              marginTop: 12,
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 8,
+            }}
+          >
+            {s.active && (
+              <IconBtn
+                icon={<Pencil size={17} strokeWidth={3} />}
+                title="Editar"
+                onClick={() => onEdit(s)}
+              />
+            )}
+
+            {s.active ? (
+              <IconBtn
+                icon={<PowerOff size={17} strokeWidth={3} />}
+                title="Desativar"
+                onClick={() => onDisable(s.id)}
+                variant="danger"
+              />
+            ) : (
+              <IconBtn
+                icon={<Power size={17} strokeWidth={3} />}
+                title="Reativar"
+                onClick={() => onActivate(s.id)}
+                variant="success"
+              />
+            )}
+          </div>
+        </div>
+      );
+        })}
+      </div>
+    ) : (
+      <div style={{ padding: 14 }}>
+        <div style={{ width: "100%", overflowX: "auto" }}>
+          <table
               style={{
                 width: "100%",
                 borderCollapse: "separate",
@@ -488,8 +633,12 @@ const filteredItems = items.filter((item) => {
                   })}
               </tbody>
             </table>
+            </div>
           </div>
-        </div>
+        )}
+          
+          </>
+        
       )}
     </Card>
   );
@@ -525,7 +674,7 @@ function StatCard({
       type="button"
       onClick={onClick}
       style={{
-        minWidth: 170,
+        minWidth: 0,
         flex: 1,
         padding: "30px 16px",
         borderRadius: 18,

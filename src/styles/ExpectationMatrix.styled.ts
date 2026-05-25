@@ -377,7 +377,7 @@ export const thStyle: React.CSSProperties = {
   textTransform: "uppercase",
   letterSpacing: ".04em",
   whiteSpace: "nowrap",
-  background: "#012942cd",
+  background: "linear-gradient(180deg, rgb(2, 46, 73) 10%, rgb(1, 41, 66) 90%, rgb(4, 71, 112) 90%)",
   borderRadius:'0px'
 };
 

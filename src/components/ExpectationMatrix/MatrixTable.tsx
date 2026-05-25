@@ -108,10 +108,11 @@ export function MatrixTable({
                 ...stickyActionColumnStyle,
                 right: 0,
                 zIndex: 20,
-                background:"#333"
+                background:"#fff",
+                borderBottom: "1px solid #e5e7eb",
               }}
             >
-              <ScanEye size={20} />
+              <ScanEye color="#334155" size={23} />
             </th>
 
           </tr>

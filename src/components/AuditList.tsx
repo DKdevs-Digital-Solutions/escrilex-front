@@ -360,13 +360,26 @@ export function AuditList({ items }: AuditListProps) {
 }
 
 
+const [isMobile, setIsMobile] = React.useState(false);
+
+React.useEffect(() => {
+  const check = () => setIsMobile(window.innerWidth <= 999);
+  check();
+
+  window.addEventListener("resize", check);
+  return () => window.removeEventListener("resize", check);
+}, []);
+
+
 
   return (
     <>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gridTemplateColumns: isMobile
+            ? "1fr"
+            : "repeat(auto-fit, minmax(180px, 1fr))",
           gap: 12,
           marginBottom: 18,
         }}
@@ -466,155 +479,299 @@ export function AuditList({ items }: AuditListProps) {
             </div>
         </div>
 
-        {!filteredItems.length ? (
-          <div style={{ padding: 28 }}>
-            <Empty message="Nenhum evento encontrado para esse filtro." />
-          </div>
-        ) : (
-          <div style={{ padding: 14 }}>
-            <div style={{ width: "100%", overflowX: "auto" }}>
-              <table
+       {!filteredItems.length ? (
+  <div style={{ padding: 28 }}>
+    <Empty message="Nenhum evento encontrado para esse filtro." />
+  </div>
+) : isMobile ? (
+  <div
+    style={{
+      padding: 14,
+      display: "grid",
+      gap: 12,
+    }}
+  >
+    {filteredItems.map((r) => {
+      const visual = getEntityVisual(r.entity);
+      const EntityIcon = visual.icon;
+
+      return (
+        <div
+          key={r.id}
+          style={{
+            padding: 14,
+            borderRadius: 18,
+            background: "#fff",
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 8px 22px rgba(15,23,42,0.06)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              minWidth: 0,
+            }}
+          >
+            <div
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 14,
+                background: stringToColor(r.actor?.name || ""),
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: 900,
+                fontSize: 15,
+                flexShrink: 0,
+                boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+              }}
+            >
+              {getInitial(r.actor?.name)}
+            </div>
+
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div
                 style={{
-                  width: "100%",
-                  borderCollapse: "separate",
-                  borderSpacing: "0 10px",
-                  tableLayout: "fixed",
+                  fontWeight: 800,
+                  fontSize: 14,
+                  color: "#0f172a",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
               >
-                <thead>
-                  <tr>
-                    <th style={thStyle}>Usuário</th>
-                    <th style={thStyle}>Data / Hora</th>
-                    <th style={thStyle}>Ação</th>
-                    <th style={thStyle}>Entidade</th>
-                  </tr>
-                </thead>
+                {r.actor?.name ?? "—"}
+              </div>
 
-                <tbody>
-                  {filteredItems.map((r) => {
-                    const visual = getEntityVisual(r.entity);
-                    const EntityIcon = visual.icon;
-
-                    return (
-                      <tr
-                        key={r.id}
-                        style={{
-                          background: "#ffffff",
-                          boxShadow: "0 6px 18px rgba(15,23,42,0.05)",
-                          cursor: "pointer",
-                        }}
-                        onMouseOver={(e) => {
-                          const row = e.currentTarget;
-                          row.style.transform = "translateY(-1px)";
-                          row.style.transition = "all 0.18s ease";
-                          row.style.boxShadow =
-                            "0 10px 24px rgba(37,99,235,0.08)";
-                        }}
-                        onMouseOut={(e) => {
-                          const row = e.currentTarget;
-                          row.style.transform = "translateY(0)";
-                          row.style.boxShadow =
-                            "0 6px 18px rgba(15,23,42,0.05)";
-                        }}
-                      >
-                        <td style={{ ...tdStyle, ...tdLeftStyle }}>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 12,
-                            }}
-                          >
-                            <div
-                            style={{
-                                width: 38,
-                                height: 38,
-                                borderRadius: "20%",
-                                background: stringToColor(r.actor?.name || ""),
-                                color: "#fff",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontWeight: 800,
-                                fontSize: 14,
-                                letterSpacing: "0.02em",
-                                flexShrink: 0,
-                                boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
-                            }}
-                            >
-                            {getInitial(r.actor?.name)}
-                            </div>
-
-                            <div>
-                              <div
-                                style={{
-                                  fontWeight: 700,
-                                  fontSize: 13.5,
-                                  color: "#0f172a",
-                                }}
-                              >
-                                {r.actor?.name ?? "—"}
-                              </div>
-                              <div
-                                style={{
-                                  fontSize: 12,
-                                  color: "#94a3b8",
-                                  marginTop: 4,
-                                }}
-                              >
-                                {r.actor?.email ?? ""}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-
-                        <td style={tdStyle}>
-                          <div
-                            style={{
-                              fontSize: 12.5,
-                              color: "#64748b",
-                              fontWeight: 700,
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {new Date(r.createdAt).toLocaleString("pt-BR")}
-                          </div>
-                        </td>
-
-                        <td style={tdStyle}>
-                          <Badge
-                            label={actionLabel[r.action] ?? r.action}
-                            variant={actionBadge[r.action] || "gray"}
-                          />
-                        </td>
-
-                        <td style={{ ...tdStyle, ...tdRightStyle }}>
-                          <div
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: 8,
-                              padding: "7px 10px",
-                              borderRadius: 999,
-                              background: visual.bg,
-                              border: `1px solid ${visual.border}`,
-                              color: visual.color,
-                              fontSize: 12.5,
-                              fontWeight: 700,
-                            }}
-                          >
-                            <EntityIcon size={13} strokeWidth={2.2} />
-                            {entityLabel[r.entity] ?? r.entity}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: "#94a3b8",
+                  marginTop: 3,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {r.actor?.email ?? ""}
+              </div>
             </div>
           </div>
-        )}
+
+          <div
+            style={{
+              marginTop: 14,
+              display: "grid",
+              gap: 10,
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 900,
+                  color: "#94a3b8",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  marginBottom: 4,
+                }}
+              >
+                Data / Hora
+              </div>
+
+              <div
+                style={{
+                  fontSize: 13,
+                  color: "#475569",
+                  fontWeight: 700,
+                }}
+              >
+                {new Date(r.createdAt).toLocaleString("pt-BR")}
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+                flexWrap: "wrap",
+              }}
+            >
+              <Badge
+                label={actionLabel[r.action] ?? r.action}
+                variant={actionBadge[r.action] || "gray"}
+              />
+
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 7,
+                  padding: "7px 10px",
+                  borderRadius: 999,
+                  background: visual.bg,
+                  border: `1px solid ${visual.border}`,
+                  color: visual.color,
+                  fontSize: 12,
+                  fontWeight: 800,
+                  maxWidth: "100%",
+                }}
+              >
+                <EntityIcon size={13} strokeWidth={2.2} />
+
+                <span
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {entityLabel[r.entity] ?? r.entity}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+) : (
+  <div style={{ padding: 14 }}>
+    <div style={{ width: "100%", overflowX: "auto" }}>
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "separate",
+          borderSpacing: "0 10px",
+          tableLayout: "fixed",
+        }}
+      >
+        <thead>
+          <tr>
+            <th style={thStyle}>Usuário</th>
+            <th style={thStyle}>Data / Hora</th>
+            <th style={thStyle}>Ação</th>
+            <th style={thStyle}>Entidade</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {filteredItems.map((r) => {
+            const visual = getEntityVisual(r.entity);
+            const EntityIcon = visual.icon;
+
+            return (
+              <tr
+                key={r.id}
+                style={{
+                  background: "#ffffff",
+                  boxShadow: "0 6px 18px rgba(15,23,42,0.05)",
+                  cursor: "pointer",
+                }}
+              >
+                <td style={{ ...tdStyle, ...tdLeftStyle }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div
+                      style={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: "20%",
+                        background: stringToColor(r.actor?.name || ""),
+                        color: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: 800,
+                        fontSize: 14,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {getInitial(r.actor?.name)}
+                    </div>
+
+                    <div style={{ minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          fontSize: 13.5,
+                          color: "#0f172a",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {r.actor?.name ?? "—"}
+                      </div>
+
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "#94a3b8",
+                          marginTop: 4,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {r.actor?.email ?? ""}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <td style={tdStyle}>
+                  <div
+                    style={{
+                      fontSize: 12.5,
+                      color: "#64748b",
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {new Date(r.createdAt).toLocaleString("pt-BR")}
+                  </div>
+                </td>
+
+                <td style={tdStyle}>
+                  <Badge
+                    label={actionLabel[r.action] ?? r.action}
+                    variant={actionBadge[r.action] || "gray"}
+                  />
+                </td>
+
+                <td style={{ ...tdStyle, ...tdRightStyle }}>
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "7px 10px",
+                      borderRadius: 999,
+                      background: visual.bg,
+                      border: `1px solid ${visual.border}`,
+                      color: visual.color,
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                    }}
+                  >
+                    <EntityIcon size={13} strokeWidth={2.2} />
+                    {entityLabel[r.entity] ?? r.entity}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
       </Card>
     </>
   );
