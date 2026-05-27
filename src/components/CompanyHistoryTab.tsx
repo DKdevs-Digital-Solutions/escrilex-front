@@ -148,7 +148,7 @@ export function CompanyHistoryTab({
         borderRadius: 20,
         border: `1px solid ${UI.border}`,
         background:
-          "radial-gradient(circle at top left, rgba(37,99,235,0.10), transparent 34%), linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+          "#fff",
         boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
         overflow: "hidden",
         position: "relative",

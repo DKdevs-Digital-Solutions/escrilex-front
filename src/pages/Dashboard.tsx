@@ -73,9 +73,9 @@ export function DashboardPage() {
 const [modalChart, setModalChart] = useState<
   null | "movimento" | "clientes" | "responsibles" | "alterations" | "responsibleChanges"
 >(null);
-const [modalTab, setModalTab] = useState<"ativos" | "inativos" | "entradas" | "saidas" | "responsibles">("ativos");
+const [modalTab, setModalTab] = useState<"ativos" | "Encerrada" | "entradas" | "saidas" | "responsibles">("ativos");
 
-type ModalTab = "ativos" | "inativos" | "entradas" | "saidas" | "responsibles";
+type ModalTab = "ativos" | "Encerrada" | "entradas" | "saidas" | "responsibles";
 
 const {
   items: companies = [],
@@ -129,7 +129,7 @@ function openModal(
 
 useEffect(() => {
   if (!modalChart) return;
-  if (modalTab === "ativos" || modalTab === "inativos") return;
+  if (modalTab === "ativos" || modalTab === "Encerrada") return;
 
   loadDrilldown();
 }, [modalChart, modalTab, selectedDrilldownType, startDate, endDate]);
@@ -155,7 +155,7 @@ const normalizedDrilldownRows = drilldownRows.map((item: any) => {
 
 const getModalRows = () => {
   if (modalTab === "ativos") return activeCompanies;
-  if (modalTab === "inativos") return inactiveCompanies;
+  if (modalTab === "Encerrada") return inactiveCompanies;
 
   return normalizedDrilldownRows;
 };
@@ -174,21 +174,12 @@ function getStatusStyle(status?: string) {
         label: "Ativa",
       };
 
-    case "SAIDA":
+    case "ENCERRADA":
       return {
         bg: "rgba(239,68,68,.12)",
         border: "rgba(239,68,68,.18)",
         color: "#dc2626",
         dot: "#ef4444",
-        label: "Saída",
-      };
-
-    case "ENCERRADA":
-      return {
-        bg: "rgba(100,116,139,.14)",
-        border: "rgba(100,116,139,.18)",
-        color: "#475569",
-        dot: "#64748b",
         label: "Encerrada",
       };
 
@@ -253,7 +244,7 @@ const periodLabel = useMemo(() => {
       color: "#059669",
     },
     {
-      name: "Inativos",
+      name: "Encerrados",
       value: data?.cards.totalInactive ?? 0,
       color: "#ea580c",
     },
@@ -297,30 +288,30 @@ const periodLabel = useMemo(() => {
     onClick: () => { setModalChart("clientes"); setModalTab("saidas") }
 
   },
-  {
-    title: "Clientes ativos",
-    value: data?.cards?.totalActive ?? 0,
-    description: "Empresas atualmente ativas",
-    icon: <Building2 size={22} />,
-    bg: "linear-gradient(135deg, #ecfdf5, #d1fae5)",
-    color: "#059669",
-    badge: "Ativos",
-    badgeBg: "#d1fae5",
-    onClick: () => { setModalChart("movimento"); setModalTab("ativos") }
+  // {
+  //   title: "Clientes ativos",
+  //   value: data?.cards?.totalActive ?? 0,
+  //   description: "Empresas atualmente ativas",
+  //   icon: <Building2 size={22} />,
+  //   bg: "linear-gradient(135deg, #ecfdf5, #d1fae5)",
+  //   color: "#059669",
+  //   badge: "Ativos",
+  //   badgeBg: "#d1fae5",
+  //   onClick: () => { setModalChart("movimento"); setModalTab("ativos") }
 
-  },
-  {
-    title: "Clientes inativos",
-    value: data?.cards?.totalInactive ?? 0,
-    description: "Empresas desativadas",
-    icon: <UserX size={22} />,
-    bg: "linear-gradient(135deg, #fff7ed, #ffedd5)",
-    color: "#ea580c",
-    badge: "Inativos",
-    badgeBg: "#ffedd5",
-    onClick: () => { setModalChart("movimento"); setModalTab("inativos") }
+  // },
+  // {
+  //   title: "Clientes inativos",
+  //   value: data?.cards?.totalInactive ?? 0,
+  //   description: "Empresas desativadas",
+  //   icon: <UserX size={22} />,
+  //   bg: "linear-gradient(135deg, #fff7ed, #ffedd5)",
+  //   color: "#ea580c",
+  //   badge: "Inativos",
+  //   badgeBg: "#ffedd5",
+  //   onClick: () => { setModalChart("movimento"); setModalTab("inativos") }
 
-  },
+  // },
   {
     title: "Alterações",
     value: data?.cards?.alterations ?? 0,
@@ -643,7 +634,7 @@ React.useEffect(() => {
             className="dashboard-cards"
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
               gap: 16,
               marginBottom: 20,
             }}
@@ -973,8 +964,8 @@ React.useEffect(() => {
                   openModal("movimento", "ativos");
                 }
 
-                if (entry.name === "Inativos") {
-                  openModal("movimento", "inativos");
+                if (entry.name === "Encerrada") {
+                  openModal("movimento", "Encerrada");
                 }
               }}
             >
@@ -1253,11 +1244,11 @@ React.useEffect(() => {
               />
 
               <ModalOption
-                active={modalTab === "inativos"}
-                label="Inativos"
+                active={modalTab === "Encerrada"}
+                label="Encerrados"
                 value={data?.cards.totalInactive ?? 0}
                 color="#ea580c"
-                onClick={() => openModal("movimento", "inativos")}
+                onClick={() => openModal("movimento", "Encerrada")}
               />
             </>
           ) : (
@@ -1431,7 +1422,7 @@ React.useEffect(() => {
                   <th style={thStyle}>Empresa</th>
                   <th style={thStyle}>CNPJ</th>
                   <th style={thStyle}>Grupo</th>
-                  <th style={thStyle}>Situação</th>
+                  <th style={thStyle}>Status</th>
                 </tr>
               )}
             </thead>

@@ -158,6 +158,19 @@ export function MatrixDatabase({
           }) => {
             await saveMatrix(companyId, {
               [field]: value,
+
+              audit: {
+                companyName: row.empresa,
+                field,
+                oldValue: row[field],
+                newValue: value,
+              },
+
+              ...(field === "status" && value === "Bloqueado"
+                ? {
+                    blockedAt: new Date().toISOString(),
+                  }
+                : {}),
             });
           }}
         />

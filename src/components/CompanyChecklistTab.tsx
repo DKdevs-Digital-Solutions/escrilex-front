@@ -455,8 +455,8 @@ export function CompanyChecklistTab({
         >
           <ClipboardCheck size={14} strokeWidth={2.4} />
           {t === "ENTRADA"
-            ? "Checklist de entrada"
-            : "Checklist de saída"}
+            ? "Processos de entrada"
+            : "Processos de saída"}
         </button>
       );
         })}
@@ -571,7 +571,7 @@ export function CompanyChecklistTab({
                   marginBottom: 8,
                 }}
               >
-                Progresso do checklist
+                Progresso do Processo
               </div>
 
               <div style={{ fontSize: 22, fontWeight: 800, color: UI.text }}>

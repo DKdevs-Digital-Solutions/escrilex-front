@@ -30,6 +30,11 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
     return <Empty message="Nenhuma empresa encontrada." />;
   }
 
+const [tooltipPos, setTooltipPos] = React.useState<{
+  top: number;
+  left: number;
+  situacao: string;
+} | null>(null);
 
 
   const [isMobile, setIsMobile] = React.useState(false);
@@ -105,18 +110,7 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
         </span>
       </div>
 
-      {c.situacao ? (
-        <Badge
-          label={c.situacao}
-          variant={
-            c.situacao === "ATIVA"
-              ? "green"
-              : c.situacao === "ENCERRADA"
-              ? "red"
-              : "yellow"
-          }
-        />
-      ) : null}
+     
     </div>
 
     {/* empresa */}
@@ -196,11 +190,61 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
         </span>
       )}
 
+       <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Situação */}
+        <span
+          className={`status-badge ${
+            c.situacao === "ATIVA" ? "on" : "off"
+          }`}
+        >
+          <span className="status-dot" />
+          {c.situacao || "—"}
+        </span>
+
+        {/* Indicador ativo */}
+        {c.active && c.situacao !== "ATIVA" && (
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "4px 8px",
+              borderRadius: 999,
+              background: "rgba(34,197,94,.10)",
+              border: "1px solid rgba(34,197,94,.18)",
+              color: "#16a34a",
+              fontSize: 11,
+              fontWeight: 800,
+            }}
+          >
+            <span
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: 999,
+                background: "#22c55e",
+                boxShadow: "0 0 0 4px rgba(34,197,94,.12)",
+              }}
+            />
+          </span>
+        )}
+      </div>
       {/* status */}
-      <span className={`status-badge ${c.active ? "on" : "off"}`}>
+      {/* <span
+        className={`status-badge ${
+          c.situacao === "ATIVA" ? "on" : "off"
+        }`}
+      >
         <span className="status-dot" />
-        {c.active ? "Ativo" : "Desativado"}
-      </span>
+        {c.situacao === "ATIVA" ? "Ativo" : "Encerrada"}
+      </span> */}
     </div>
   </div>
 
@@ -255,7 +299,7 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
         <tr>
           <Th style={{ ...thStyle}}>Cod.</Th>
           <Th style={thStyle}>Empresa</Th>
-          <Th style={thStyle}>Situação</Th>
+          {/* <Th style={thStyle}>Situação</Th> */}
           <Th style={thStyle}>CNPJ</Th>
           <Th style={thStyle}>Grupo</Th>
           <Th style={thStyle}>Status</Th>
@@ -370,22 +414,7 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
             </Td>
 
              {/* Situação */}
-            <Td style={tdBaseStyle}>
-              {c.situacao ? (
-                <Badge
-                  label={c.situacao}
-                  variant={
-                    c.situacao === "ATIVA"
-                      ? "green"
-                      : c.situacao === "ENCERRADA"
-                      ? "red"
-                      : "yellow"
-                  }
-                />
-              ) : (
-                <span style={{ color: "#cbd5e1", fontWeight: 600 }}>—</span>
-              )}
-            </Td>
+            
 
             {/* CNPJ */}
             <Td style={tdBaseStyle}>
@@ -440,15 +469,100 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
               )}
             </Td>
 
-           
+           <Td style={tdBaseStyle}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                flexWrap: "wrap",
+              }}
+            >
+              {c.situacao ? (
+                <Badge
+                  label={c.situacao}
+                  variant={
+                    c.situacao === "ATIVA"
+                      ? "green"
+                      : c.situacao === "ENCERRADA"
+                      ? "red"
+                      : "yellow"
+                  }
+                />
+              ) : (
+                <span style={{ color: "#cbd5e1", fontWeight: 600 }}>—</span>
+              )}
 
-            <Td style={tdBaseStyle}>
+              {/* indicador de sistema ativo */}
+              {/* indicador de sistema ativo */}
+              {c.active && c.situacao !== "ATIVA" && (
+                <div
+                  className="system-active-wrapper"
+                  style={{
+                    position: "relative",
+                    display: "inline-flex",
+                    alignItems: "center",
+                  }}
+                >
               
-                  <span className={`status-badge ${c.active ? "on" : "off"}`}>
-                    <span className="status-dot" />
-                    {c.active ? "Ativo" : "Desativado"}
-                  </span>
-            </Td>
+
+                  {/* floating card */}
+                 
+              {c.active && c.situacao !== "ATIVA" && (
+                <span
+                  onMouseEnter={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+
+                    setTooltipPos({
+                      top: rect.bottom + 10,
+                      left: rect.right - 280,
+                      situacao: c.situacao,
+                    });
+                  }}
+                  onMouseLeave={() => setTooltipPos(null)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "4px 8px",
+                    borderRadius: 999,
+                    background: "rgba(34,197,94,.10)",
+                    border: "1px solid rgba(34,197,94,.18)",
+                    color: "#16a34a",
+                    fontSize: 11,
+                    fontWeight: 800,
+                    whiteSpace: "nowrap",
+                    cursor: "help",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: 999,
+                      background: "#22c55e",
+                      boxShadow: "0 0 0 4px rgba(34,197,94,.12)",
+                    }}
+                  />
+
+                </span>
+              )}
+                   
+                </div>
+              )}
+            </div>
+          </Td>
+
+            {/* <Td style={tdBaseStyle}>
+            <span
+              className={`status-badge ${
+                c.situacao === "ATIVA" ? "on" : "off"
+              }`}
+            >
+              <span className="status-dot" />
+              {c.situacao === "ATIVA" ? "Ativo" : "Encerrada"}
+            </span>
+          </Td> */}
 
             {/* Ação */}
            <Td
@@ -468,7 +582,7 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
                 }}
               >
                 {/* 👁 Ver empresa */}
-                <button
+                {/* <button
                   title="Abrir empresa"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -489,7 +603,7 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
                   }}
                 >
                   <Eye size={17} strokeWidth={2.2} />
-                </button>
+                </button> */}
 
                 {/* 🔄 Ativar / Desativar */}
                 <button
@@ -498,7 +612,28 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
                     e.stopPropagation();
                     onToggleActive(c.id, !c.active);
                   }}
-                  style={actionBtnStyle(c.active ? "#ef4444" : "#16a34a")}
+                  style={{
+                    ...actionBtnStyle(c.active ? "#ef4444" : "#16a34a"),
+
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+
+                    minWidth: 118,
+                    height: 38,
+
+                    padding: "0 14px",
+
+                    borderRadius: 12,
+
+                    fontSize: 12.5,
+                    fontWeight: 800,
+
+                    whiteSpace: "nowrap",
+
+                    transition: "all .18s ease",
+                  }}
                   onMouseEnter={(e) => {
                     const el = e.currentTarget;
 
@@ -520,9 +655,15 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
                   }}
                 >
                   {c.active ? (
-                    <PowerOff size={17} strokeWidth={2.2} />
+                    <>
+                      <PowerOff size={17} strokeWidth={2.2} />
+                      Desativar
+                    </>
                   ) : (
-                    <Power size={17} strokeWidth={2.2} />
+                    <>
+                      <Power size={17} strokeWidth={2.2} />
+                      Ativar
+                    </>
                   )}
                 </button>
               </div>
@@ -531,6 +672,57 @@ export function CompanyListTable({ items, onOpenCompany, onToggleActive }: Props
         ))}
       </tbody>
       </Table>
+
+      {tooltipPos && (
+  <div
+    style={{
+      position: "fixed",
+      top: tooltipPos.top,
+      left: tooltipPos.left,
+      width: 280,
+      padding: 14,
+      borderRadius: 18,
+      background: "#fff",
+      border: "1px solid #e2e8f0",
+      boxShadow: "0 24px 60px rgba(15,23,42,.20)",
+      zIndex: 99999,
+      pointerEvents: "none",
+    }}
+  >
+   <strong
+  style={{
+    display: "block",
+    fontSize: 12,
+    color: "#0f172a",
+    marginBottom: 6,
+    fontWeight: 900,
+  }}
+>
+  Status operacional ativo
+</strong>
+
+<div
+  style={{
+    fontSize: 12.5,
+    lineHeight: 1.65,
+    color: "#64748b",
+  }}
+>
+  Esta empresa ainda está ativa no sistema, mesmo com status
+  <strong
+    style={{
+      padding: "2px 6px",
+      borderRadius: 6,
+      fontSize: 11.5,
+      fontWeight: "bold",
+      color:"#000"
+    }}
+  >
+    {tooltipPos.situacao}.
+  </strong>
+</div>
+  </div>
+)}
   </div>
 );
 }

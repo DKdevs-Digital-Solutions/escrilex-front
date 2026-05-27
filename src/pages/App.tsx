@@ -52,12 +52,12 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
       icon: <Activity size={15} strokeWidth={1.8} />,
       roles: ["ADMIN","GESTOR_EMPRESA"],
     },
-    {
-        id: "expectationMatrix",
-        label: "Matriz",
-        icon: <ClipboardList size={15} strokeWidth={1.8} />,
-        roles: ["ADMIN", "GESTOR_EMPRESA"],
-      },
+    // {
+    //     id: "expectationMatrix",
+    //     label: "Matriz",
+    //     icon: <ClipboardList size={15} strokeWidth={1.8} />,
+    //     roles: ["ADMIN", "GESTOR_EMPRESA"],
+    //   },
       { id: "companies", label: "Empresas", icon: <Briefcase size={15} strokeWidth={1.8} />, roles: [] }
       
     ],

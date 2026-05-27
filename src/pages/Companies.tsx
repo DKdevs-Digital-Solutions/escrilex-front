@@ -86,10 +86,12 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
     load();
   }, []);
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
 
-    return items.filter((c) => {
+  const filtered = useMemo(() => {
+  const q = search.toLowerCase().trim();
+  const qNumbers = q.replace(/\D/g, "");
+
+  return items.filter((c) => {
     if (filterSituacao && c.situacao !== filterSituacao) return false;
     if (filterGrupo && c.grupo !== filterGrupo) return false;
 
@@ -99,15 +101,21 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
 
     if (!q) return true;
 
+    const razaoSocial = String(c.razaoSocial || "").toLowerCase();
+    const nomeFantasia = String(c.nomeFantasia || "").toLowerCase();
+    const cnpj = String(c.cnpj || "").replace(/\D/g, "");
+    const cod = String(c.cod || "").toLowerCase();
+    const grupo = String(c.grupo || "").toLowerCase();
+
     return (
-      (c.razaoSocial || "").toLowerCase().includes(q) ||
-      (c.nomeFantasia || "").toLowerCase().includes(q) ||
-      (c.cnpj || "").replace(/\D/g, "").includes(q.replace(/\D/g, "")) ||
-      (c.cod || "").toLowerCase().includes(q) ||
-      (c.grupo || "").toLowerCase().includes(q)
+      razaoSocial.includes(q) ||
+      nomeFantasia.includes(q) ||
+      cod.includes(q) ||
+      grupo.includes(q) ||
+      (qNumbers && cnpj.includes(qNumbers))
     );
   });
-  }, [items, search, filterSituacao, filterGrupo, filterStatus]);
+}, [items, search, filterSituacao, filterGrupo, filterStatus]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -138,16 +146,19 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
     height: 50,
   };
 
-  async function handleToggleActive(id: string, active: boolean) {
+async function handleToggleActive(id: string, active: boolean) {
   try {
-    await companyRepository.update(id, { active });
+    await companyRepository.update(id, {
+      active,
+      situacao: active ? "ATIVA" : "ENCERRADA",
+    });
 
     toast(
-      active ? "Empresa ativada com sucesso" : "Empresa desativada",
+      active ? "Empresa ativada com sucesso" : "Empresa encerrada",
       "success"
     );
 
-    await load(); // recarrega lista
+    await load();
   } catch (e: any) {
     toast(e.message || "Erro ao atualizar status", "error");
   }
@@ -261,7 +272,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
               >
                 <Plus size={15} strokeWidth={2.8} />
               </span>
-              Nova empresa
+              Cadastrar Empresa
             </button>
           </div>
         </div>
@@ -307,7 +318,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
           </div>
         </div>
 
-        <div style={{ flex: 1, minWidth: 240, position: "relative" }}>
+        <div style={{ flex: 1, minWidth: 240, maxWidth: 500, position: "relative" }}>
           <div
             style={{
               position: "absolute",
@@ -324,7 +335,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar razão pelo CNPJ..."
+            placeholder="Buscar por empresa, código, CNPJ ou grupo..."
             style={{
               ...iStyle,
               width: "100%",
@@ -346,7 +357,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
               onClick={() => setSearch("")}
               style={{
                 position: "absolute",
-                right: 10,
+                right: 20,
                 top: "50%",
                 height: 50,
                 transform: "translateY(-15%)",
@@ -363,7 +374,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
         </div>
 
         <PremiumSelect
-          label="Situação"
+          label="Status"
           value={filterSituacao}
           onChange={setFilterSituacao}
           options={[
@@ -379,7 +390,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
           ]}
         />
 
-         <PremiumSelect
+         {/* <PremiumSelect
           label="Status"
           value={filterStatus}
           onChange={setFilterStatus}
@@ -401,9 +412,9 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
               ...grupos.map((g) => ({ value: g, label: g })),
             ]}
           />
-        )}
+        )} */}
 
-        {hasFilters && (
+        {/* {hasFilters && (
           <button
             type="button"
             onClick={() => {
@@ -461,7 +472,7 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
             </div>
 
           </button>
-        )}
+        )} */}
       </div>
 
       {/* listagem */}

@@ -864,7 +864,7 @@ async function handleSaveResponsibles() {
     { id: "dados", label: "Dados" },
     { id: "socios", label: "Sócios", count: socios.length },
     { id: "responsaveis", label: "Responsáveis", count: sectors.length },
-    { id: "checklist", label: "Checklist" },
+    { id: "checklist", label: "Processos" },
     ...(isAdmin
       ? [{ id: "historico" as TabId, label: "Histórico", count: historicoRuns.length }]
       : []),
@@ -880,9 +880,9 @@ async function handleSaveResponsibles() {
     >
       <CompanyDetailHeader company={company} onBack={onBack} />
 
-      <div style={{ marginTop: 16 }}>
+      <div style={{ marginTop: 16, background: 'transparent' }}>
         
-       <div style={{
+       {/* <div style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "stretch",
@@ -930,7 +930,7 @@ async function handleSaveResponsibles() {
               hint="Setores configuráveis"
             />
           </div>
-        </div>
+        </div> */}
 
         <div
           style={{
@@ -944,7 +944,7 @@ async function handleSaveResponsibles() {
         </div>
 
         {activeTab === "dados" && (
-          <div style={{ ...cardShellStyle(), padding: 0 }}>
+          <div style={{  padding: 0, boxShadow: "none", border: "none" }}>
             <CompanyDataTab
               company={company}
               canEdit={canEdit}
