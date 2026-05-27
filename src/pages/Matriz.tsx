@@ -216,11 +216,11 @@ const {
         visibleColumnsCount={visibleColumns.length}
       />
 
-      <MatrixFilters
+      {/* <MatrixFilters
         search={search}
         setSearch={setSearch}
         onOpenFilters={() => setFiltersOpen(true)}
-      />
+      /> */}
 
       {filtersOpen && (
         <AdvancedFiltersModal

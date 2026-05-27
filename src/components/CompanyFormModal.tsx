@@ -66,7 +66,7 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
     <Modal
       open={open}
       onClose={onClose}
-      title="Nova empresa"
+      title="Cadastrar Empresa"
       width={800}
       footer={
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
@@ -93,7 +93,7 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
         {/* 🔷 CNPJ */}
-        <Section title="Consulta CNPJ">
+        <Section title="">
           <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
             <div style={{ flex: 1 }}>
                 <Input
@@ -171,11 +171,11 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
         </Section>
 
         {/* 🔷 SITUAÇÃO */}
-        <Section title="Situação">
+        <Section title="Status">
           <FormGrid cols={3}>
             <Select
               style={{ height: 48 }}
-              label="Situação"
+              label="Status"
               value={form.situacao}
               onChange={set("situacao")}
             >
@@ -202,7 +202,7 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
               <option value="ENCERRADA">Encerrada</option>
             </Select>
 
-            <Input style={{ height: 48 }} type="date" label="Data situação" value={form.dataSituacao} onChange={set("dataSituacao")} />
+            <Input style={{ height: 48 }} type="date" label="Data status" value={form.dataSituacao} onChange={set("dataSituacao")} />
 
             <Select style={{ height: 48 }} label="Motivo entrada" value={form.motivoEntrada} onChange={set("motivoEntrada")}>
               <option value="">Selecione...</option>
