@@ -1,18 +1,26 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useToast } from "../toast";
-import { Card, Empty, Loading } from "../ui";
+import { Card, Loading } from "../ui";
 import {
   Plus,
   Search,
   ChevronLeft,
   ChevronRight,
   X,
-  Building2,
   SlidersHorizontal,
+  ChevronDown,
 } from "lucide-react";
+
 import { useCompanies } from "../hooks/useCompanies";
+import { useExpectationMatrix } from "../hooks/useExpectationMatrix";
+
 import { CompanyList } from "../components/CompanyList";
 import { CompanyFormModal } from "../components/CompanyFormModal";
+import { companyRepository } from "../repository/company.repository";
+
+import { ColumnsPanel } from "../components/ColumnsPanel";
+import { MatrixDrawer } from "../components/MatrixDrawer";
+import { MatrixStats } from "../components/ExpectationMatrix/MatrixStats";
 
 interface CompanyForm {
   cnpj: string;
@@ -66,62 +74,132 @@ const EMPTY_FORM: CompanyForm = {
 
 const PAGE_SIZE = 20;
 
-export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => void }) {
+const DEFAULT_VISIBLE_COLUMNS = [
+  "codigo",
+  "empresa",
+  "cnpjCpf",
+  "grupo",
+  "status",
+];
+
+export function Companies({
+  onOpenCompany,
+}: {
+  onOpenCompany: (id: string) => void;
+}) {
   const { toast } = useToast();
+
   const [form, setForm] = useState<CompanyForm>(EMPTY_FORM);
   const [loadingCnpj, setLoadingCnpj] = useState(false);
+
   const [search, setSearch] = useState("");
   const [filterSituacao, setFilterSituacao] = useState("");
   const [filterGrupo, setFilterGrupo] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [page, setPage] = useState(1);
 
-  const { items, loading, create, buscarCnpj, load, modalOpen,setModalOpen, saving } = useCompanies();
+  const [columnsOpen, setColumnsOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<any>(null);
+  const [visibleKeys, setVisibleKeys] = useState<string[]>(
+    DEFAULT_VISIBLE_COLUMNS
+  );
+
+  const {
+    items,
+    loading,
+    create,
+    buscarCnpj,
+    load,
+    modalOpen,
+    setModalOpen,
+    saving,
+  } = useCompanies();
+
+  const {
+    columns,
+    options,
+    users,
+    loadingOptions,
+    total
+  } = useExpectationMatrix();
 
   useEffect(() => {
     setPage(1);
   }, [search, filterSituacao, filterGrupo, filterStatus]);
 
-    useEffect(() => {
+  useEffect(() => {
     load();
   }, []);
 
+  const visibleColumns = useMemo(() => {
+    return columns.filter((column: any) => visibleKeys.includes(column.key));
+  }, [columns, visibleKeys]);
+
+  function toggleColumn(key: string) {
+    setVisibleKeys((prev) =>
+      prev.includes(key)
+        ? prev.filter((item) => item !== key)
+        : [...prev, key]
+    );
+  }
+
+  const normalizedItems = useMemo(() => {
+    return items.map((company: any) => ({
+      ...company,
+
+      companyId: company.id,
+
+      codigo: company.cod,
+      empresa: company.razaoSocial,
+      cnpjCpf: company.cnpj,
+      matrizFilial: company.filial,
+      perfilComercial: company.perfil,
+      status: company.situacao,
+      entrada: company.dataEntrada,
+
+      dataInicioCobrancaFiscal:
+        company.dataInicioCobrancaFiscal || company.dataInicioCobranca,
+      dataFimCobrancaFiscal:
+        company.dataFimCobrancaFiscal || company.dataFimCobranca,
+    }));
+  }, [items]);
 
   const filtered = useMemo(() => {
-  const q = search.toLowerCase().trim();
-  const qNumbers = q.replace(/\D/g, "");
+    const q = search.toLowerCase().trim();
+    const qNumbers = q.replace(/\D/g, "");
 
-  return items.filter((c) => {
-    if (filterSituacao && c.situacao !== filterSituacao) return false;
-    if (filterGrupo && c.grupo !== filterGrupo) return false;
+    return normalizedItems.filter((c: any) => {
+      if (filterSituacao && c.situacao !== filterSituacao) return false;
+      if (filterGrupo && c.grupo !== filterGrupo) return false;
 
-    if (filterStatus !== "all" && String(c.active) !== filterStatus) {
-      return false;
-    }
+      if (filterStatus !== "all" && String(c.active) !== filterStatus) {
+        return false;
+      }
 
-    if (!q) return true;
+      if (!q) return true;
 
-    const razaoSocial = String(c.razaoSocial || "").toLowerCase();
-    const nomeFantasia = String(c.nomeFantasia || "").toLowerCase();
-    const cnpj = String(c.cnpj || "").replace(/\D/g, "");
-    const cod = String(c.cod || "").toLowerCase();
-    const grupo = String(c.grupo || "").toLowerCase();
+      const razaoSocial = String(c.razaoSocial || "").toLowerCase();
+      const nomeFantasia = String(c.nomeFantasia || "").toLowerCase();
+      const cnpj = String(c.cnpj || "").replace(/\D/g, "");
+      const cod = String(c.cod || "").toLowerCase();
+      const grupo = String(c.grupo || "").toLowerCase();
 
-    return (
-      razaoSocial.includes(q) ||
-      nomeFantasia.includes(q) ||
-      cod.includes(q) ||
-      grupo.includes(q) ||
-      (qNumbers && cnpj.includes(qNumbers))
-    );
-  });
-}, [items, search, filterSituacao, filterGrupo, filterStatus]);
+      return (
+        razaoSocial.includes(q) ||
+        nomeFantasia.includes(q) ||
+        cod.includes(q) ||
+        grupo.includes(q) ||
+        (qNumbers && cnpj.includes(qNumbers))
+      );
+    });
+  }, [normalizedItems, search, filterSituacao, filterGrupo, filterStatus]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const grupos = useMemo(
-    () => [...new Set(items.map((c) => c.grupo).filter(Boolean))].sort() as string[],
+    () =>
+      [...new Set(items.map((c: any) => c.grupo).filter(Boolean))].sort() as string[],
     [items]
   );
 
@@ -131,6 +209,88 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
     filterGrupo ||
     filterStatus !== "all"
   );
+
+  async function handleToggleActive(id: string, active: boolean) {
+    try {
+      await companyRepository.update(id, {
+        active,
+        situacao: active ? "ATIVA" : "ENCERRADA",
+      });
+
+      toast(
+        active ? "Empresa ativada com sucesso" : "Empresa encerrada",
+        "success"
+      );
+
+      await load();
+    } catch (e: any) {
+      toast(e.message || "Erro ao atualizar status", "error");
+    }
+  }
+
+  function exportCompaniesToExcel() {
+    const headers = visibleColumns.map((column: any) => column.label);
+
+    const rows = filtered.map((company: any) => {
+      return visibleColumns.map((column: any) => {
+        const value = company[column.key];
+
+        if (!value) return "";
+
+        if (column.type === "date") {
+          return formatDateBR(value);
+        }
+
+        if (column.type === "user") {
+          const user = users.find((u: any) => u.id === value);
+          return user?.name || "";
+        }
+
+        return String(value);
+      });
+    });
+
+    const html = `
+      <html>
+        <head>
+          <meta charset="UTF-8" />
+        </head>
+        <body>
+          <table>
+            <thead>
+              <tr>
+                ${headers.map((h: string) => `<th>${escapeHtml(h)}</th>`).join("")}
+              </tr>
+            </thead>
+            <tbody>
+              ${rows
+        .map(
+          (row: any[]) => `
+                    <tr>
+                      ${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}
+                    </tr>
+                  `
+        )
+        .join("")}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const blob = new Blob([html], {
+      type: "application/vnd.ms-excel;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "empresas.xls";
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }
 
   const iStyle: React.CSSProperties = {
     padding: "10px 12px",
@@ -146,27 +306,8 @@ export function Companies({ onOpenCompany }: { onOpenCompany: (id: string) => vo
     height: 50,
   };
 
-async function handleToggleActive(id: string, active: boolean) {
-  try {
-    await companyRepository.update(id, {
-      active,
-      situacao: active ? "ATIVA" : "ENCERRADA",
-    });
-
-    toast(
-      active ? "Empresa ativada com sucesso" : "Empresa encerrada",
-      "success"
-    );
-
-    await load();
-  } catch (e: any) {
-    toast(e.message || "Erro ao atualizar status", "error");
-  }
-}
-
   return (
     <div>
-      {/* topo premium */}
       <div
         style={{
           marginBottom: 20,
@@ -188,8 +329,6 @@ async function handleToggleActive(id: string, active: boolean) {
           }}
         >
           <div>
-           
-
             <h1
               style={{
                 margin: 0,
@@ -217,68 +356,53 @@ async function handleToggleActive(id: string, active: boolean) {
             </p>
           </div>
 
-          <div
+          <button
+            onClick={() => {
+              setForm(EMPTY_FORM);
+              setModalOpen(true);
+            }}
             style={{
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
-              gap: 12,
-              flexWrap: "wrap",
+              gap: 10,
+              padding: "13px 18px",
+              fontSize: 14,
+              fontWeight: 800,
+              borderRadius: 14,
+              border: "1px solid #BB9F58",
+              background: "#BB9F58",
+              color: "#fff",
+              cursor: "pointer",
+              fontFamily: "inherit",
+              transition: "all 0.18s ease",
+              boxShadow: "0 10px 24px rgba(187, 159, 88, 0.3)",
             }}
           >
-            
-            <button
-              onClick={() => {
-                setForm(EMPTY_FORM);
-                setModalOpen(true);
-              }}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 10,
-                padding: "13px 18px",
-                fontSize: 14,
-                fontWeight: 800,
-                borderRadius: 14,
-                border: "1px solid #BB9F58", // Borda combinando com o fundo
-                background: "#BB9F58",       // A cor que você solicitou
-                color: "#fff",
-                cursor: "pointer",
-                fontFamily: "inherit",
-                transition: "all 0.18s ease",
-                // Sombra ajustada para um tom escuro neutro ou quente
-                boxShadow: "0 10px 24px rgba(187, 159, 88, 0.3)", 
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.background = "#A38A4A"; // Escurece um pouco no hover
-                e.currentTarget.style.boxShadow = "0 14px 28px rgba(187, 159, 88, 0.45)";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.background = "#BB9F58"; // Volta para a cor original
-                e.currentTarget.style.boxShadow = "0 10px 24px rgba(187, 159, 88, 0.3)";
-              }}
-            >
-              <span
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: 999,
-                  background: "rgba(255,255,255,0.16)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Plus size={15} strokeWidth={2.8} />
-              </span>
-              Cadastrar Empresa
-            </button>
-          </div>
+            Cadastrar Empresa
+          </button>
         </div>
+
+      
       </div>
 
-      {/* filtros */}
+      <div
+        style={{
+          marginBottom: 0,
+          padding: "0px",
+          borderRadius: 20,
+         
+        }}
+      >
+        <MatrixStats
+          items={items}
+          total={total}
+          visibleColumnsCount={visibleColumns.length}
+        />
+        <br />
+      </div>
+
+
+
       <div
         style={{
           background: "#fff",
@@ -304,9 +428,9 @@ async function handleToggleActive(id: string, active: boolean) {
               color: "#334155",
             }}
           >
-            <SlidersHorizontal size={15} strokeWidth={2.2} />
             Filtros da listagem
           </div>
+
           <div
             style={{
               marginTop: 4,
@@ -318,7 +442,14 @@ async function handleToggleActive(id: string, active: boolean) {
           </div>
         </div>
 
-        <div style={{ flex: 1, minWidth: 240, maxWidth: 500, position: "relative" }}>
+        <div
+          style={{
+            flex: 1,
+            minWidth: 240,
+            maxWidth: 500,
+            position: "relative",
+          }}
+        >
           <div
             style={{
               position: "absolute",
@@ -342,14 +473,6 @@ async function handleToggleActive(id: string, active: boolean) {
               paddingLeft: 36,
               boxSizing: "border-box",
             }}
-            onFocus={(e) => {
-              e.target.style.borderColor = "#2563eb";
-              e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.10)";
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = "#e2e8f0";
-              e.target.style.boxShadow = "none";
-            }}
           />
 
           {search && (
@@ -357,10 +480,9 @@ async function handleToggleActive(id: string, active: boolean) {
               onClick={() => setSearch("")}
               style={{
                 position: "absolute",
-                right: 20,
+                right: 15,
                 top: "50%",
-                height: 50,
-                transform: "translateY(-15%)",
+                transform: "translateY(-50%)",
                 background: "none",
                 border: "none",
                 cursor: "pointer",
@@ -390,23 +512,12 @@ async function handleToggleActive(id: string, active: boolean) {
           ]}
         />
 
-         {/* <PremiumSelect
-          label="Status"
-          value={filterStatus}
-          onChange={setFilterStatus}
-          variant="active"
-          options={[
-            { value: "all", label: "Todas empresas" },
-            { value: "true", label: "Ativa" },
-            { value: "false", label: "Desativada" },
-          ]}
-        />
-
-        {grupos.length > 0 && (
+        {/* {grupos.length > 0 && (
           <PremiumSelect
             label="Grupo"
             value={filterGrupo}
             onChange={setFilterGrupo}
+            variant="group"
             options={[
               { value: "", label: "Todos grupos" },
               ...grupos.map((g) => ({ value: g, label: g })),
@@ -425,7 +536,7 @@ async function handleToggleActive(id: string, active: boolean) {
             }}
             style={{
               height: 52,
-              padding: "0 18px",
+              padding: "0 16px",
               display: "inline-flex",
               alignItems: "center",
               gap: 8,
@@ -438,44 +549,14 @@ async function handleToggleActive(id: string, active: boolean) {
               fontWeight: 800,
               cursor: "pointer",
               fontFamily: "inherit",
-              transition: "all 0.18s ease",
-              boxShadow: "0 6px 18px rgba(239,68,68,0.08)",
-              backdropFilter: "blur(6px)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background =
-                "linear-gradient(135deg, rgba(239,68,68,0.16), rgba(248,113,113,0.16))";
-              e.currentTarget.style.transform = "translateY(-1px)";
-              e.currentTarget.style.boxShadow =
-                "0 10px 24px rgba(239,68,68,0.18)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background =
-                "linear-gradient(135deg, rgba(239,68,68,0.08), rgba(248,113,113,0.08))";
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "0 6px 18px rgba(239,68,68,0.08)";
             }}
           >
-            <div
-              style={{
-                width: 26,
-                height: 26,
-                borderRadius: 999,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "rgba(239,68,68,0.12)",
-              }}
-            >
-              <X size={14} />
-            </div>
-
+            <X size={14} />
+            Limpar
           </button>
         )} */}
       </div>
 
-      {/* listagem */}
       <Card
         style={{
           borderRadius: 20,
@@ -486,7 +567,7 @@ async function handleToggleActive(id: string, active: boolean) {
           padding: 0,
         }}
       >
-        {loading ? (
+        {loading || loadingOptions ? (
           <div style={{ padding: 24 }}>
             <Loading message="Carregando empresas..." />
           </div>
@@ -495,11 +576,14 @@ async function handleToggleActive(id: string, active: boolean) {
             <CompanyList
               items={paginated}
               loading={loading}
+              visibleColumns={visibleColumns}
+              users={users}
               onOpenCompany={onOpenCompany}
               onToggleActive={handleToggleActive}
+              onOpenColumns={() => setColumnsOpen(true)}
+              onExportExcel={exportCompaniesToExcel}
             />
 
-           
             {filtered.length > PAGE_SIZE && (
               <div
                 style={{
@@ -520,7 +604,8 @@ async function handleToggleActive(id: string, active: boolean) {
                     fontWeight: 600,
                   }}
                 >
-                  {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de{" "}
+                  {(page - 1) * PAGE_SIZE + 1}–
+                  {Math.min(page * PAGE_SIZE, filtered.length)} de{" "}
                   {filtered.length} resultados
                 </span>
 
@@ -532,51 +617,6 @@ async function handleToggleActive(id: string, active: boolean) {
                   >
                     <ChevronLeft size={14} strokeWidth={2.5} />
                   </button>
-
-                  {(() => {
-                    const pages: number[] = [];
-
-                    if (totalPages <= 7) {
-                      for (let i = 1; i <= totalPages; i++) pages.push(i);
-                    } else if (page <= 4) {
-                      pages.push(1, 2, 3, 4, 5, -1, totalPages);
-                    } else if (page >= totalPages - 3) {
-                      pages.push(
-                        1,
-                        -1,
-                        totalPages - 4,
-                        totalPages - 3,
-                        totalPages - 2,
-                        totalPages - 1,
-                        totalPages
-                      );
-                    } else {
-                      pages.push(1, -1, page - 1, page, page + 1, -2, totalPages);
-                    }
-
-                    return pages.map((p, i) =>
-                      p < 0 ? (
-                        <span
-                          key={`e${i}`}
-                          style={{
-                            padding: "0 4px",
-                            color: "#94a3b8",
-                            fontSize: 13,
-                          }}
-                        >
-                          …
-                        </span>
-                      ) : (
-                        <button
-                          key={p}
-                          onClick={() => setPage(p)}
-                          style={pageNumberBtn(p === page)}
-                        >
-                          {p}
-                        </button>
-                      )
-                    );
-                  })()}
 
                   <button
                     disabled={page === totalPages}
@@ -592,6 +632,29 @@ async function handleToggleActive(id: string, active: boolean) {
         )}
       </Card>
 
+      {columnsOpen && (
+        <ColumnsPanel
+          columns={columns}
+          visibleKeys={visibleKeys}
+          setVisibleKeys={setVisibleKeys}
+          toggleColumn={toggleColumn}
+          onClose={() => setColumnsOpen(false)}
+        />
+      )}
+
+      {selectedRow && (
+        <MatrixDrawer
+          row={selectedRow}
+          columns={columns}
+          users={users}
+          options={options}
+          saving={false}
+          onSave={async () => { }}
+          onClose={() => setSelectedRow(null)}
+          readOnly
+        />
+      )}
+
       <CompanyFormModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -605,6 +668,29 @@ async function handleToggleActive(id: string, active: boolean) {
       />
     </div>
   );
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function formatDateBR(value: any) {
+  if (!value) return "";
+
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+    const [year, month, day] = value.slice(0, 10).split("-");
+    return `${day}/${month}/${year}`;
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleDateString("pt-BR");
 }
 
 function pageBtn(disabled: boolean): React.CSSProperties {
@@ -623,26 +709,6 @@ function pageBtn(disabled: boolean): React.CSSProperties {
     boxShadow: "0 2px 8px rgba(15,23,42,0.04)",
   };
 }
-
-function pageNumberBtn(active: boolean): React.CSSProperties {
-  return {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    border: `1px solid ${active ? "#2563eb" : "#e2e8f0"}`,
-    background: active ? "#dbeafe" : "#fff",
-    color: active ? "#2563eb" : "#374151",
-    fontWeight: active ? 800 : 600,
-    fontSize: 13,
-    cursor: "pointer",
-    fontFamily: "inherit",
-    transition: "all 0.16s ease",
-  };
-}
-
-
-import { ChevronDown } from "lucide-react";
-import { companyRepository } from "../repository/company.repository";
 
 type SelectTheme = {
   border: string;
@@ -674,24 +740,6 @@ const statusTheme: Record<string, SelectTheme> = {
     soft: "rgba(34,197,94,0.10)",
     iconShadow: "0 5px 12px rgba(34,197,94,0.18)",
   },
-  SAIDA: {
-    ...defaultTheme,
-    border: "rgba(234,179,8,0.32)",
-    bg: "linear-gradient(135deg, rgba(234,179,8,0.08), #ffffff)",
-    icon: "linear-gradient(135deg, #d97706, #fde68a)",
-    text: "#92400e",
-    soft: "rgba(234,179,8,0.10)",
-    iconShadow: "0 5px 12px rgba(234,179,8,0.18)",
-  },
-  SUSPENSA: {
-    ...defaultTheme,
-    border: "rgba(245,158,11,0.34)",
-    bg: "linear-gradient(135deg, rgba(245,158,11,0.08), #ffffff)",
-    icon: "linear-gradient(135deg, #f59e0b, #fed7aa)",
-    text: "#92400e",
-    soft: "rgba(245,158,11,0.10)",
-    iconShadow: "0 5px 12px rgba(245,158,11,0.18)",
-  },
   ENCERRADA: {
     ...defaultTheme,
     border: "rgba(239,68,68,0.30)",
@@ -702,29 +750,6 @@ const statusTheme: Record<string, SelectTheme> = {
     iconShadow: "0 5px 12px rgba(239,68,68,0.18)",
   },
 };
-
-const activeTheme: Record<string, SelectTheme> = {
-  true: {
-    ...defaultTheme,
-    border: "rgba(34,197,94,0.30)",
-    bg: "linear-gradient(135deg, rgba(34,197,94,0.075), #ffffff)",
-    icon: "linear-gradient(135deg, #22c55e, #86efac)",
-    text: "#15803d",
-    soft: "rgba(34,197,94,0.10)",
-    iconShadow: "0 5px 12px rgba(34,197,94,0.18)",
-  },
-  false: {
-    ...defaultTheme,
-    border: "rgba(239,68,68,0.30)",
-    bg: "linear-gradient(135deg, rgba(239,68,68,0.075), #ffffff)",
-    icon: "linear-gradient(135deg, #ef4444, #fca5a5)",
-    text: "#991b1b",
-    soft: "rgba(239,68,68,0.10)",
-    iconShadow: "0 5px 12px rgba(239,68,68,0.18)",
-  },
-};
-
-
 
 function getGroupTheme(name: string): SelectTheme {
   const colors = [
@@ -753,8 +778,6 @@ function getGroupTheme(name: string): SelectTheme {
   };
 }
 
-
-
 function PremiumSelect({
   label,
   value,
@@ -766,7 +789,7 @@ function PremiumSelect({
   value: string;
   onChange: (v: string) => void;
   options: { value: string; label: string }[];
-  variant?: "status" | "group" | "active";
+  variant?: "status" | "group";
 }) {
   const selectedLabel =
     options.find((opt) => opt.value === value)?.label ||
@@ -774,13 +797,11 @@ function PremiumSelect({
     "";
 
   const theme =
-    !value || value === "all"
+    !value
       ? defaultTheme
-      : variant === "active"
-      ? activeTheme[value] ?? defaultTheme
       : variant === "status"
-      ? statusTheme[value] ?? defaultTheme
-      : getGroupTheme(value);
+        ? statusTheme[value] ?? defaultTheme
+        : getGroupTheme(value);
 
   return (
     <div style={{ position: "relative", minWidth: 215, height: 52 }}>
@@ -806,11 +827,7 @@ function PremiumSelect({
         }}
       >
         {options.map((opt) => (
-          <option
-            key={opt.value}
-            value={opt.value}
-            style={{ color: "#0f172a" }}
-          >
+          <option key={opt.value} value={opt.value} style={{ color: "#0f172a" }}>
             {opt.label}
           </option>
         ))}

@@ -26,6 +26,13 @@ import {
   Cell,
   PieChart,
   Pie,
+  RadialBar,
+  RadialBarChart,
+  PolarAngleAxis,
+  RadarChart,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
 } from "recharts";
 import { useDashboardSummary } from "../hooks/useDashboardSummary";
 import { useDashboardDrilldown } from "../hooks/useDashboardDrilldown";
@@ -88,6 +95,9 @@ const [selectedDrilldownType, setSelectedDrilldownType] =
   useState<DrilldownType>("entries");
 
 
+const [selectedDrilldownLabel, setSelectedDrilldownLabel] = useState("");
+const [selectedDrilldownKey, setSelectedDrilldownKey] = useState("");
+
 
 const {
   data: drilldownData,
@@ -129,10 +139,24 @@ function openModal(
 
 useEffect(() => {
   if (!modalChart) return;
-  if (modalTab === "ativos" || modalTab === "Encerrada") return;
+
+  if (isChartFilterModal()) {
+    return;
+  }
+
+  if (modalTab === "ativos" || modalTab === "Encerrada") {
+    return;
+  }
 
   loadDrilldown();
-}, [modalChart, modalTab, selectedDrilldownType, startDate, endDate]);
+}, [
+  modalChart,
+  modalTab,
+  selectedDrilldownType,
+  selectedDrilldownKey,
+  startDate,
+  endDate,
+]);
 
 
 const activeCompanies = companies.filter((item: any) => item.active);
@@ -153,12 +177,77 @@ const normalizedDrilldownRows = drilldownRows.map((item: any) => {
   };
 });
 
+
+function normalizeValue(value: any) {
+  return String(value || "")
+    .trim()
+    .toLowerCase();
+}
+
+function isChartFilterModal() {
+  return (
+    selectedDrilldownType === "tributacao" ||
+    selectedDrilldownType === "ramo" ||
+    selectedDrilldownType === "perfil"
+  );
+}
+
+function getChartFilterRows() {
+  if (!selectedDrilldownKey) return [];
+
+  return companies.filter((company: any) => {
+    if (selectedDrilldownType === "tributacao") {
+      return normalizeValue(company.tributacao) === normalizeValue(selectedDrilldownKey);
+    }
+
+    if (selectedDrilldownType === "ramo") {
+      return normalizeValue(company.ramo) === normalizeValue(selectedDrilldownKey);
+    }
+
+    if (selectedDrilldownType === "perfil") {
+      return normalizeValue(company.perfil) === normalizeValue(selectedDrilldownKey);
+    }
+
+    return false;
+  });
+}
+
+
 const getModalRows = () => {
+  if (isChartFilterModal()) {
+    return getChartFilterRows();
+  }
+
   if (modalTab === "ativos") return activeCompanies;
   if (modalTab === "Encerrada") return inactiveCompanies;
 
   return normalizedDrilldownRows;
 };
+
+function getExtraColumnByDrilldown() {
+  if (selectedDrilldownType === "tributacao") {
+    return {
+      label: "Tributação",
+      key: "tributacao",
+    };
+  }
+
+  if (selectedDrilldownType === "ramo") {
+    return {
+      label: "Ramo",
+      key: "ramo",
+    };
+  }
+
+  if (selectedDrilldownType === "perfil") {
+    return {
+      label: "Perfil",
+      key: "perfil",
+    };
+  }
+
+  return null;
+}
 
 
 function getStatusStyle(status?: string) {
@@ -364,12 +453,27 @@ const drilldownTypeByChartType: Record<DashboardChartType, DrilldownType> = {
 };
 
 
+const taxationChartData = (data?.charts?.taxation ?? []).map((item: any) => ({
+  name: item.label,
+  value: item.total,
+  color: "#7c3aed",
+}));
+
+const activityBranchChartData = (data?.charts?.activityBranch ?? []).map((item: any) => ({
+  name: item.label,
+  value: item.total,
+  color: "#2563eb",
+}));
+
+const profileChartData = (data?.charts?.profile ?? []).map((item: any) => ({
+  name: item.label,
+  value: item.total,
+  color: "#0f766e",
+}));
 
 
     
 
-const [selectedDrilldownLabel, setSelectedDrilldownLabel] = useState("");
-const [selectedDrilldownKey, setSelectedDrilldownKey] = useState("");
 
       
 
@@ -670,9 +774,8 @@ React.useEffect(() => {
             style={{
               borderRadius: 20,
               padding: 22,
-              border: "1px solid #e2e8f0",
+              border: "2px solid #e2e8f0",
               background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
-              boxShadow: "0 12px 28px rgba(15,23,42,.06)",
             }}
           >
           <div style={{ marginBottom: 18, justifyContent:"space-between", display:"flex" }}>
@@ -893,9 +996,8 @@ React.useEffect(() => {
       style={{
         borderRadius: 20,
         padding: 22,
-        border: "1px solid #e2e8f0",
+        border: "2px solid #e2e8f0",
         background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
-        boxShadow: "0 12px 28px rgba(15,23,42,.06)",
       }}
     >
       <div style={{ marginBottom: 18 }}>
@@ -1100,6 +1202,49 @@ React.useEffect(() => {
     </div>
   </div>
   </div>
+
+  <div
+  className="dashboard-charts-grid"
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gap: 16,
+    marginTop: 16,
+  }}
+>
+ <TaxationDistributionChart
+  data={taxationChartData}
+  onItemClick={(item) => {
+    setSelectedChartType("tributacao");
+    setSelectedDrilldownType("tributacao");
+    setSelectedDrilldownLabel(item.name);
+    setSelectedDrilldownKey(item.name);
+    setModalChart("clientes");
+  }}
+/>
+
+<ActivityBranchRadialChart
+  data={activityBranchChartData}
+  onItemClick={(item) => {
+    setSelectedChartType("ramo");
+    setSelectedDrilldownType("ramo");
+    setSelectedDrilldownLabel(item.name);
+    setSelectedDrilldownKey(item.name);
+    setModalChart("clientes");
+  }}
+/>
+
+<ProfileRadarChart
+  data={profileChartData}
+  onItemClick={(item) => {
+    setSelectedChartType("perfil");
+    setSelectedDrilldownType("perfil");
+    setSelectedDrilldownLabel(item.name);
+    setSelectedDrilldownKey(item.name);
+    setModalChart("clientes");
+  }}
+/>
+</div>
 
 
 
@@ -1417,16 +1562,24 @@ React.useEffect(() => {
                   <th style={thStyle}>Data</th>
                 </tr>
               ) : (
-                <tr style={{ background: "#f8fafc" }}>
-                  <th style={thStyle}>Código</th>
-                  <th style={thStyle}>Empresa</th>
-                  <th style={thStyle}>CNPJ</th>
-                  <th style={thStyle}>Grupo</th>
-                  <th style={thStyle}>Status</th>
-                </tr>
+                (() => {
+                  const extraColumn = getExtraColumnByDrilldown();
+
+                  return (
+                    <tr style={{ background: "#f8fafc" }}>
+                      <th style={thStyle}>Código</th>
+                      <th style={thStyle}>Empresa</th>
+                      <th style={thStyle}>CNPJ</th>
+                      <th style={thStyle}>Grupo</th>
+
+                      {extraColumn && <th style={thStyle}>{extraColumn.label}</th>}
+
+                      <th style={thStyle}>Status</th>
+                    </tr>
+                  );
+                })()
               )}
             </thead>
-
             <tbody>
               {getModalRows().map((item: any) => {
                 if (isResponsibleModal) {
@@ -1533,6 +1686,37 @@ React.useEffect(() => {
                       </span>
                     </td>
 
+                    {(() => {
+                      const extraColumn = getExtraColumnByDrilldown();
+
+                      if (!extraColumn) return null;
+
+                      return (
+                        <td style={tdStyle}>
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: "7px 10px",
+                              borderRadius: 999,
+                              background: "rgba(37,99,235,.08)",
+                              border: "1px solid rgba(37,99,235,.14)",
+                              color: "#2563eb",
+                              fontSize: 11.5,
+                              fontWeight: 900,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                            title={item[extraColumn.key]}
+                          >
+                            {item[extraColumn.key] || "--"}
+                          </span>
+                        </td>
+                      );
+                    })()}
+
                     <td style={tdStyle}>
                       {(() => {
                         const statusStyle = getStatusStyle(item.situacao);
@@ -1562,6 +1746,7 @@ React.useEffect(() => {
                                 background: statusStyle.dot,
                               }}
                             />
+
                             {statusStyle.label}
                           </span>
                         );
@@ -1634,7 +1819,7 @@ function DashboardCard({
         borderRadius: 20,
         padding: 18,
         background: "#fff",
-        border: "1px solid #e2e8f0",
+        border: "2px solid #e2e8f0",
         cursor: "pointer",
         transition:
           "all 0.18s ease, transform 0.15s ease, box-shadow 0.18s ease",
@@ -1815,16 +2000,7 @@ function CustomTooltip({ active, payload, label }: any) {
         minWidth: 120,
       }}
     >
-      <div
-        style={{
-          fontSize: 12,
-          color: "#64748b",
-          fontWeight: 700,
-          marginBottom: 6,
-        }}
-      >
-        {label}
-      </div>
+      
 
       <div
         style={{
@@ -1867,7 +2043,7 @@ function CustomTooltip({ active, payload, label }: any) {
             fontWeight: 900,
           }}
         >
-          {data.value.toLocaleString("pt-BR")}
+          {data.value.toLocaleString("pt-BR")}%
         </strong>
       </div>
     </div>
@@ -1942,6 +2118,640 @@ function ModalOption({
     </button>
   );
 }
+
+
+function TaxationDistributionChart({
+  data,
+  onItemClick,
+}: {
+  data: any[];
+  onItemClick: (item: any) => void;
+}) {
+  const total = data.reduce((acc, item) => acc + Number(item.value || 0), 0);
+
+  return (
+    <div style={premiumChartCardStyle}>
+      <ChartHeader
+        title="Tributação das empresas"
+        description="Clique em um regime para visualizar as empresas vinculadas."
+      />
+
+      <div style={taxationSummaryStyle}>
+        <div>
+          <span style={taxationKickerStyle}>Total analisado</span>
+
+          <strong style={taxationTotalStyle}>
+            {total.toLocaleString("pt-BR")}
+          </strong>
+
+          <span style={taxationSubtitleStyle}>
+            {total === 1 ? "empresa localizada" : "empresas localizadas"}
+          </span>
+        </div>
+
+        <div style={taxationCountBoxStyle}>
+          <span> <strong>{data.length}</strong> {data.length === 1 ? "regime" : "regimes"}</span>
+        </div>
+      </div>
+
+     
+
+      <div style={taxationListStyle}>
+        {data.map((item, index) => {
+          const percent = total ? Math.round((item.value / total) * 100) : 0;
+          const color = TAX_COLORS[index % TAX_COLORS.length];
+
+          return (
+            <button
+              key={item.name}
+              onClick={() => onItemClick(item)}
+              style={taxationItemStyle}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "rgba(187,159,88,.45)";
+                e.currentTarget.style.background =
+                  "linear-gradient(135deg,#ffffff 0%,#fffaf0 100%)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "#e2e8f0";
+                e.currentTarget.style.background = "#fff";
+              }}
+            >
+              <div style={taxationItemTopStyle}>
+                <div style={taxationItemNameWrapStyle}>
+                  <span
+                    style={{
+                      ...taxationDotStyle,
+                      background: color,
+                      boxShadow: `0 0 0 4px ${color}22`,
+                    }}
+                  />
+
+                  <strong style={taxationNameStyle} title={item.name}>
+                    {item.name}
+                  </strong>
+                </div>
+
+                <div style={taxationValueBoxStyle}>
+                  <strong>{item.value}</strong>
+                  <span>{percent}%</span>
+                </div>
+              </div>
+
+              <div style={taxationProgressTrackStyle}>
+                <div
+                  style={{
+                    width: `${percent}%`,
+                    height: "100%",
+                    borderRadius: 999,
+                    background: color,
+                  }}
+                />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const TAX_COLORS = [
+  "#7c3aed",
+  "#0f766e",
+  "#2563eb",
+  "#dc2626",
+  "#94a3b8",
+];
+
+const taxationSummaryStyle: React.CSSProperties = {
+  marginTop: 20,
+  padding: 18,
+  borderRadius: 22,
+  background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+  border: "1px solid #e2e8f0",
+  boxShadow: "0 12px 28px rgba(15,23,42,.06)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 14,
+};
+
+const taxationKickerStyle: React.CSSProperties = {
+  display: "inline-flex",
+  padding: "5px 9px",
+  borderRadius: 8,
+  background: "#0f766e",
+  color: "#fff",
+  fontSize: 10.5,
+  fontWeight: 950,
+  textTransform: "uppercase",
+  letterSpacing: ".08em",
+};
+
+const taxationTotalStyle: React.CSSProperties = {
+  display: "block",
+  marginTop: 10,
+  fontSize: 40,
+  lineHeight: 1,
+  fontWeight: 950,
+  color: "#0f172a",
+  letterSpacing: "-0.04em",
+};
+
+const taxationSubtitleStyle: React.CSSProperties = {
+  display: "block",
+  marginTop: 6,
+  fontSize: 12,
+  color: "#64748b",
+  fontWeight: 800,
+};
+
+const taxationCountBoxStyle: React.CSSProperties = {
+  borderRadius: 10,
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+  placeItems: "center",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,.9)",
+  color: "#012942",
+  padding:"10px",
+
+};
+
+const taxationStackWrapperStyle: React.CSSProperties = {
+  marginTop: 16,
+  height: 18,
+  padding: 3,
+  borderRadius: 999,
+  overflow: "hidden",
+  display: "flex",
+  gap: 3,
+  background: "#e2e8f0",
+};
+
+const taxationItemStyle: React.CSSProperties = {
+  border: "1px solid #e2e8f0",
+  background: "#fff",
+  borderRadius: 18,
+  padding: 14,
+  cursor: "pointer",
+  display: "grid",
+  gap: 11,
+  textAlign: "left",
+  boxShadow: "0 8px 20px rgba(15,23,42,.04)",
+  transition: "all .16s ease",
+};
+
+const taxationValueBoxStyle: React.CSSProperties = {
+  minWidth: 58,
+  height: 38,
+  borderRadius: 14,
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+  display: "grid",
+  placeItems: "center",
+  color: "#0f172a",
+};
+
+
+const taxationListStyle: React.CSSProperties = {
+  display: "grid",
+  gap: 10,
+  marginTop: 16,
+};
+
+const taxationItemTopStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
+};
+
+const taxationItemNameWrapStyle: React.CSSProperties = {
+  minWidth: 0,
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+};
+
+const taxationDotStyle: React.CSSProperties = {
+  width: 10,
+  height: 10,
+  borderRadius: 999,
+  flexShrink: 0,
+};
+
+const taxationNameStyle: React.CSSProperties = {
+  fontSize: 13,
+  fontWeight: 950,
+  color: "#334155",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+};
+
+const taxationProgressTrackStyle: React.CSSProperties = {
+  height: 8,
+  borderRadius: 999,
+  background: "#e2e8f0",
+  overflow: "hidden",
+};
+
+
+
+
+function ActivityBranchRadialChart({
+  data,
+  onItemClick,
+}: {
+  data: any[];
+  onItemClick: (item: any) => void;
+}) {
+  const total = data.reduce((acc, item) => acc + Number(item.value || 0), 0);
+
+  const chartData = data.map((item, index) => {
+    const percent = total ? Math.round((Number(item.value || 0) / total) * 100) : 0;
+
+    return {
+      ...item,
+      percent,
+      fill: BRANCH_COLORS[index % BRANCH_COLORS.length],
+    };
+  });
+
+  return (
+    <div style={premiumChartCardStyle}>
+      <ChartHeader
+        title="Ramo de atividade"
+        description="Distribuição premium por segmento de atuação."
+      />
+
+      <div style={{ height: 260, marginTop: 18 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <RadialBarChart
+            innerRadius="24%"
+            outerRadius="92%"
+            data={chartData}
+            startAngle={90}
+            endAngle={-270}
+          >
+            <PolarAngleAxis
+              type="number"
+              domain={[0, 100]}
+              tick={false}
+            />
+
+            <RadialBar
+              dataKey="percent"
+              background={{ fill: "#e2e8f0" }}
+              cornerRadius={999}
+              barSize={20}
+              onClick={(entry: any) => onItemClick(entry)}
+              cursor="pointer"
+            />
+
+            <Tooltip content={<CustomTooltip />} />
+          </RadialBarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
+        {chartData.map((item) => (
+          <button
+            key={item.name}
+            onClick={() => onItemClick(item)}
+            style={{
+              border: "1px solid #e2e8f0",
+              background: "#fff",
+              borderRadius: 16,
+              padding: "11px 12px",
+              cursor: "pointer",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+              boxShadow: "0 8px 20px rgba(15,23,42,.04)",
+            }}
+          >
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 9,
+                minWidth: 0,
+              }}
+            >
+              <span
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: 999,
+                  background: item.fill,
+                  flexShrink: 0,
+                }}
+              />
+
+              <strong
+                style={{
+                  fontSize: 12.5,
+                  fontWeight: 900,
+                  color: "#334155",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+                title={item.name}
+              >
+                {item.name}
+              </strong>
+            </span>
+
+            <strong
+              style={{
+                fontSize: 12,
+                fontWeight: 950,
+                color: "#0f172a",
+                flexShrink: 0,
+              }}
+            >
+              {item.value} · {item.percent}%
+            </strong>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const BRANCH_COLORS = [
+  "#2563eb",
+  "#0f766e",
+  "#f97316",
+  "#7c3aed",
+  "#0891b2",
+];
+
+
+
+function ProfileRadarChart({
+  data,
+  onItemClick,
+}: {
+  data: any[];
+  onItemClick: (item: any) => void;
+}) {
+  const total = data.reduce((acc, item) => acc + Number(item.value || 0), 0);
+
+  const chartData = data.map((item) => ({
+    ...item,
+    percent: total ? Math.round((Number(item.value || 0) / total) * 100) : 0,
+  }));
+
+  return (
+    <div style={premiumChartCardStyle}>
+      <ChartHeader
+        title="Perfil"
+        description="Mapa visual da distribuição por perfil comercial."
+      />
+
+      <div style={{ width: "100%", height: 310, marginTop: 14 }}>
+        <ResponsiveContainer>
+          <RadarChart data={chartData}>
+            <PolarGrid stroke="#e2e8f0" />
+
+            <PolarAngleAxis
+              dataKey="name"
+              tick={{
+                fontSize: 11,
+                fontWeight: 800,
+                fill: "#475569",
+              }}
+            />
+
+            <PolarRadiusAxis
+              angle={90}
+              domain={[0, 100]}
+              tick={false}
+              axisLine={false}
+            />
+
+            <Radar
+              name="Perfil"
+              dataKey="percent"
+              stroke="#012942"
+              fill="#012942"
+              fillOpacity={0.18}
+              strokeWidth={3}
+              dot={{
+                r: 4,
+                fill: "#BB9F58",
+                stroke: "#fff",
+                strokeWidth: 2,
+              }}
+              onClick={(entry: any) => onItemClick(entry)}
+            />
+
+            <Tooltip content={<ProfileRadarTooltip />} />
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div style={profileLegendWrapStyle}>
+  {chartData.map((item, index) => {
+    const color = PROFILE_COLORS[index % PROFILE_COLORS.length];
+
+    return (
+      <button
+        key={item.name}
+        onClick={() => onItemClick(item)}
+        style={profileLegendItemStyle}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = color;
+          e.currentTarget.style.background = `${color}10`;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = "#e2e8f0";
+          e.currentTarget.style.background = "#fff";
+        }}
+      >
+        <span
+          style={{
+            ...profileLegendDotStyle,
+            background: color,
+            boxShadow: `0 0 0 4px ${color}18`,
+          }}
+        />
+
+        <span style={profileLegendNameStyle} title={item.name}>
+          {item.name}
+        </span>
+
+        <span style={profileLegendValueStyle}>
+          {item.value}
+        </span>
+      </button>
+    );
+  })}
+</div>
+    </div>
+  );
+}
+
+
+const profileLegendWrapStyle: React.CSSProperties = {
+  marginTop: 14,
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: 10,
+  
+};
+
+const profileLegendItemStyle: React.CSSProperties = {
+  minWidth: 0,
+  border: "1px solid #e2e8f0",
+  background: "#fff",
+  borderRadius: 16,
+  padding: "10px 12px",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  gap: 9,
+  transition: "all .16s ease",
+  
+};
+
+const profileLegendDotStyle: React.CSSProperties = {
+  width: 9,
+  height: 9,
+  borderRadius: 999,
+  flexShrink: 0,
+};
+
+const profileLegendNameStyle: React.CSSProperties = {
+  flex: 1,
+  minWidth: 0,
+  fontSize: 12,
+  fontWeight: 900,
+  color: "#334155",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  textAlign: "left",
+};
+
+const profileLegendValueStyle: React.CSSProperties = {
+  minWidth: 28,
+  height: 26,
+  borderRadius: 999,
+  background: "#f8fafc",
+  border: "1px solid #e2e8f0",
+  color: "#012942",
+  fontSize: 12,
+  fontWeight: 950,
+  display: "grid",
+  placeItems: "center",
+};
+
+
+function ProfileRadarTooltip({ active, payload }: any) {
+  if (!active || !payload?.length) return null;
+
+  const item = payload[0]?.payload;
+
+  return (
+    <div
+      style={{
+        borderRadius: 14,
+        border: "2px solid #e2e8f0",
+        background: "rgba(255,255,255,.96)",
+        boxShadow: "0 16px 40px rgba(15,23,42,.16)",
+        padding: "10px 12px",
+      }}
+    >
+      <strong
+        style={{
+          display: "block",
+          fontSize: 12,
+          color: "#0f172a",
+          marginBottom: 5,
+        }}
+      >
+        {item.name}
+      </strong>
+
+      <span
+        style={{
+          display: "block",
+          fontSize: 12,
+          color: "#64748b",
+          fontWeight: 800,
+        }}
+      >
+        {item.value} empresa(s) · {item.percent}%
+      </span>
+    </div>
+  );
+}
+
+
+const PROFILE_COLORS = [
+  "#012942",
+  "#BB9F58",
+  "#2563eb",
+  "#0f766e",
+  "#64748b",
+];
+
+
+
+
+function ChartHeader({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div>
+      <h3
+        style={{
+          margin: 0,
+          fontSize: 17,
+          fontWeight: 950,
+          color: "#0f172a",
+          letterSpacing: "-0.02em",
+        }}
+      >
+        {title}
+      </h3>
+
+      <p
+        style={{
+          margin: "6px 0 0",
+          color: "#64748b",
+          fontSize: 13,
+          lineHeight: 1.45,
+        }}
+      >
+        {description}
+      </p>
+    </div>
+  );
+}
+
+
+const premiumChartCardStyle: React.CSSProperties = {
+  borderRadius: 24,
+  padding: 22,
+  border: "2px solid #e2e8f0",
+  background:
+    "radial-gradient(circle at top right, rgba(37,99,235,.08), transparent 36%), linear-gradient(180deg,#ffffff 0%,#f8fbff 100%)",
+  overflow: "hidden",
+  
+};
+
+
+
 
 const tableStyle: React.CSSProperties = {
   width: "100%",

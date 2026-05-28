@@ -272,125 +272,7 @@ function SectionBlock({
   );
 }
 
-function SectionsPanel({
-  sections,
-  visibleSections,
-  setVisibleSections,
-  onClose,
-}: {
-  sections: { key: string; label: string; type: string }[];
-  visibleSections: Record<string, boolean>;
-  setVisibleSections: React.Dispatch<React.SetStateAction<any>>;
-  onClose: () => void;
-}) {
-  const allSelected = sections.every((section) => visibleSections[section.key]);
 
-  function toggleSection(key: string) {
-    setVisibleSections((prev: any) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  }
-
-  return (
-    <div style={panelOverlayStyle} onClick={onClose}>
-      <div style={columnsPanelStyle} onClick={(e) => e.stopPropagation()}>
-        <div style={columnsPanelHeaderStyle}>
-          <div>
-            <div style={panelKickerStyle}>Personalização</div>
-
-            <h2 style={panelTitleStyle}>Gerenciar seções</h2>
-
-            <p style={panelSubtitleStyle}>
-              Escolha os blocos que devem aparecer nos dados da empresa.
-            </p>
-          </div>
-
-          <button onClick={onClose} style={clearButtonStyle}>
-            <X size={16} />
-          </button>
-        </div>
-
-        <div style={columnsPanelActionsStyle}>
-          <button
-            style={softActionButtonStyle}
-            onClick={() => {
-              if (allSelected) {
-                setVisibleSections(DEFAULT_VISIBLE_SECTIONS);
-              } else {
-                setVisibleSections(
-                  sections.reduce((acc: any, section) => {
-                    acc[section.key] = true;
-                    return acc;
-                  }, {})
-                );
-              }
-            }}
-          >
-            {allSelected ? (
-              <>
-                <RotateCcw size={14} />
-                Restaurar padrão
-              </>
-            ) : (
-              <>
-                <Eye size={14} />
-                Mostrar todas
-              </>
-            )}
-          </button>
-        </div>
-
-        <div style={columnsListStyle}>
-          {sections.map((section) => {
-            const checked = visibleSections[section.key];
-
-            return (
-              <label
-                key={section.key}
-                style={{
-                  ...columnRowStyle,
-                  background: checked
-                    ? "linear-gradient(135deg, rgba(187,159,88,.12), rgba(250,204,21,.08))"
-                    : "#fff",
-                  borderColor: checked
-                    ? "rgba(187,159,88,.30)"
-                    : "#e2e8f0",
-                  boxShadow: checked
-                    ? "0 10px 24px rgba(187,159,88,.12)"
-                    : "none",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => toggleSection(section.key)}
-                  style={{
-                    width: 18,
-                    height: 18,
-                    cursor: "pointer",
-                    accentColor: "#BB9F58",
-                    transform: "translateY(1px)",
-                    filter: checked
-                      ? "drop-shadow(0 0 6px rgba(187,159,88,.45))"
-                      : "none",
-                  }}
-                />
-
-                <span style={{ flex: 1 }}>
-                  <strong style={columnLabelStyle}>{section.label}</strong>
-                  <span style={columnKeyStyle}>{section.key}</span>
-                </span>
-
-                <small style={columnTypeBadgeStyle}>{section.type}</small>
-              </label>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 type Props = {
   company: any;
@@ -514,93 +396,7 @@ export function CompanyDataTab({
   ef,
   fmtDate,
 }: Props) {
-  const [sectionsOpen, setSectionsOpen] = React.useState(false);
-
-  const [visibleSections, setVisibleSections] = React.useState(
-    DEFAULT_VISIBLE_SECTIONS
-  );
-
-  const sectionOptions = [
-    {
-      key: "identificacao",
-      label: "Identificação da Empresa",
-      type: "principal",
-    },
-    {
-      key: "acompanhamento",
-      label: "Informações de Acompanhamento",
-      type: "status",
-    },
-    {
-      key: "datas",
-      label: "Datas",
-      type: "cadastro",
-    },
-    {
-      key: "responsaveis",
-      label: "Responsáveis Técnicos",
-      type: "equipe",
-    },
-    {
-      key: "financeiro",
-      label: "Informações Financeiras",
-      type: "financeiro",
-    },
-    {
-      key: "marketing",
-      label: "Negócios / Marketing",
-      type: "restrito",
-    },
-    {
-      key: "particularidades",
-      label: "Particularidades da Empresa",
-      type: "observação",
-    },
-    {
-      key: "acessos",
-      label: "Acessos",
-      type: "segurança",
-    },
-  ];
-
-
-  function exportCompanyToExcel(company: any) {
-  const rows = [
-    {
-      Código: company.cod || "",
-      Empresa: company.razaoSocial || "",
-      "CNPJ/CPF": company.cnpj || "",
-      IE: company.ieAtual || "",
-      Grupo: company.grupo || "",
-      "Matriz / Filial": company.filial || "",
-      Tributação: company.tributacao || "",
-      Ramo: company.ramo || "",
-      Status: company.situacao || "",
-      "Data Entrada Fiscal": company.dataEntradaFiscal || "",
-      "Data Saída Fiscal": company.dataSaidaFiscal || "",
-      "Data Entrada Contábil": company.dataEntradaContabil || "",
-      "Data Saída Contábil": company.dataSaidaContabil || "",
-      "Data Entrada Folha": company.dataEntradaFolha || "",
-      "Data Saída Folha": company.dataSaidaFolha || "",
-      "Resp. Atendimento": company.respAtendimento || "",
-      "Analista Líder Fiscal": company.analistaLiderFiscal || "",
-      "Analista Líder Contábil": company.analistaLiderContabil || "",
-      "Resp. Fec. RH": company.respFecRh || "",
-      "Perfil Comercial": company.perfil || "",
-      Observações: company.observacoes || "",
-    },
-  ];
-
-  const worksheet = XLSX.utils.json_to_sheet(rows);
-  const workbook = XLSX.utils.book_new();
-
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Empresa");
-
-  XLSX.writeFile(
-    workbook,
-    `empresa-${company.cod || company.razaoSocial || "dados"}.xlsx`
-  );
-}
+  
 
   return (
     <>
@@ -652,138 +448,10 @@ export function CompanyDataTab({
             justifyContent: "flex-end",
           }}
         >
-           <button
-          onClick={() => exportCompanyToExcel(company)}
-          style={{
-            padding: "0 16px",
-
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-
-            borderRadius: 10,
-            border: "2px solid #ccc",
-
-            background:
-              "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
-
-            color: "#065f46",
-
-            fontSize: 13,
-            fontWeight: 800,
-            letterSpacing: ".02em",
-
-            cursor: "pointer",
-
-            boxShadow:
-              "0 10px 25px rgba(16,185,129,.10), inset 0 1px 0 rgba(255,255,255,.7)",
-
-            transition:
-              "all .18s ease",
-          }}
-          
-        >
-          <div
-            style={{
-              width: 24,
-              height: 24,
-              borderRadius: 8,
-
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-
-              background:
-                "linear-gradient(135deg, #22c55e, #16a34a)",
-
-              color: "#fff",
-
-              boxShadow:
-                "0 8px 18px rgba(34,197,94,.28)",
-            }}
-          >
-            <FileSpreadsheet size={14} />
-          </div>
-
-          Exportar
-        </button>
-
-
-
-          <button
-            type="button"
-            onClick={() => setSectionsOpen(true)}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 10,
-
-              padding: "5px 18px",
-
-              borderRadius: 10,
-
-              border: "2px solid rgba(187,159,88,.28)",
-
-              background:
-                "linear-gradient(135deg, rgba(187,159,88,.16), rgba(250,204,21,.08))",
-
-              color: "#7c5f18",
-
-              fontSize: 13,
-              fontWeight: 900,
-              letterSpacing: "-0.01em",
-
-              cursor: "pointer",
-
-              boxShadow:
-                "0 10px 24px rgba(187,159,88,.14), inset 0 1px 0 rgba(255,255,255,.65)",
-
-              backdropFilter: "blur(12px)",
-
-              transition: "all .18s cubic-bezier(.16,1,.3,1)",
-
-              position: "relative",
-              overflow: "hidden",
-            }}
            
-          >
-            <span
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: 10,
 
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
 
-                background: "rgba(255,255,255,.55)",
 
-                border: "1px solid rgba(187,159,88,.22)",
-
-                boxShadow: "0 6px 14px rgba(187,159,88,.10)",
-
-                flexShrink: 0,
-              }}
-            >
-              <Columns3 size={15} strokeWidth={2.4} />
-            </span>
-
-            <span>Gerenciar </span>
-
-            <span
-              style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "linear-gradient(120deg, transparent 20%, rgba(255,255,255,.28) 50%, transparent 80%)",
-                transform: "translateX(-120%)",
-                transition: "transform .8s ease",
-                pointerEvents: "none",
-              }}
-              className="btn-shine"
-            />
-          </button>
 
           {canEdit &&
             (editing ? (
@@ -818,7 +486,6 @@ export function CompanyDataTab({
         </div>
       </div>
 
-      {visibleSections.identificacao && (
         <SectionBlock
           title="Identificação da Empresa"
           subtitle="Dados principais de cadastro e enquadramento."
@@ -833,9 +500,7 @@ export function CompanyDataTab({
           <DataSelectField label="Tributação" value={company.tributacao} editing={editing} editValue={editForm.tributacao} onEditChange={ef("tributacao")} options={tributacaoOptions} />
           <DataSelectField label="Ramo" value={company.ramo} editing={editing} editValue={editForm.ramo} onEditChange={ef("ramo")} options={ramoOptions} />
         </SectionBlock>
-      )}
 
-      {visibleSections.acompanhamento && (
         <SectionBlock
           title="Informações de Acompanhamento"
           subtitle="Status atual da empresa dentro do escritório."
@@ -852,9 +517,8 @@ export function CompanyDataTab({
           />
           <div /> 
         </SectionBlock>
-      )}
+      
 
-      {visibleSections.datas && (
         <SectionBlock
           title="Datas"
           subtitle="Entradas, saídas e períodos de cobrança por departamento."
@@ -877,9 +541,7 @@ export function CompanyDataTab({
           <DataField label="Início cobrança Consultoria" value={fmtDate(company.dataInicioCobrancaConsultoria)} editing={editing} editValue={editForm.dataInicioCobrancaConsultoria} onEditChange={ef("dataInicioCobrancaConsultoria")} type="date" />
           <DataField label="Fim cobrança Consultoria" value={fmtDate(company.dataFimCobrancaConsultoria)} editing={editing} editValue={editForm.dataFimCobrancaConsultoria} onEditChange={ef("dataFimCobrancaConsultoria")} type="date" />
         </SectionBlock>
-      )}
-
-      {visibleSections.responsaveis && (
+      
         <SectionBlock
           title="Responsáveis Técnicos"
           subtitle="Carteira e responsáveis internos por área."
@@ -894,9 +556,8 @@ export function CompanyDataTab({
           <DataField label="Resp. Compliance" value={company.respCompliance} editing={editing} editValue={editForm.respCompliance} onEditChange={ef("respCompliance")} />
           <DataField label="Resp. Qualidade" value={company.respQualidade} editing={editing} editValue={editForm.respQualidade} onEditChange={ef("respQualidade")} />
         </SectionBlock>
-      )}
+      
 
-      {visibleSections.financeiro && (
         <SectionBlock
           title="Informações Financeiras"
           subtitle="Perfil comercial, cobranças, complexidade e acompanhamento financeiro."
@@ -912,9 +573,8 @@ export function CompanyDataTab({
           <DataSelectField label="Complexidade Fiscal" value={company.complexidadeFiscal} editing={editing} editValue={editForm.complexidadeFiscal} onEditChange={ef("complexidadeFiscal")} options={complexidadeOptions} />
           <DataSelectField label="Complexidade Contábil" value={company.complexidadeContabil} editing={editing} editValue={editForm.complexidadeContabil} onEditChange={ef("complexidadeContabil")} options={complexidadeOptions} />
         </SectionBlock>
-      )}
+      
 
-      {visibleSections.marketing && (
         <SectionBlock
           title="Informações área de negócios / marketing"
           subtitle="Campos restritos para contexto comercial e relacionamento."
@@ -923,9 +583,8 @@ export function CompanyDataTab({
           <DataField label="Motivo da entrada" value={company.motivoEntrada} editing={editing} editValue={editForm.motivoEntrada} onEditChange={ef("motivoEntrada")} multiline />
           <DataField label="Motivo da saída" value={company.motivoSaida} editing={editing} editValue={editForm.motivoSaida} onEditChange={ef("motivoSaida")} multiline />
         </SectionBlock>
-      )}
+      
 
-      {visibleSections.particularidades && (
         <SectionBlock
           title="Particularidades da Empresa"
           subtitle="Observações importantes para operação e atendimento."
@@ -933,9 +592,8 @@ export function CompanyDataTab({
         >
           <DataField label="Observações" value={company.observacoes} editing={editing} editValue={editForm.observacoes} onEditChange={ef("observacoes")} multiline highlight />
         </SectionBlock>
-      )}
+      
 
-      {visibleSections.acessos && (
         <SectionBlock
           title="Acessos"
           subtitle="Credenciais e acessos operacionais. Recomenda-se exibir apenas para usuários autorizados."
@@ -949,16 +607,8 @@ export function CompanyDataTab({
           <DataField label="Login Sefaz" value={company.sefazLogin} editing={editing} editValue={editForm.sefazLogin} onEditChange={ef("sefazLogin")} />
           <DataField label="Senha Sefaz" value={company.sefazSenha ? "••••••••" : null} editing={editing} editValue={editForm.sefazSenha} onEditChange={ef("sefazSenha")} type="password" />
         </SectionBlock>
-      )}
-
-      {sectionsOpen && (
-        <SectionsPanel
-          sections={sectionOptions}
-          visibleSections={visibleSections}
-          setVisibleSections={setVisibleSections}
-          onClose={() => setSectionsOpen(false)}
-        />
-      )}
+      
+      
     </>
   );
 }
