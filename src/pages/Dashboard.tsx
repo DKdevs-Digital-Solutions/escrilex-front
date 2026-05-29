@@ -1216,7 +1216,7 @@ React.useEffect(() => {
     gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
     gap: 16,
     marginTop: 16,
-    height:"400px"
+    height: !isMobile ? "400px" : "auto"
   }}
 >
  <TaxationDistributionChart
@@ -2257,7 +2257,6 @@ function TaxationDistributionChart({
                     boxShadow: "0 18px 45px rgba(15,23,42,.14)",
                     fontSize: 12,
                     position: "relative",
-                    right: "100px",
 
                   }}
                 >
@@ -2345,40 +2344,6 @@ const TAX_COLORS = [
   "#4C1D95", // Roxo profundo
   "#475569", // Slate
 ];
-
-
-
-
-const renderBranchLabel = (props: LabelProps) => {
-  const { x, y, width, value } = props;
-
-  if (x == null || y == null || width == null) return null;
-
-  const radius = 13;
-  const cx = Number(x) + Number(width) / 2;
-  const cy = Number(y) - radius - 4;
-
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={radius} fill="#012942" />
-
-      <text
-        x={cx}
-        y={cy}
-        fill="#fff"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        style={{
-          fontSize: 10,
-          fontWeight: 900,
-        }}
-      >
-        {String(value || "").slice(0, 2).toUpperCase()}
-      </text>
-    </g>
-  );
-};
-
 
 
 
@@ -2732,7 +2697,6 @@ function ProfileRadarTooltip({ active, payload }: any) {
         zIndex:3000000,
         bottom:"70px",
         position:"relative",
-        right:"170px"
       }}
     >
       <strong

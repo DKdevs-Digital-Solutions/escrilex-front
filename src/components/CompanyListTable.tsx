@@ -456,11 +456,11 @@ export function CompanyListTable({
                       >
                         {company.active ? (
                           <>
-                            <PowerOff size={17} strokeWidth={2.2} />
+                            <PowerOff size={17} strokeWidth={3} />
                           </>
                         ) : (
                           <>
-                            <Power size={17} strokeWidth={2.2} />
+                            <Power size={17} strokeWidth={3} />
                           </>
                         )}
                       </button>
@@ -524,8 +524,8 @@ function actionBtnStyle(color: string): React.CSSProperties {
     height: 38,
     borderRadius: 12,
     border: "1px solid #e2e8f0",
-    background: "#fff",
-    color,
+    background: color,
+    color: "#fff",
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
@@ -552,66 +552,6 @@ function tooltipStyle(pos: { top: number; left: number }): React.CSSProperties {
   };
 }
 
-const toolbarStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 12,
-  flexWrap: "wrap",
-  marginBottom: 14,
-};
-
-const toolbarTitleStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: 15,
-  fontWeight: 900,
-  color: "#0f172a",
-};
-
-const toolbarSubtitleStyle: React.CSSProperties = {
-  display: "block",
-  marginTop: 3,
-  fontSize: 12.5,
-  color: "#64748b",
-  fontWeight: 700,
-};
-
-const toolbarActionsStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 8,
-  flexWrap: "wrap",
-};
-
-const excelButtonStyle: React.CSSProperties = {
-  height: 38,
-  padding: "0 14px",
-  borderRadius: 12,
-  border: "1px solid #bbf7d0",
-  background: "linear-gradient(180deg, #ffffff, #f0fdf4)",
-  color: "#166534",
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 8,
-  fontSize: 12.5,
-  fontWeight: 850,
-  cursor: "pointer",
-};
-
-const columnsButtonStyle: React.CSSProperties = {
-  height: 38,
-  padding: "0 14px",
-  borderRadius: 12,
-  border: "1px solid #e2e8f0",
-  background: "linear-gradient(180deg, #ffffff, #f8fafc)",
-  color: "#334155",
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 8,
-  fontSize: 12.5,
-  fontWeight: 850,
-  cursor: "pointer",
-};
 
 const thStyle: React.CSSProperties = {
   fontSize: 11,
@@ -638,27 +578,6 @@ const tdBaseStyle: React.CSSProperties = {
   
 };
 
-const stickyActionHeaderStyle: React.CSSProperties = {
-  right: -2,
-  zIndex: 20,
-  background: "#fff",
-
-
-  boxShadow: `
-    inset 1px 0 0 #ccc,
-    -10px 0 24px rgba(15,23,42,.05)
-  `,
-
-  textAlign: "center",
-};
-
-const stickyActionCellStyle: React.CSSProperties = {
-  right: 0,
-  zIndex: 10,
-  background: "#fff",
-  borderRight: "1px solid #eef2f7",
-  boxShadow: "-14px 0 22px rgba(15,23,42,.06)",
-};
 
 const codePillStyle: React.CSSProperties = {
   display: "inline-flex",
