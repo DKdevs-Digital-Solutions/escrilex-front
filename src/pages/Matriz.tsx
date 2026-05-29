@@ -138,9 +138,6 @@ const DEFAULT_VISIBLE_COLUMNS = [
   "empresa",
   "cnpjCpf",
   "grupo",
-  "tributacao",
-  "ramo",
-  "perfilComercial",
   "status",
 ];
 

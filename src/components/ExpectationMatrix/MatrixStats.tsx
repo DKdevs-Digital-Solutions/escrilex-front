@@ -66,6 +66,7 @@ function StatCard({ icon, label, value, color, background }: any) {
           ...statIconStyle,
           color,
           background,
+          
         }}
       >
         {icon}

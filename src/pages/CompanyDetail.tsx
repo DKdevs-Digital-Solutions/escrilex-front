@@ -938,6 +938,8 @@ async function handleSaveResponsibles() {
             padding: 5,
             marginBottom: 18,
             width: "100%",
+            boxShadow:"none",
+            border: "2px solid #e2e8f0",
           }}
         >
           <Tabs active={activeTab} onChange={setActiveTab} tabs={TABS} />
@@ -961,7 +963,7 @@ async function handleSaveResponsibles() {
         )}
 
         {activeTab === "socios" && (
-          <div className="socios-section" style={{ ...cardShellStyle(), padding: 14 }}>
+          <div className="socios-section" style={{ ...cardShellStyle(), padding: 14, border: "2px solid #e2e8f0", boxShadow: "none" }}>
             <CompanyPartnersTab
               socios={socios}
               onAdd={() => {

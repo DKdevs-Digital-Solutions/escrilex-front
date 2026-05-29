@@ -33,10 +33,9 @@ export function CompanyDetailHeader({ company, onBack }: Props) {
         marginBottom: 22,
         padding: "20px 22px",
         borderRadius: 20,
-        border: "1px solid #e2e8f0",
+        border: "2px solid #e2e8f0",
         background:
           "linear-gradient(135deg, #ffffff 0%, #f8fbff 55%, #eef6ff 100%)",
-        boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
       }}
     >
       <div

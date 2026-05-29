@@ -141,7 +141,7 @@ function StatCard({
         padding: "30px 16px",
         borderRadius: 18,
         background: active ? softBg : "#fff",
-        border: `1px solid ${active ? color : softBorder}`,
+        border: `2px solid ${active ? color : softBorder}`,
         boxShadow: active
           ? `0 10px 24px ${softBg}`
           : "0 8px 20px rgba(15,23,42,0.05)",
@@ -285,9 +285,8 @@ export function UserList({
     <Card
       style={{
         borderRadius: 20,
-        border: "1px solid #e5e7eb",
+        border: "2px solid #e2e8f0",
         background: "linear-gradient(180deg, #ffffff 0%, #fcfdff 100%)",
-        boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
         overflow: "hidden",
         padding: 0,
       }}
@@ -651,9 +650,9 @@ export function UserList({
                         padding: "16px 14px",
                         borderTopLeftRadius: 16,
                         borderBottomLeftRadius: 16,
-                        borderTop: "1px solid #edf2f7",
-                        borderBottom: "1px solid #edf2f7",
-                        borderLeft: "1px solid #edf2f7",
+                        borderTop: "1px solid #ccc",
+                        borderBottom: "1px solid #ccc",
+                        borderLeft: "1px solid #ccc",
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -710,8 +709,8 @@ export function UserList({
                     <td
                       style={{
                         padding: "16px 14px",
-                        borderTop: "1px solid #edf2f7",
-                        borderBottom: "1px solid #edf2f7",
+                        borderTop: "1px solid #ccc",
+                        borderBottom: "1px solid #ccc",
                       }}
                     >
                       <div
@@ -736,8 +735,8 @@ export function UserList({
                     <td
                       style={{
                         padding: "16px 14px",
-                        borderTop: "1px solid #edf2f7",
-                        borderBottom: "1px solid #edf2f7",
+                        borderTop: "1px solid #ccc",
+                        borderBottom: "1px solid #ccc",
                       }}
                     >
                       {(() => {
@@ -799,8 +798,8 @@ export function UserList({
                     <td
                       style={{
                         padding: "16px 14px",
-                        borderTop: "1px solid #edf2f7",
-                        borderBottom: "1px solid #edf2f7",
+                        borderTop: "1px solid #ccc",
+                        borderBottom: "1px solid #ccc",
                       }}
                     >
                       <Badge
@@ -813,9 +812,9 @@ export function UserList({
                       style={{
                         padding: "16px 14px",
                         textAlign: "right",
-                        borderTop: "1px solid #edf2f7",
-                        borderBottom: "1px solid #edf2f7",
-                        borderRight: "1px solid #edf2f7",
+                        borderTop: "1px solid #ccc",
+                        borderBottom: "1px solid #ccc",
+                        borderRight: "1px solid #ccc",
                         borderTopRightRadius: 16,
                         borderBottomRightRadius: 16,
                       }}

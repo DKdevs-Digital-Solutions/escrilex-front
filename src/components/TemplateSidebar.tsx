@@ -71,9 +71,8 @@ export function TemplateSidebar({
       <div
         style={{
           background: "linear-gradient(180deg, #ffffff 0%, #fcfdff 100%)",
-          border: "1px solid #e5e7eb",
+          border: "2px solid #e2e8f0",
           borderRadius: 20,
-          boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
           overflow: "hidden",
         }}
       >
@@ -163,7 +162,7 @@ export function TemplateSidebar({
                       textAlign: "left",
                       padding: "14px 14px",
                       borderRadius: 14,
-                      border: `1px solid ${active ? "#93c5fd" : "#e5e7eb"}`,
+                      border: `2px solid ${active ? "#93c5fd" : "#e5e7eb"}`,
                       background: active
                         ? "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)"
                         : "#fff",

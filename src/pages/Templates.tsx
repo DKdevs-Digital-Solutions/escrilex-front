@@ -259,6 +259,60 @@ export function Templates() {
   };
 
   return (
+    <>
+    
+    <div
+        style={{
+          marginBottom: 20,
+          padding: "22px 24px",
+          borderRadius: 20,
+          border: "2px solid #e2e8f0",
+          background:
+            "linear-gradient(135deg, #ffffff 0%, #f8fbff 55%, #eef6ff 100%)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 16,
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 28,
+                lineHeight: 1.1,
+                fontWeight: 900,
+                color: "#0f172a",
+                letterSpacing: "-0.03em",
+              }}
+            >
+              Gestão de Processos
+            </h1>
+
+            <p
+              style={{
+                margin: "10px 0 0",
+                fontSize: 14.5,
+                color: "#64748b",
+                maxWidth: 720,
+                lineHeight: 1.6,
+              }}
+            >
+             Visualize, organize e acompanhe os processos operacionais cadastrados em um único painel.
+            </p>
+          </div>
+
+          
+        </div>
+        </div>
+
+
+    
     <div
         className="template-section"
         style={{
@@ -269,6 +323,12 @@ export function Templates() {
           width: "100%",
         }}
       >
+        
+      
+
+
+
+        
       <TemplateSidebar
         templates={templates}
         loading={loading}
@@ -288,7 +348,7 @@ export function Templates() {
           <div
             style={{
               background: "#fff",
-              border: "1px solid #e5e7eb",
+              border: "2px solid #e2e8f0",
               borderRadius: 20,
               boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
               padding: 24,
@@ -505,6 +565,9 @@ export function Templates() {
         </div>
       </Modal>
     </div>
+
+    </>
+
   );
 }
 

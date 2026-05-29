@@ -99,13 +99,14 @@ export const statsGridStyle: React.CSSProperties = {
   gap: 16,
   alignItems: "stretch",
   width: "100%",
+  
 };
 
 export const statCardStyle: React.CSSProperties = {
   padding: 16,
   borderRadius: 20,
   background: "#fff",
-  border: "1px solid #e2e8f0",
+  border: "2px solid #e2e8f0",
   boxShadow: "0 12px 30px rgba(15,23,42,.05)",
   display: "flex",
   alignItems: "center",

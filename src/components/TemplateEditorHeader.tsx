@@ -77,9 +77,8 @@ export function TemplateEditorHeader({
       style={{
         marginBottom: 20,
         borderRadius: 20,
-        border: "1px solid #e5e7eb",
+        border: "2px solid #e2e8f0",
         background: "#fff",
-        boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
         overflow: "hidden",
       }}
     >
@@ -87,7 +86,7 @@ export function TemplateEditorHeader({
       <div
         style={{
           padding: "18px 22px",
-          borderBottom: "1px solid #eef2f7",
+          borderBottom: "1px solid #e2e8f0",
           background:
             "linear-gradient(180deg, rgba(248,250,252,0.95) 0%, rgba(255,255,255,1) 100%)",
         }}

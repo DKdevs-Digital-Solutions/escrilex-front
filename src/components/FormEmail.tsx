@@ -246,7 +246,7 @@ export function EmailNotificationsSettings({
               padding: 24,
               borderRadius: 15,
               background: "#fff",
-              border: "1px solid #e2e8f0",
+              border: "2px solid #e2e8f0",
             }}
           >
             <div
@@ -480,7 +480,7 @@ export function EmailNotificationsSettings({
                 padding: 22,
                 height: "100%",
                 background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
-                border: "1px solid #e2e8f0",
+                border: "2px solid #e2e8f0",
                
               }}
             >

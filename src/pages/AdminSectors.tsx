@@ -113,10 +113,9 @@ export function AdminSectors() {
     marginBottom: 20,
     padding: "22px 24px",
     borderRadius: 20,
-    border: "1px solid #e2e8f0",
+    border: "2px solid #e2e8f0",
     background:
       "linear-gradient(135deg, #ffffff 0%, #f8fbff 55%, #eef6ff 100%)",
-    boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
   }}
 >
   <div

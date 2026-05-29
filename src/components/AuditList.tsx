@@ -178,7 +178,7 @@ function StatCard({
         padding: "30px 16px",
         borderRadius: 18,
         background: active ? softBg : "#fff",
-        border: `1px solid ${active ? color : softBorder}`,
+        border: `2px solid ${active ? color : softBorder}`,
         boxShadow: active
           ? `0 10px 24px ${softBg}`
           : "0 8px 20px rgba(15,23,42,0.05)",
@@ -273,20 +273,20 @@ const thStyle: React.CSSProperties = {
 
 const tdStyle: React.CSSProperties = {
   padding: "16px 14px",
-  borderTop: "1px solid #edf2f7",
-  borderBottom: "1px solid #edf2f7",
+  borderTop: "1px solid #ccc",
+  borderBottom: "1px solid #ccc",
 };
 
 const tdLeftStyle: React.CSSProperties = {
   borderTopLeftRadius: 16,
   borderBottomLeftRadius: 16,
-  borderLeft: "1px solid #edf2f7",
+  borderLeft: "1px solid #ccc",
 };
 
 const tdRightStyle: React.CSSProperties = {
   borderTopRightRadius: 16,
   borderBottomRightRadius: 16,
-  borderRight: "1px solid #edf2f7",
+  borderRight: "1px solid #ccc ",
 };
 
 export function AuditList({ items }: AuditListProps) {
@@ -436,9 +436,8 @@ React.useEffect(() => {
       <Card
         style={{
           borderRadius: 20,
-          border: "1px solid #e5e7eb",
+          border: "2px solid #e2e8f0",
           background: "linear-gradient(180deg, #ffffff 0%, #fcfdff 100%)",
-          boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
           overflow: "hidden",
           padding: 0,
         }}
@@ -480,20 +479,20 @@ React.useEffect(() => {
         </div>
 
        {!filteredItems.length ? (
-  <div style={{ padding: 28 }}>
-    <Empty message="Nenhum evento encontrado para esse filtro." />
-  </div>
-) : isMobile ? (
-  <div
-    style={{
-      padding: 14,
-      display: "grid",
-      gap: 12,
-    }}
-  >
-    {filteredItems.map((r) => {
-      const visual = getEntityVisual(r.entity);
-      const EntityIcon = visual.icon;
+      <div style={{ padding: 28 }}>
+        <Empty message="Nenhum evento encontrado para esse filtro." />
+      </div>
+    ) : isMobile ? (
+      <div
+        style={{
+          padding: 14,
+          display: "grid",
+          gap: 12,
+        }}
+      >
+        {filteredItems.map((r) => {
+          const visual = getEntityVisual(r.entity);
+          const EntityIcon = visual.icon;
 
       return (
         <div
@@ -502,8 +501,7 @@ React.useEffect(() => {
             padding: 14,
             borderRadius: 18,
             background: "#fff",
-            border: "1px solid #e5e7eb",
-            boxShadow: "0 8px 22px rgba(15,23,42,0.06)",
+            border: "2px solid #e5e7eb",
           }}
         >
           <div

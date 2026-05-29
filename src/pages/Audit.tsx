@@ -85,12 +85,11 @@ export function Audit() {
       <div
         style={{
           marginBottom: 20,
-          padding: "22px 24px",
+          padding: "10px 24px",
           borderRadius: 20,
-          border: "1px solid #e2e8f0",
+          border: "2px solid #e2e8f0",
           background:
             "linear-gradient(135deg, #ffffff 0%, #f8fbff 55%, #eef6ff 100%)",
-          boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
         }}
       >
         <div
@@ -133,7 +132,7 @@ export function Audit() {
 
           <div
             style={{
-              padding: "16px 18px",
+              padding: "10px 18px",
               borderRadius: 14,
               background: "#fff",
               border: "1px solid #e5e7eb",
@@ -213,7 +212,7 @@ export function Audit() {
       <div
         style={{
           background: "#fff",
-          border: "1px solid #e2e8f0",
+          border: "2px solid #e2e8f0",
           borderRadius: 18,
           padding: "18px 20px",
           marginBottom: 20,
@@ -221,7 +220,6 @@ export function Audit() {
           gap: 12,
           flexWrap: "wrap",
           alignItems: "flex-end",
-          boxShadow: "0 8px 24px rgba(15,23,42,0.04)",
         }}
       >
         <div style={{ width: "100%", marginBottom: 4 }}>
