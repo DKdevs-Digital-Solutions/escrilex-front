@@ -33,6 +33,12 @@ import {
   PolarGrid,
   PolarRadiusAxis,
   Radar,
+  Sector,
+  PieLabelRenderProps,
+  PieSectorShapeProps,
+  LabelProps,
+  CartesianGrid,
+  LabelList,
 } from "recharts";
 import { useDashboardSummary } from "../hooks/useDashboardSummary";
 import { useDashboardDrilldown } from "../hooks/useDashboardDrilldown";
@@ -1210,6 +1216,7 @@ React.useEffect(() => {
     gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
     gap: 16,
     marginTop: 16,
+    height:"400px"
   }}
 >
  <TaxationDistributionChart
@@ -2120,6 +2127,56 @@ function ModalOption({
 }
 
 
+const RADIAN = Math.PI / 180;
+
+const renderCustomizedLabel = ({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  percent,
+}: PieLabelRenderProps) => {
+  if (cx == null || cy == null || innerRadius == null || outerRadius == null) {
+    return null;
+  }
+
+  const radius = Number(innerRadius) + (Number(outerRadius) - Number(innerRadius)) * 0.55;
+  const x = Number(cx) + radius * Math.cos(-(midAngle ?? 0) * RADIAN);
+  const y = Number(cy) + radius * Math.sin(-(midAngle ?? 0) * RADIAN);
+
+  if (!percent || percent < 0.05) return null;
+
+  return (
+    <text
+      x={x}
+      y={y}
+      fill="#fff"
+      textAnchor="middle"
+      dominantBaseline="central"
+      style={{
+        fontSize: 12,
+        fontWeight: 900,
+        filter: "drop-shadow(0 2px 4px rgba(15,23,42,.35))",
+      }}
+    >
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
+
+const MyCustomPie = (props: PieSectorShapeProps) => {
+  return (
+    <Sector
+      {...props}
+      fill={TAX_COLORS[(props.index ?? 0) % TAX_COLORS.length]}
+      stroke="#fff"
+      strokeWidth={4}
+      cornerRadius={10}
+    />
+  );
+};
+
 function TaxationDistributionChart({
   data,
   onItemClick,
@@ -2129,6 +2186,12 @@ function TaxationDistributionChart({
 }) {
   const total = data.reduce((acc, item) => acc + Number(item.value || 0), 0);
 
+  const chartData = data.map((item, index) => ({
+    ...item,
+    value: Number(item.value || 0),
+    fill: TAX_COLORS[index % TAX_COLORS.length],
+  }));
+
   return (
     <div style={premiumChartCardStyle}>
       <ChartHeader
@@ -2136,225 +2199,187 @@ function TaxationDistributionChart({
         description="Clique em um regime para visualizar as empresas vinculadas."
       />
 
-      <div style={taxationSummaryStyle}>
-        <div>
-          <span style={taxationKickerStyle}>Total analisado</span>
-
-          <strong style={taxationTotalStyle}>
-            {total.toLocaleString("pt-BR")}
-          </strong>
-
-          <span style={taxationSubtitleStyle}>
-            {total === 1 ? "empresa localizada" : "empresas localizadas"}
-          </span>
-        </div>
-
-        <div style={taxationCountBoxStyle}>
-          <span> <strong>{data.length}</strong> {data.length === 1 ? "regime" : "regimes"}</span>
-        </div>
-      </div>
-
      
 
-      <div style={taxationListStyle}>
-        {data.map((item, index) => {
-          const percent = total ? Math.round((item.value / total) * 100) : 0;
-          const color = TAX_COLORS[index % TAX_COLORS.length];
+      <div
+        style={{
+          width: "100%",
+          height: 300,
+          position: "relative",
+          marginTop: 0,
+        }}
+      >
+        <PieChart
+          style={{
+            width: "100%",
+            height: "100%",
+            maxHeight: 350,
+            aspectRatio: 1,
+            padding: 0,
+          }}
+          responsive
+        >
+          <Pie
+            data={chartData}
+            dataKey="value"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            innerRadius="48%"
+            outerRadius="82%"
+            paddingAngle={4}
+            labelLine={false}
+            label={renderCustomizedLabel}
+            shape={MyCustomPie}
+            isAnimationActive
+            onClick={(item) => onItemClick(item)}
+            style={{ cursor: "pointer" }}
+          />
 
-          return (
-            <button
-              key={item.name}
-              onClick={() => onItemClick(item)}
-              style={taxationItemStyle}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "rgba(187,159,88,.45)";
-                e.currentTarget.style.background =
-                  "linear-gradient(135deg,#ffffff 0%,#fffaf0 100%)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "#e2e8f0";
-                e.currentTarget.style.background = "#fff";
-              }}
-            >
-              <div style={taxationItemTopStyle}>
-                <div style={taxationItemNameWrapStyle}>
-                  <span
-                    style={{
-                      ...taxationDotStyle,
-                      background: color,
-                      boxShadow: `0 0 0 4px ${color}22`,
-                    }}
-                  />
+          <Tooltip
+          
+            cursor={false}
+            content={({ active, payload }) => {
+              if (!active || !payload?.length) return null;
 
-                  <strong style={taxationNameStyle} title={item.name}>
-                    {item.name}
-                  </strong>
-                </div>
+              const item = payload[0].payload;
+              const percent = total
+                ? Math.round((Number(item.value || 0) / total) * 100)
+                : 0;
 
-                <div style={taxationValueBoxStyle}>
-                  <strong>{item.value}</strong>
-                  <span>{percent}%</span>
-                </div>
-              </div>
-
-              <div style={taxationProgressTrackStyle}>
+              return (
                 <div
                   style={{
-                    width: `${percent}%`,
-                    height: "100%",
-                    borderRadius: 999,
-                    background: color,
+                    background: "#fff",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: 16,
+                    padding: "10px 12px",
+                    boxShadow: "0 18px 45px rgba(15,23,42,.14)",
+                    fontSize: 12,
+                    position: "relative",
+                    right: "100px",
+
                   }}
-                />
-              </div>
-            </button>
-          );
-        })}
+                >
+                  <strong
+                    style={{
+                      display: "block",
+                      color: "#0f172a",
+                      marginBottom: 4,
+                    }}
+                  >
+                    {item.name}
+                  </strong>
+
+                  <span style={{ color: "#64748b" }}>
+                    {Number(item.value || 0).toLocaleString("pt-BR")} empresas
+                  </span>
+
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontWeight: 900,
+                      color: item.fill,
+                    }}
+                  >
+                    {percent}% 
+                  </div>
+                </div>
+              );
+            }}
+          />
+        </PieChart>
+
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <div style={{ textAlign: "center" }}>
+            <span
+              style={{
+                display: "block",
+                fontSize: 10,
+                fontWeight: 900,
+                color: "#94a3b8",
+                textTransform: "uppercase",
+                letterSpacing: ".08em",
+              }}
+            >
+              Total
+            </span>
+
+            <strong
+              style={{
+                display: "block",
+                fontSize: 28,
+                fontWeight: 950,
+                color: "#012942",
+                lineHeight: 1,
+              }}
+            >
+              {total.toLocaleString("pt-BR")}
+            </strong>
+          </div>
+        </div>
       </div>
+
     </div>
   );
 }
 
 const TAX_COLORS = [
-  "#7c3aed",
-  "#0f766e",
-  "#2563eb",
-  "#dc2626",
-  "#94a3b8",
+  "#1E3A8A", // Azul fiscal
+  "#0F766E", // Verde tributário
+  "#B45309", // Âmbar
+  "#7E22CE", // Roxo
+  "#BE123C", // Vinho
+  "#155E75", // Azul petróleo
+  "#166534", // Verde escuro
+  "#9A3412", // Marrom executivo
+  "#4C1D95", // Roxo profundo
+  "#475569", // Slate
 ];
 
-const taxationSummaryStyle: React.CSSProperties = {
-  marginTop: 20,
-  padding: 18,
-  borderRadius: 22,
-  background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
-  border: "1px solid #e2e8f0",
-  boxShadow: "0 12px 28px rgba(15,23,42,.06)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 14,
-};
 
-const taxationKickerStyle: React.CSSProperties = {
-  display: "inline-flex",
-  padding: "5px 9px",
-  borderRadius: 8,
-  background: "#0f766e",
-  color: "#fff",
-  fontSize: 10.5,
-  fontWeight: 950,
-  textTransform: "uppercase",
-  letterSpacing: ".08em",
-};
 
-const taxationTotalStyle: React.CSSProperties = {
-  display: "block",
-  marginTop: 10,
-  fontSize: 40,
-  lineHeight: 1,
-  fontWeight: 950,
-  color: "#0f172a",
-  letterSpacing: "-0.04em",
-};
 
-const taxationSubtitleStyle: React.CSSProperties = {
-  display: "block",
-  marginTop: 6,
-  fontSize: 12,
-  color: "#64748b",
-  fontWeight: 800,
-};
+const renderBranchLabel = (props: LabelProps) => {
+  const { x, y, width, value } = props;
 
-const taxationCountBoxStyle: React.CSSProperties = {
-  borderRadius: 10,
-  background: "#f8fafc",
-  border: "1px solid #e2e8f0",
-  placeItems: "center",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,.9)",
-  color: "#012942",
-  padding:"10px",
+  if (x == null || y == null || width == null) return null;
 
-};
+  const radius = 13;
+  const cx = Number(x) + Number(width) / 2;
+  const cy = Number(y) - radius - 4;
 
-const taxationStackWrapperStyle: React.CSSProperties = {
-  marginTop: 16,
-  height: 18,
-  padding: 3,
-  borderRadius: 999,
-  overflow: "hidden",
-  display: "flex",
-  gap: 3,
-  background: "#e2e8f0",
-};
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={radius} fill="#012942" />
 
-const taxationItemStyle: React.CSSProperties = {
-  border: "1px solid #e2e8f0",
-  background: "#fff",
-  borderRadius: 18,
-  padding: 14,
-  cursor: "pointer",
-  display: "grid",
-  gap: 11,
-  textAlign: "left",
-  boxShadow: "0 8px 20px rgba(15,23,42,.04)",
-  transition: "all .16s ease",
-};
-
-const taxationValueBoxStyle: React.CSSProperties = {
-  minWidth: 58,
-  height: 38,
-  borderRadius: 14,
-  background: "#f8fafc",
-  border: "1px solid #e2e8f0",
-  display: "grid",
-  placeItems: "center",
-  color: "#0f172a",
+      <text
+        x={cx}
+        y={cy}
+        fill="#fff"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        style={{
+          fontSize: 10,
+          fontWeight: 900,
+        }}
+      >
+        {String(value || "").slice(0, 2).toUpperCase()}
+      </text>
+    </g>
+  );
 };
 
 
-const taxationListStyle: React.CSSProperties = {
-  display: "grid",
-  gap: 10,
-  marginTop: 16,
-};
-
-const taxationItemTopStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 12,
-};
-
-const taxationItemNameWrapStyle: React.CSSProperties = {
-  minWidth: 0,
-  display: "flex",
-  alignItems: "center",
-  gap: 10,
-};
-
-const taxationDotStyle: React.CSSProperties = {
-  width: 10,
-  height: 10,
-  borderRadius: 999,
-  flexShrink: 0,
-};
-
-const taxationNameStyle: React.CSSProperties = {
-  fontSize: 13,
-  fontWeight: 950,
-  color: "#334155",
-  whiteSpace: "nowrap",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-};
-
-const taxationProgressTrackStyle: React.CSSProperties = {
-  height: 8,
-  borderRadius: 999,
-  background: "#e2e8f0",
-  overflow: "hidden",
-};
 
 
 
@@ -2366,128 +2391,208 @@ function ActivityBranchRadialChart({
   data: any[];
   onItemClick: (item: any) => void;
 }) {
-  const total = data.reduce((acc, item) => acc + Number(item.value || 0), 0);
-
-  const chartData = data.map((item, index) => {
-    const percent = total ? Math.round((Number(item.value || 0) / total) * 100) : 0;
-
-    return {
-      ...item,
-      percent,
-      fill: BRANCH_COLORS[index % BRANCH_COLORS.length],
-    };
-  });
+  const chartData = data.map((item, index) => ({
+    ...item,
+    value: Number(item.value || 0),
+    color: BRANCH_COLORS[index % BRANCH_COLORS.length],
+  }));
 
   return (
-    <div style={premiumChartCardStyle}>
-      <ChartHeader
-        title="Ramo de atividade"
-        description="Distribuição premium por segmento de atuação."
-      />
+    <div
+      style={{
+        borderRadius: 20,
+        padding: 22,
+        border: "2px solid #e2e8f0",
+        background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+      }}
+    >
+      <div style={{ marginBottom: 18 }}>
+        <h3
+          style={{
+            margin: 0,
+            fontSize: 17,
+            fontWeight: 900,
+            color: "#0f172a",
+          }}
+        >
+          Ramo de atividade
+        </h3>
 
-      <div style={{ height: 260, marginTop: 18 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <RadialBarChart
-            innerRadius="24%"
-            outerRadius="92%"
-            data={chartData}
-            startAngle={90}
-            endAngle={-270}
-          >
-            <PolarAngleAxis
-              type="number"
-              domain={[0, 100]}
-              tick={false}
-            />
-
-            <RadialBar
-              dataKey="percent"
-              background={{ fill: "#e2e8f0" }}
-              cornerRadius={999}
-              barSize={20}
-              onClick={(entry: any) => onItemClick(entry)}
-              cursor="pointer"
-            />
-
-            <Tooltip content={<CustomTooltip />} />
-          </RadialBarChart>
-        </ResponsiveContainer>
+        <p
+          style={{
+            margin: "5px 0 0",
+            color: "#64748b",
+            fontSize: 13,
+          }}
+        >
+          Distribuição por segmento de atuação.
+        </p>
       </div>
 
-      <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
-        {chartData.map((item) => (
-          <button
-            key={item.name}
-            onClick={() => onItemClick(item)}
-            style={{
-              border: "1px solid #e2e8f0",
-              background: "#fff",
-              borderRadius: 16,
-              padding: "11px 12px",
-              cursor: "pointer",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 12,
-              boxShadow: "0 8px 20px rgba(15,23,42,.04)",
-            }}
-          >
-            <span
+      <div style={{ width: "100%", height: 300 }}>
+       <div style={{ width: "100%", height: Math.max(chartData.length * 30, 260) }}>
+  <ResponsiveContainer>
+    <BarChart
+      layout="vertical"
+      data={chartData}
+      barSize={18}
+      barCategoryGap={6}
+      margin={{
+        top: 4,
+        right: 18,
+        left: 0,
+        bottom: 4,
+      }}
+    >
+      <CartesianGrid
+        horizontal={false}
+        vertical={true}
+        stroke="#e2e8f0"
+      />
+
+      <XAxis
+        type="number"
+        axisLine={false}
+        tickLine={false}
+        tick={{
+          fontSize: 11,
+          fill: "#94a3b8",
+        }}
+      />
+
+      <YAxis
+        type="category"
+        dataKey="name"
+        width={0}
+        axisLine={false}
+        tickLine={false}
+        tick={false}
+      />
+
+      <Tooltip
+        cursor={{
+          fill: "rgba(15,23,42,.04)",
+        }}
+        content={({ active, payload }) => {
+          if (!active || !payload?.length) return null;
+
+          const item = payload[0].payload;
+
+          const total = chartData.reduce(
+            (acc, current) => acc + Number(current.value || 0),
+            0
+          );
+
+          const percent = total
+            ? Math.round((item.value / total) * 100)
+            : 0;
+
+          return (
+            <div
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 9,
-                minWidth: 0,
+                background: "#fff",
+                border: "1px solid #e2e8f0",
+                borderRadius: 16,
+                padding: "12px 14px",
+                minWidth: 210,
+                boxShadow: "0 20px 40px rgba(15,23,42,.12)",
               }}
             >
-              <span
+              <div
                 style={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: 999,
-                  background: item.fill,
-                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  marginBottom: 10,
                 }}
-              />
-
-              <strong
-                style={{
-                  fontSize: 12.5,
-                  fontWeight: 900,
-                  color: "#334155",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-                title={item.name}
               >
-                {item.name}
-              </strong>
-            </span>
+                <span
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 999,
+                    background: item.color,
+                  }}
+                />
 
-            <strong
-              style={{
-                fontSize: 12,
-                fontWeight: 950,
-                color: "#0f172a",
-                flexShrink: 0,
-              }}
-            >
-              {item.value} · {item.percent}%
-            </strong>
-          </button>
+                <strong
+                  style={{
+                    color: "#0f172a",
+                    fontSize: 13,
+                    fontWeight: 900,
+                  }}
+                >
+                  {item.name}
+                </strong>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 6,
+                }}
+              >
+                <span style={{ color: "#64748b", fontSize: 12 }}>
+                  Empresas
+                </span>
+
+                <strong style={{ color: "#012942", fontSize: 13 }}>
+                  {item.value}
+                </strong>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span style={{ color: "#64748b", fontSize: 12 }}>
+                  Participação
+                </span>
+
+                <strong style={{ color: item.color, fontSize: 13 }}>
+                  {percent}%
+                </strong>
+              </div>
+            </div>
+          );
+        }}
+      />
+
+      <Bar
+        dataKey="value"
+        radius={[0, 999, 999, 0]}
+        onClick={(entry: any) => onItemClick(entry)}
+      >
+        {chartData.map((entry) => (
+          <Cell
+            key={entry.name}
+            fill={entry.color}
+            cursor="pointer"
+          />
         ))}
+      </Bar>
+    </BarChart>
+  </ResponsiveContainer>
+</div>
       </div>
     </div>
   );
 }
 
 const BRANCH_COLORS = [
-  "#2563eb",
-  "#0f766e",
-  "#f97316",
-  "#7c3aed",
-  "#0891b2",
+  "#155E75",
+  "#166534",
+  "#B45309",
+  "#BE185D",
+  "#0F766E",
+  "#6D28D9",
+  "#BE123C",
+  "#15803D",
+  "#1D4ED8",
+  "#7E22CE",
 ];
 
 
@@ -2501,155 +2606,115 @@ function ProfileRadarChart({
 }) {
   const total = data.reduce((acc, item) => acc + Number(item.value || 0), 0);
 
-  const chartData = data.map((item) => ({
+  const chartData = data.map((item, index) => ({
     ...item,
+    value: Number(item.value || 0),
     percent: total ? Math.round((Number(item.value || 0) / total) * 100) : 0,
+    fill: PROFILE_COLORS[index % PROFILE_COLORS.length],
   }));
 
   return (
     <div style={premiumChartCardStyle}>
       <ChartHeader
         title="Perfil"
-        description="Mapa visual da distribuição por perfil comercial."
+        description="Distribuição semicircular por perfil comercial."
       />
 
-      <div style={{ width: "100%", height: 310, marginTop: 14 }}>
-        <ResponsiveContainer>
-          <RadarChart data={chartData}>
-            <PolarGrid stroke="#e2e8f0" />
-
-            <PolarAngleAxis
-              dataKey="name"
-              tick={{
-                fontSize: 11,
-                fontWeight: 800,
-                fill: "#475569",
-              }}
-            />
-
-            <PolarRadiusAxis
-              angle={90}
-              domain={[0, 100]}
-              tick={false}
-              axisLine={false}
-            />
-
-            <Radar
-              name="Perfil"
-              dataKey="percent"
-              stroke="#012942"
-              fill="#012942"
-              fillOpacity={0.18}
-              strokeWidth={3}
-              dot={{
-                r: 4,
-                fill: "#BB9F58",
-                stroke: "#fff",
-                strokeWidth: 2,
-              }}
-              onClick={(entry: any) => onItemClick(entry)}
-            />
-
-            <Tooltip content={<ProfileRadarTooltip />} />
-          </RadarChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div style={profileLegendWrapStyle}>
-  {chartData.map((item, index) => {
-    const color = PROFILE_COLORS[index % PROFILE_COLORS.length];
-
-    return (
-      <button
-        key={item.name}
-        onClick={() => onItemClick(item)}
-        style={profileLegendItemStyle}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = color;
-          e.currentTarget.style.background = `${color}10`;
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = "#e2e8f0";
-          e.currentTarget.style.background = "#fff";
+      <div
+        style={{
+          width: "100%",
+          height: 250,
+          marginTop: 0,
+          position: "relative",
+          overflow: "hidden",
+          padding:0
         }}
       >
-        <span
+        <PieChart
+          responsive
           style={{
-            ...profileLegendDotStyle,
-            background: color,
-            boxShadow: `0 0 0 4px ${color}18`,
+            width: "100%",
+            height: "100%",
+            maxHeight: 250,
+            aspectRatio: 2,
           }}
-        />
+        >
+          <Pie
+            data={chartData}
+            dataKey="value"
+            nameKey="name"
+            startAngle={180}
+            endAngle={0}
+            cx="50%"
+            cy="100%"
+            innerRadius="48%"
+            outerRadius="118%"
+            paddingAngle={3}
+            labelLine={false}
+            label={({ percent }) => {
+              return percent ? `${percent}%` : "";
+            }}
+            isAnimationActive
+            onClick={(item) => onItemClick(item)}
+            style={{ cursor: "pointer" }}
+          >
+            {chartData.map((item) => (
+              <Cell
+                key={item.name}
+                fill={item.fill}
+                stroke="#fff"
+                strokeWidth={4}
+              />
+            ))}
+          </Pie>
 
-        <span style={profileLegendNameStyle} title={item.name}>
-          {item.name}
-        </span>
+          <Tooltip content={<ProfileRadarTooltip />} />
+        </PieChart>
 
-        <span style={profileLegendValueStyle}>
-          {item.value}
-        </span>
-      </button>
-    );
-  })}
-</div>
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            bottom: 4,
+            transform: "translateX(-50%)",
+            textAlign: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <span
+            style={{
+              display: "block",
+              fontSize: 10,
+              fontWeight: 900,
+              color: "#94a3b8",
+              textTransform: "uppercase",
+              letterSpacing: ".08em",
+            }}
+          >
+            Total
+          </span>
+
+          <strong
+            style={{
+              display: "block",
+              fontSize: 28,
+              fontWeight: 950,
+              color: "#012942",
+              lineHeight: 1,
+              zIndex: 1,
+            }}
+          >
+            {total.toLocaleString("pt-BR")}
+          </strong>
+        </div>
+      </div>
+
+      
     </div>
   );
 }
 
 
-const profileLegendWrapStyle: React.CSSProperties = {
-  marginTop: 14,
-  display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: 10,
-  
-};
-
-const profileLegendItemStyle: React.CSSProperties = {
-  minWidth: 0,
-  border: "1px solid #e2e8f0",
-  background: "#fff",
-  borderRadius: 16,
-  padding: "10px 12px",
-  cursor: "pointer",
-  display: "flex",
-  alignItems: "center",
-  gap: 9,
-  transition: "all .16s ease",
-  
-};
-
-const profileLegendDotStyle: React.CSSProperties = {
-  width: 9,
-  height: 9,
-  borderRadius: 999,
-  flexShrink: 0,
-};
-
-const profileLegendNameStyle: React.CSSProperties = {
-  flex: 1,
-  minWidth: 0,
-  fontSize: 12,
-  fontWeight: 900,
-  color: "#334155",
-  whiteSpace: "nowrap",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  textAlign: "left",
-};
-
-const profileLegendValueStyle: React.CSSProperties = {
-  minWidth: 28,
-  height: 26,
-  borderRadius: 999,
-  background: "#f8fafc",
-  border: "1px solid #e2e8f0",
-  color: "#012942",
-  fontSize: 12,
-  fontWeight: 950,
-  display: "grid",
-  placeItems: "center",
-};
 
 
 function ProfileRadarTooltip({ active, payload }: any) {
@@ -2662,9 +2727,12 @@ function ProfileRadarTooltip({ active, payload }: any) {
       style={{
         borderRadius: 14,
         border: "2px solid #e2e8f0",
-        background: "rgba(255,255,255,.96)",
-        boxShadow: "0 16px 40px rgba(15,23,42,.16)",
+        background: "#fff",
         padding: "10px 12px",
+        zIndex:3000000,
+        bottom:"70px",
+        position:"relative",
+        right:"170px"
       }}
     >
       <strong
@@ -2694,11 +2762,16 @@ function ProfileRadarTooltip({ active, payload }: any) {
 
 
 const PROFILE_COLORS = [
-  "#012942",
-  "#BB9F58",
-  "#2563eb",
-  "#0f766e",
-  "#64748b",
+  "#012942", // Azul institucional
+  "#BB9F58", // Dourado premium
+  "#0F766E", // Verde petróleo
+  "#7C3AED", // Roxo
+  "#F97316", // Laranja
+  "#2563EB", // Azul destaque
+  "#DC2626", // Vermelho
+  "#0891B2", // Ciano
+  "#16A34A", // Verde sucesso
+  "#475569", // Cinza executivo
 ];
 
 

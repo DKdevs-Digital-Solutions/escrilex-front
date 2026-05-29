@@ -322,8 +322,6 @@ export function CompanyListTable({
 
                 <Th
                   style={{
-                    ...stickyActionHeaderStyle,
-                    width: 150,
                     borderBottom: "1px solid rgba(226,232,240,0.7)",
                     textAlign:"center"
                   }}
@@ -397,11 +395,9 @@ export function CompanyListTable({
                   ))}
 
                   <Td
-                      data-action-cell="true"
-                      align="right"
+                      align="center"
                       style={{
                         ...tdBaseStyle,
-                        ...stickyActionCellStyle,
                         
 
                         padding: 0,
@@ -411,22 +407,11 @@ export function CompanyListTable({
                           ? "linear-gradient(90deg, #fff1f2 0%, #ffe4e6 100%)"
                           : "linear-gradient(90deg, #ecfdf5 0%, #d1fae5 100%)",
 
-                        position: "sticky",
-                        right: -1,
+                        right: 0,
 
                         overflow: "hidden",
 
-                        boxShadow: company.active
-                          ? `
-                            inset 2px 0 0 #dc2626,
-                            inset 14px 0 30px rgba(239,68,68,.10),
-                            -10px 0 24px rgba(15,23,42,.05)
-                          `
-                          : `
-                            inset 2px 0 0 #16a34a,
-                            inset 14px 0 30px rgba(34,197,94,.10),
-                            -10px 0 24px rgba(15,23,42,.05)
-                          `,
+                       
                       }}
                     >
                       <div
@@ -435,7 +420,7 @@ export function CompanyListTable({
                           width: "100%",
 
                           display: "flex",
-                          justifyContent: "flex-end",
+                          justifyContent: "center",
                           alignItems: "center",
 
                           gap: 8,
@@ -465,8 +450,6 @@ export function CompanyListTable({
                           display: "inline-flex",
                           alignItems: "center",
                           gap: 8,
-                          paddingInline: 12,
-                          minWidth: 120,
                           justifyContent: "center",
                           fontWeight: 700,
                         }}
@@ -474,12 +457,10 @@ export function CompanyListTable({
                         {company.active ? (
                           <>
                             <PowerOff size={17} strokeWidth={2.2} />
-                            Desativar
                           </>
                         ) : (
                           <>
                             <Power size={17} strokeWidth={2.2} />
-                            Ativar
                           </>
                         )}
                       </button>
@@ -658,7 +639,6 @@ const tdBaseStyle: React.CSSProperties = {
 };
 
 const stickyActionHeaderStyle: React.CSSProperties = {
-  position: "sticky",
   right: -2,
   zIndex: 20,
   background: "#fff",
@@ -673,7 +653,6 @@ const stickyActionHeaderStyle: React.CSSProperties = {
 };
 
 const stickyActionCellStyle: React.CSSProperties = {
-  position: "sticky",
   right: 0,
   zIndex: 10,
   background: "#fff",
