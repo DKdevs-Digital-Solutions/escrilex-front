@@ -192,11 +192,10 @@ function SectionBlock({
         margin: "18px 0px",
         padding: 0,
         borderRadius: 24,
-        border: "1px solid rgba(226,232,240,.85)",
+        border: "2px solid #e2e8f0",
         background:
           "linear-gradient(180deg, rgba(255,255,255,.96), rgba(248,250,252,.88))",
-        boxShadow:
-          "0 18px 45px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.9)",
+        
         overflow: "hidden",
       }}
     >
@@ -404,7 +403,7 @@ export function CompanyDataTab({
         className="section-user-dados"
         style={{
           padding: "24px 24px",
-          borderBottom: "1px solid #eef2f7",
+          border: "2px solid #e2e8f0",
           background:
             "#fff",
           display: "flex",
@@ -413,6 +412,7 @@ export function CompanyDataTab({
           gap: 14,
           flexWrap: "wrap",
           borderRadius: 14,
+          boxShadow:"none"
         }}
       >
         <div style={{ minWidth: 0 }}>

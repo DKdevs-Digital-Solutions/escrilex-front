@@ -26,6 +26,7 @@ export function CompanyPartnersTab({
           gap: 12,
           flexWrap: "wrap",
           padding: "18px 10px",
+          
         }}
       >
         <div>

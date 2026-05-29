@@ -313,10 +313,9 @@ export function Companies({
           marginBottom: 20,
           padding: "22px 24px",
           borderRadius: 20,
-          border: "1px solid #e2e8f0",
+          border: "2px solid #e2e8f0",
           background:
             "linear-gradient(135deg, #ffffff 0%, #f8fbff 55%, #eef6ff 100%)",
-          boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
         }}
       >
         <div
@@ -406,7 +405,7 @@ export function Companies({
       <div
         style={{
           background: "#fff",
-          border: "1px solid #e2e8f0",
+          border: "2px solid #e2e8f0",
           borderRadius: 18,
           padding: "18px 20px",
           marginBottom: 20,
@@ -414,7 +413,6 @@ export function Companies({
           gap: 12,
           flexWrap: "wrap",
           alignItems: "flex-end",
-          boxShadow: "0 8px 24px rgba(15,23,42,0.04)",
         }}
       >
         <div style={{ width: "100%", marginBottom: 4 }}>
@@ -560,9 +558,8 @@ export function Companies({
       <Card
         style={{
           borderRadius: 20,
-          border: "1px solid #e5e7eb",
+          border: "2px solid #e2e8f0",
           background: "linear-gradient(180deg, #ffffff 0%, #fcfdff 100%)",
-          boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
           overflow: "hidden",
           padding: 0,
         }}

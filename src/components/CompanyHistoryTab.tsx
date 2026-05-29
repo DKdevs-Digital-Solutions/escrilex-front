@@ -51,7 +51,7 @@ function KpiCard({
         padding: "16px 18px",
         borderRadius: 16,
         background: "#fff",
-        border: `1px solid ${UI.border}`,
+        border: `2px solid ${UI.border}`,
         boxShadow: UI.shadowSm,
       }}
     >
@@ -146,10 +146,9 @@ export function CompanyHistoryTab({
       style={{
         padding: 20,
         borderRadius: 20,
-        border: `1px solid ${UI.border}`,
+        border: `2px solid ${UI.border}`,
         background:
           "#fff",
-        boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
         overflow: "hidden",
         position: "relative",
       }}
@@ -323,7 +322,8 @@ export function CompanyHistoryTab({
           style={{
             ...cardShellStyle(),
             overflow: "hidden",
-            boxShadow: UI.shadowSm,
+            boxShadow: "none",
+            border: "2px solid #e2e8f0",
           }}
         >
           {historicoRuns.length ? (

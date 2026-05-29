@@ -247,7 +247,7 @@ export function SectionCard({
       <div
         style={{
           padding: "25px 25px",
-          borderBottom: "1px solid #f1f5f9",
+          borderBottom: "1px solid #e2e8f0",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",

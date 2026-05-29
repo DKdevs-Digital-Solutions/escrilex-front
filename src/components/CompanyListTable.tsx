@@ -322,11 +322,13 @@ export function CompanyListTable({
 
                 <Th
                   style={{
-                    ...thStyle,
                     ...stickyActionHeaderStyle,
                     width: 150,
+                    borderBottom: "1px solid rgba(226,232,240,0.7)",
+                    textAlign:"center"
                   }}
                 >
+                  ação
                 </Th>
               </tr>
             </Thead>
@@ -410,18 +412,18 @@ export function CompanyListTable({
                           : "linear-gradient(90deg, #ecfdf5 0%, #d1fae5 100%)",
 
                         position: "sticky",
-                        right: 0,
+                        right: -1,
 
                         overflow: "hidden",
 
                         boxShadow: company.active
                           ? `
-                            inset 3px 0 0 #dc2626,
+                            inset 2px 0 0 #dc2626,
                             inset 14px 0 30px rgba(239,68,68,.10),
                             -10px 0 24px rgba(15,23,42,.05)
                           `
                           : `
-                            inset 3px 0 0 #16a34a,
+                            inset 2px 0 0 #16a34a,
                             inset 14px 0 30px rgba(34,197,94,.10),
                             -10px 0 24px rgba(15,23,42,.05)
                           `,
@@ -438,7 +440,7 @@ export function CompanyListTable({
 
                           gap: 8,
 
-                          padding: "10px",
+                          padding: "6px",
                         }}
                       >
                       {/* <button
@@ -636,10 +638,10 @@ const thStyle: React.CSSProperties = {
   color: "#64748b",
   textTransform: "uppercase",
   letterSpacing: "0.12em",
-  padding: "0 16px 12px 16px",
+  padding: "16px",
   whiteSpace: "nowrap",
-
-  borderRight: "1px solid rgba(226,232,240,0.55)",
+ borderBottom: "2px solid rgba(226,232,240,0.7)",
+  borderRight: "2px solid rgba(226,232,240,0.55)",
 };
 
 const tdBaseStyle: React.CSSProperties = {
@@ -647,20 +649,27 @@ const tdBaseStyle: React.CSSProperties = {
   background: "rgba(255,255,255,0.96)",
   whiteSpace: "nowrap",
 
-  borderBottom: "1px solid rgba(226,232,240,0.7)",
-  borderRight: "1px solid rgba(226,232,240,0.55)",
+  borderBottom: "2px solid rgba(226,232,240,0.7)",
+  borderRight: "2px solid rgba(226,232,240,0.55)",
 
   transition: "all .18s ease",
   position: "relative",
+  
 };
 
 const stickyActionHeaderStyle: React.CSSProperties = {
   position: "sticky",
-  right: 0,
+  right: -2,
   zIndex: 20,
   background: "#fff",
-  textAlign: "right",
-  boxShadow: "-14px 0 22px rgba(15,23,42,.06)",
+
+
+  boxShadow: `
+    inset 1px 0 0 #ccc,
+    -10px 0 24px rgba(15,23,42,.05)
+  `,
+
+  textAlign: "center",
 };
 
 const stickyActionCellStyle: React.CSSProperties = {

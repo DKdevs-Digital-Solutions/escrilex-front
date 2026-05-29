@@ -269,7 +269,9 @@ function RowCard({
       gap: 14,
       alignItems: "stretch",
       padding: 16,
-      borderBottom: `1px solid ${UI.borderSoft}`,
+      borderBottom: "1px solid #e2e8f0",
+      width:"99%",
+      margin:"0 auto",  
     }}
     >
       <div style={{ minWidth: 0 }}>
@@ -278,12 +280,14 @@ function RowCard({
             display: "flex",
             alignItems: "center",
             gap: 12,
+            top:"5px",
+            position:"relative"
           }}
         >
           <div
             style={{
               width: 40,
-              height: 40,
+              height: 60,
               borderRadius: 12,
               display: "flex",
               alignItems: "center",
@@ -596,9 +600,8 @@ export function CompanyResponsiblesTab({
     <div
       style={{
         borderRadius: 15,
-        border: `1px solid ${UI.border}`,
+        border: "2px solid #e2e8f0",
         background: "linear-gradient(180deg, #ffffff 0%, #fbfdff 100%)",
-        boxShadow: "rgba(15, 23, 42, 0.06) 0px 10px 30px",
         padding: 18,
       }}
     >
@@ -692,9 +695,8 @@ export function CompanyResponsiblesTab({
     <div
       style={{
         borderRadius: 15,
-        border: `1px solid ${UI.border}`,
+        border: "2px solid #e2e8f0",
         background: UI.surface,
-        boxShadow: "rgba(15, 23, 42, 0.06) 0px 10px 30px",
         overflow: "hidden",
       }}
     >
@@ -781,7 +783,7 @@ function StatCard({
         padding: "16px 18px",
         borderRadius: 16,
         background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
-        border: `1px solid rgba(0,0,0,0.05)`,
+        border: `1px solid #ccc`,
         boxShadow: "0 8px 22px rgba(15,23,42,0.06)",
         display: "flex",
         alignItems: "center",

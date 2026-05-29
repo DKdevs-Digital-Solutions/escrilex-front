@@ -80,9 +80,10 @@ export function TemplateSections({
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 18,  }}>
       {sections.map((s: any, index: number) => (
         <SectionCard
+        style={{border: "2px solid #e2e8f0", boxShadow:"none"}}
           key={s.id}
           title={
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

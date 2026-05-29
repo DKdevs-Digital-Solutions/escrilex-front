@@ -30,9 +30,6 @@ export function CompanyList({
       <div
         style={{
           background: "#fff",
-          borderRadius: 0,
-          border: "1px solid #e5e7eb",
-          boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
           overflow: "hidden",
         }}
       >
@@ -134,16 +131,14 @@ export function CompanyList({
     <div
       style={{
         background: "linear-gradient(180deg, #ffffff 0%, #fcfdff 100%)",
-        borderRadius: 0,
-        border: "1px solid #e5e7eb",
         overflow: "hidden",
-        boxShadow: "0 10px 30px rgba(15,23,42,0.06)",
       }}
     >
       <div
         style={{
           padding: "18px 22px",
-          borderBottom: "1px solid #eef2f7",
+          borderBottom: "2px solid #e2e8f0",
+
           background:
             "linear-gradient(180deg, rgba(248,250,252,0.95) 0%, rgba(255,255,255,1) 100%)",
         }}
@@ -307,7 +302,7 @@ export function CompanyList({
         </div>
       </div>
 
-      <div style={{ padding:"10px" }}>
+      <div style={{ padding:"20px 0px", position:"relative", bottom:"20px" }}>
         <CompanyListTable
           items={items}
           visibleColumns={visibleColumns}

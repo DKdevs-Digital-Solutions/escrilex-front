@@ -70,7 +70,7 @@ function KpiCard({
         padding: "16px 18px",
         borderRadius: 16,
         background: "#fff",
-        border: `1px solid ${UI.border}`,
+        border: `2px solid ${UI.border}`,
         boxShadow: UI.shadowSm,
       }}
     >
@@ -354,6 +354,8 @@ export function CompanyChecklistTab({
           ...cardShellStyle(),
           padding: 18,
           background: "linear-gradient(180deg, #ffffff 0%, #fbfdff 100%)",
+          border: "2px solid #e2e8f0",
+          boxShadow: "none",
         }}
       >
         <div
@@ -363,6 +365,8 @@ export function CompanyChecklistTab({
             justifyContent: "space-between",
             gap: 16,
             flexWrap: "wrap",
+            
+            
           }}
         >
           <div style={{ minWidth: 0 }}>
@@ -549,6 +553,8 @@ export function CompanyChecklistTab({
             ...cardShellStyle(),
             padding: 18,
             background: "linear-gradient(180deg, #ffffff 0%, #fbfdff 100%)",
+            border: "2px solid #e2e8f0",
+            boxShadow: "none",
           }}
         >
           <div
@@ -643,6 +649,8 @@ export function CompanyChecklistTab({
               style={{
                 ...cardShellStyle(),
                 overflow: "hidden",
+                border: "2px solid #e2e8f0",  
+                boxShadow: "none",
               }}
             >
               <SectionHeader section={section} UI={UI} />
