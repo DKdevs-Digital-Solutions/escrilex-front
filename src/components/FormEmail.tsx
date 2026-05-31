@@ -102,134 +102,90 @@ export function EmailNotificationsSettings({
 
       <div
         style={{
+          marginBottom: 0,
+          padding: "20px 24px",
+          borderRadius: 20,
+          border: "2px solid #e2e8f0",
+          background:
+            "linear-gradient(135deg, #ffffff 0%, #f8fbff 55%, #eef6ff 100%)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 16,
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 28,
+                lineHeight: 1.1,
+                fontWeight: 900,
+                color: "#0f172a",
+                letterSpacing: "-0.03em",
+              }}
+            >
+              Conta de e-mail
+            </h1>
+
+            <p
+              style={{
+                margin: "10px 0 0",
+                fontSize: 14.5,
+                color: "#64748b",
+                maxWidth: 700,
+                lineHeight: 1.6,
+              }}
+            >
+              Defina a conta principal utilizada para o envio de notificações, avisos e comunicações automatizadas da plataforma.
+            </p>
+          </div>
+
+           <span
+  style={{
+    position: "relative",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 7,
+    padding: "9px 14px",
+    borderRadius: 10,
+    background: form.active
+      ? "linear-gradient(135deg, #36ad62 0%, #53b577 100%)"
+      : "rgba(148,163,184,.16)",
+    color: form.active ? "#ffffff" : "#64748b",
+    fontSize: 12,
+    fontWeight: 900,
+    border: form.active
+      ? "1px solid rgba(255,255,255,.18)"
+      : "1px solid #cbd5e1",
+   
+    whiteSpace: "nowrap",
+  }}
+>
+  <ShieldCheck
+    color={form.active ? "#ffffff" : "#94a3b8"}
+    size={15}
+  />
+
+  {form.active ? "Conta ativa" : "Conta inativa"}
+</span>
+        </div>
+      </div>
+
+      <div
+        style={{
           width: "100%",
           borderRadius: 8,
           overflow: "hidden",
         }}
       >
-        <div
-          className="email-header"
-          style={{
-            position: "relative",
-            overflow: "hidden",
-            padding: 28,
-            background:
-              "linear-gradient(135deg, #012942 0%, #073b5f 52%, #012942 100%)",
-            color: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 18,
-            borderRadius:8
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              top: -70,
-              right: -60,
-              width: 190,
-              height: 190,
-              borderRadius: "50%",
-              background: "rgba(125,211,252,.13)",
-            }}
-          />
-
-          <div
-            className="email-header-content"
-            style={{
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-            }}
-          >
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 8,
-                background:
-                  "linear-gradient(135deg, rgba(56,189,248,.28), rgba(34,197,94,.18))",
-                border: "1px solid rgba(255,255,255,.28)",
-                boxShadow:
-                  "inset 0 1px 0 rgba(255,255,255,.18), 0 14px 30px rgba(56,189,248,.18)",
-                display: "grid",
-                placeItems: "center",
-                
-              }}
-            >
-              <Mail size={26} color="#7dd3fc" />
-            </div>
-
-            <div>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  marginBottom: 8,
-                  padding: "5px 10px",
-                  borderRadius: 8,
-                  background: "rgba(255,255,255,.12)",
-                  border: "1px solid rgba(255,255,255,.18)",
-                  color: "#fde68a",
-                  fontSize: 11,
-                  fontWeight: 900,
-                  letterSpacing: 0.5,
-                  textTransform: "uppercase",
-                }}
-              >
-                <Sparkles size={12} color="#facc15" />
-                Conta SMTP
-              </div>
-
-              <h2 style={{ margin: 0, fontSize: 25, fontWeight: 900 }}>
-                Conta de e-mail
-              </h2>
-
-              <p
-                style={{
-                  margin: "6px 0 0",
-                  color: "rgba(255,255,255,.76)",
-                  fontSize: 13.5,
-                  maxWidth: 590,
-                  lineHeight: 1.5,
-                }}
-              >
-                Cadastre a conta única responsável pelo envio automático de
-                notificações do sistema.
-              </p>
-            </div>
-          </div>
-
-          <span
-            style={{
-              position: "relative",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 7,
-              padding: "8px 12px",
-              borderRadius:8,
-              background: form.active
-                ? "rgba(16,185,129,.16)"
-                : "rgba(148,163,184,.16)",
-              color: form.active ? "#d1fae5" : "#e2e8f0",
-              fontSize: 12,
-              fontWeight: 900,
-              border: form.active
-                ? "1px solid rgba(167,243,208,.32)"
-                : "1px solid rgba(226,232,240,.28)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <ShieldCheck
-              color={form.active ? "#00ff7b" : "#cbd5e1"}
-              size={15}
-            />
-            {form.active ? "Conta ativa" : "Conta inativa"}
-          </span>
-        </div>
+        
 
         <div
           className="email-main-grid"
