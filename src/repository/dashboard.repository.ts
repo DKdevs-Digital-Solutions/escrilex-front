@@ -105,6 +105,27 @@ export async function getDashboardSummary(
 }
 
 
+export async function getDashboardAnalytics(
+  params: DashboardSummaryParams
+): Promise<DashboardSummary> {
+  const query = new URLSearchParams();
+
+  if (params.startDate) {
+    query.append("startDate", new Date(params.startDate).toISOString());
+  }
+
+  if (params.endDate) {
+    query.append("endDate", new Date(params.endDate).toISOString());
+  }
+
+  const response = await api.get<DashboardSummary>(
+    `/api/dashboard/analytics${query.toString() ? `?${query.toString()}` : ""}`
+  );
+
+  return response.data;
+}
+
+
 export async function getDashboardDrilldown(
   params: DashboardDrilldownParams
 ): Promise<DashboardDrilldown> {

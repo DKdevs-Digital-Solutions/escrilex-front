@@ -103,7 +103,7 @@ export function EmailNotificationsSettings({
       <div
         style={{
           marginBottom: 0,
-          padding: "20px 24px",
+          padding: "15px 24px",
           borderRadius: 20,
           border: "2px solid #e2e8f0",
           background:
@@ -126,7 +126,6 @@ export function EmailNotificationsSettings({
                 margin: 0,
                 fontSize: 28,
                 lineHeight: 1.1,
-                fontWeight: 900,
                 color: "#0f172a",
                 letterSpacing: "-0.03em",
               }}

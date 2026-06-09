@@ -43,6 +43,7 @@ import {
 import { useDashboardSummary } from "../hooks/useDashboardSummary";
 import { useDashboardDrilldown } from "../hooks/useDashboardDrilldown";
 import { useCompanies } from "../hooks/useCompanies";
+import { useDashboardAnalytics } from "../hooks/useDashboardAnalytics";
 
 export type DashboardSummary = {
   period: {
@@ -83,6 +84,8 @@ export function DashboardPage() {
   
 } = useDashboardSummary();
 
+
+
 const [modalChart, setModalChart] = useState<
   null | "movimento" | "clientes" | "responsibles" | "alterations" | "responsibleChanges"
 >(null);
@@ -116,6 +119,24 @@ const {
   startDate,
   endDate,
 });
+
+const {
+  dataAnalytics,
+  loadDashboardAnalytics,
+  loadingAnalytics,
+  errorAnalytics,
+} = useDashboardAnalytics({
+  startDate,
+  endDate,
+});
+
+
+const permanencia = dataAnalytics?.permanencia;
+
+const motivosSaida = dataAnalytics?.motivosSaida ?? [];
+
+const cancelamentos = dataAnalytics?.cancelamentos;
+
 
 
 function openModal(
@@ -225,10 +246,38 @@ const getModalRows = () => {
   }
 
   if (modalTab === "ativos") return activeCompanies;
+
   if (modalTab === "Encerrada") return inactiveCompanies;
+
+  if (modalTab === "saidas") {
+    return normalizedDrilldownRows.map((item: any) => {
+      const analyticsCompany = permanencia?.empresas?.find(
+        (empresa: any) => empresa.id === item.id
+      );
+
+      return {
+        ...item,
+
+        diasPermanencia:
+          analyticsCompany?.diasPermanencia ?? item.diasPermanencia,
+
+        motivoSaida:
+          analyticsCompany?.motivoSaida ?? item.motivoSaida,
+
+        status:
+          analyticsCompany?.status ?? item.situacao,
+
+        dataSaida:
+          analyticsCompany?.dataSaida ?? item.inactivatedAt ?? item.dataSaida,
+      };
+    });
+  }
 
   return normalizedDrilldownRows;
 };
+
+
+
 
 function getExtraColumnByDrilldown() {
   if (selectedDrilldownType === "tributacao") {
@@ -380,7 +429,7 @@ const periodLabel = useMemo(() => {
     color: "#dc2626",
     badge: "Saída",
     badgeBg: "#fee2e2",
-    onClick: () => { setModalChart("clientes"); setModalTab("saidas") }
+    onClick: () => { setModalChart("clientes"); setModalTab("saidas"), openModal("clientes", "saidas"), loadDashboardAnalytics();}
 
   },
   // {
@@ -522,6 +571,30 @@ React.useEffect(() => {
     window.removeEventListener("resize", checkMobile);
   };
 }, []);
+
+
+const isExitModal =
+  modalChart === "clientes" &&
+  modalTab === "saidas";
+
+
+
+  function getDiasPermanencia(item: any) {
+  const dataEntrada = item.dataEntrada;
+  const dataSaida = item.inactivatedAt || item.dataSaida;
+
+  if (!dataEntrada || !dataSaida) return null;
+
+  const entrada = new Date(dataEntrada).getTime();
+  const saida = new Date(dataSaida).getTime();
+
+  return Math.max(
+    0,
+    Math.ceil((saida - entrada) / (1000 * 60 * 60 * 24))
+  );
+}
+
+
 
   return (
     <div
@@ -699,7 +772,10 @@ React.useEffect(() => {
             </Field>
 
             <button
-              onClick={loadDashboard}
+              onClick={() => {
+                  loadDashboard();
+                  loadDashboardAnalytics();
+                }}
               disabled={loading}
               style={{
                 height: 46,
@@ -833,6 +909,7 @@ React.useEffect(() => {
 
               if (entry.name === "Saíram") {
                 openModal("clientes", "saidas");
+                loadDashboardAnalytics();
               }
             }}
             
@@ -1425,6 +1502,41 @@ React.useEffect(() => {
         </div>
       )}
 
+       {isExitModal && (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile
+                ? "1fr"
+                : "repeat(2, minmax(0, 1fr))",
+              gap: 12,
+              marginTop: 18,
+              marginBottom: 16,
+            }}
+          >
+            {/* <AnalyticsMiniCard
+              label="Permanência média"
+              value={`${permanencia?.mediaDias ?? 0} dias`}
+              helper="Tempo médio entre entrada e saída"
+              color="#2563eb"
+            /> */}
+
+            <AnalyticsMiniCard
+              label="Motivos agrupados"
+              value={motivosSaida.length}
+              helper="Motivos diferentes no período"
+              color="#7c3aed"
+            />
+
+            <AnalyticsMiniCard
+              label="Cancelamentos"
+              value={`${cancelamentos?.percentual ?? 0}%`}
+              helper={`${cancelamentos?.quantidade ?? 0} de ${cancelamentos?.totalEmpresas ?? 0} empresas`}
+              color="#dc2626"
+            />
+          </div>
+        )}
+
       <div
         style={{
           border: "1px solid #e2e8f0",
@@ -1440,6 +1552,8 @@ React.useEffect(() => {
               : 0,
         }}
       >
+       
+
         {modalChart === "alterations" ? (
           <table style={tableStyle}>
             <thead>
@@ -1577,11 +1691,19 @@ React.useEffect(() => {
                       <th style={thStyle}>Código</th>
                       <th style={thStyle}>Empresa</th>
                       <th style={thStyle}>CNPJ</th>
-                      <th style={thStyle}>Grupo</th>
+                      {isExitModal ? (
+                          <>
+                            <th style={thStyle}>Permanência</th>
+                            <th style={thStyle}>Motivo saída</th>
+                          </>
+                        ) : (
+                          <th style={thStyle}>Grupo</th>
+                        )}
+
+                        <th style={thStyle}>Status</th>
 
                       {extraColumn && <th style={thStyle}>{extraColumn.label}</th>}
 
-                      <th style={thStyle}>Status</th>
                     </tr>
                   );
                 })()
@@ -1603,7 +1725,7 @@ React.useEffect(() => {
 
                       <td style={tdStyle}>
                         <span style={{ fontFamily: "monospace", fontSize: 12 }}>
-                          {item.cnpj || "--"}
+                          {item.cnpj || "--"} 
                         </span>
                       </td>
 
@@ -1638,7 +1760,7 @@ React.useEffect(() => {
                             textOverflow: "ellipsis",
                             maxWidth: "100%",
                       }}>
-                        {item.cod || "--"}
+                        {item?.cod}
                       </span>
                       </td>
 
@@ -1679,19 +1801,109 @@ React.useEffect(() => {
                       </span>
                     </td>
 
-                    <td style={tdStyle}>
-                      <span style={{
-                         fontSize: "13px",
-                            display: "block",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            maxWidth: "100%",
-                      }}>
-                      {item.grupo || item.department || item.newResponsible?.name || "--"}
+                    {isExitModal ? (
+                      <>
+                        <td style={tdStyle}>
+                          {(() => {
+                            const dias = getDiasPermanencia(item);
+                            const dataSaidaReal = item.inactivatedAt || item.dataSaida;
 
-                      </span>
-                    </td>
+                            return (
+                              <>
+                                <strong
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  gap: 6,
+
+                                  padding: "6px 10px",
+                                  borderRadius: 999,
+
+                                  background: "rgba(37,99,235,.08)",
+                                  border: "1px solid rgba(37,99,235,.16)",
+                                  color: "#2563eb",
+
+                                  fontSize: 12,
+                                  fontWeight: 900,
+
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                <CalendarDays
+                                  size={13}
+                                  strokeWidth={2.5}
+                                />
+
+                                {dias !== null ? `${dias} dias` : "--"}
+                              </strong>
+
+                                <div
+                                style={{
+                                  marginTop: 6,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 6,
+
+                                  fontSize: 11,
+                                  fontWeight: 800,
+                                  color: "#64748b",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    padding: "3px 7px",
+                                    borderRadius: 999,
+                                    background: "rgba(34,197,94,.10)",
+                                    color: "#16a34a",
+                                  }}
+                                >
+                                  {item.dataEntrada
+                                    ? new Date(item.dataEntrada).toLocaleDateString("pt-BR")
+                                    : "--"}
+                                </span>
+
+                              <span
+                                style={{
+                                  padding: "3px 7px",
+                                  borderRadius: 999,
+                                  background: "rgba(239,68,68,.10)",
+                                  color: "#dc2626",
+                                }}
+                              >
+                                {dataSaidaReal
+                                  ? new Date(dataSaidaReal).toLocaleDateString("pt-BR")
+                                  : "--"}
+                              </span>
+                            </div>
+                              </>
+                            );
+                          })()}
+                        </td>
+
+                        <td style={tdStyle}>
+                          <span
+                            title={item.motivoSaida}
+                            style={{
+                              display: "block",
+                              maxWidth: 240,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              fontSize: 12.5,
+                            }}
+                          >
+                            {item.motivoSaida || "--"}
+                          </span>
+                        </td>
+                      </>
+                    ) : (
+                      <td style={tdStyle}>
+                        <span>
+                          {item.grupo || item.department || item.newResponsible?.name || "--"}
+                        </span>
+                      </td>
+                    )}
 
                     {(() => {
                       const extraColumn = getExtraColumnByDrilldown();
@@ -2795,3 +3007,64 @@ const tableStyle: React.CSSProperties = {
   minWidth: "100%",
   borderCollapse: "collapse",
 };
+
+
+function AnalyticsMiniCard({
+  label,
+  value,
+  helper,
+  color,
+}: {
+  label: string;
+  value: string | number;
+  helper: string;
+  color: string;
+}) {
+  return (
+    <div
+      style={{
+        padding: 16,
+        borderRadius: 18,
+        background: "#fff",
+        border: "1px solid #e2e8f0",
+        boxShadow: "0 10px 26px rgba(15,23,42,.06)",
+      }}
+    >
+      <span
+        style={{
+          display: "block",
+          fontSize: 11,
+          fontWeight: 900,
+          color: "#64748b",
+          textTransform: "uppercase",
+          letterSpacing: ".08em",
+        }}
+      >
+        {label}
+      </span>
+
+      <strong
+        style={{
+          display: "block",
+          marginTop: 6,
+          fontSize: 24,
+          fontWeight: 950,
+          color,
+        }}
+      >
+        {value}
+      </strong>
+
+      <p
+        style={{
+          margin: "4px 0 0",
+          fontSize: 12,
+          color: "#64748b",
+          fontWeight: 700,
+        }}
+      >
+        {helper}
+      </p>
+    </div>
+  );
+}

@@ -298,6 +298,8 @@ const statusOptions = [
   { value: "EM_SAIDA", label: "Em Saída" },
   { value: "BAIXADA", label: "Baixada" },
   { value: "PENDENTE", label: "Pendente de Documentação" },
+  { value: "BLOQUEADO", label: "Bloqueado" },
+
 ];
 
 const matrizFilialOptions = [
@@ -542,7 +544,7 @@ export function CompanyDataTab({
           <DataField label="Fim cobrança Consultoria" value={fmtDate(company.dataFimCobrancaConsultoria)} editing={editing} editValue={editForm.dataFimCobrancaConsultoria} onEditChange={ef("dataFimCobrancaConsultoria")} type="date" />
         </SectionBlock>
       
-        <SectionBlock
+        {/* <SectionBlock
           title="Responsáveis Técnicos"
           subtitle="Carteira e responsáveis internos por área."
           icon={<Users size={13} strokeWidth={2.3} />}
@@ -555,7 +557,7 @@ export function CompanyDataTab({
           <DataField label="Resp. Fec. Contábil" value={company.respFecContabil} editing={editing} editValue={editForm.respFecContabil} onEditChange={ef("respFecContabil")} />
           <DataField label="Resp. Compliance" value={company.respCompliance} editing={editing} editValue={editForm.respCompliance} onEditChange={ef("respCompliance")} />
           <DataField label="Resp. Qualidade" value={company.respQualidade} editing={editing} editValue={editForm.respQualidade} onEditChange={ef("respQualidade")} />
-        </SectionBlock>
+        </SectionBlock> */}
       
 
         <SectionBlock

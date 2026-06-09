@@ -117,10 +117,13 @@ export function Companies({
 
   const {
     columns,
+    sections,
+    sectorColumns,
     options,
     users,
     loadingOptions,
-    total
+    total,
+    setores,
   } = useExpectationMatrix();
 
   useEffect(() => {
@@ -132,8 +135,15 @@ export function Companies({
   }, []);
 
   const visibleColumns = useMemo(() => {
-    return columns.filter((column: any) => visibleKeys.includes(column.key));
-  }, [columns, visibleKeys]);
+    const allColumns = [
+      ...columns,
+      ...sectorColumns,
+    ];
+
+    return allColumns.filter((column: any) =>
+      visibleKeys.includes(column.key)
+    );
+  }, [columns, sectorColumns, visibleKeys]);
 
   function toggleColumn(key: string) {
     setVisibleKeys((prev) =>
@@ -507,6 +517,7 @@ export function Companies({
             { value: "EM_SAIDA", label: "Em Saída" },
             { value: "BAIXADA", label: "Baixada" },
             { value: "PENDENTE", label: "Pendente de Documentação" },
+            { value: "BLOQUEADO", label: "Bloqueado" },
           ]}
         />
 
@@ -631,7 +642,13 @@ export function Companies({
 
       {columnsOpen && (
         <ColumnsPanel
-          columns={columns}
+          sections={[
+            ...sections,
+            {
+              name: "Responsáveis",
+              columns: sectorColumns,
+            },
+          ]}
           visibleKeys={visibleKeys}
           setVisibleKeys={setVisibleKeys}
           toggleColumn={toggleColumn}

@@ -58,13 +58,34 @@ const actionBadge: Record<string, any> = {
 
 type AuditItem = {
   id: string;
-  action: string;
-  entity: string;
-  createdAt: string;
-  actor?: {
-    name?: string;
-    email?: string;
+
+  data: string;
+  hora: string;
+
+  nomeEmpresa: string | null;
+
+  usuarioResponsavel: {
+    id: string;
+    name: string;
+    email: string;
   } | null;
+
+  action: string;
+
+  entity: string;
+  entityId: string;
+
+  camposAlterados: {
+    campo: string;
+    valorAnterior: unknown;
+    novoValor: unknown;
+  }[];
+
+  valorAnterior: unknown;
+  novoValor: unknown;
+
+  ip: string | null;
+  userAgent: string | null;
 };
 
 type AuditFilterType = "all" | "login" | "user_actions" | "unidentified";
@@ -517,7 +538,7 @@ React.useEffect(() => {
                 width: 42,
                 height: 42,
                 borderRadius: 14,
-                background: stringToColor(r.actor?.name || ""),
+                background: stringToColor(r.usuarioResponsavel?.name || ""),
                 color: "#fff",
                 display: "flex",
                 alignItems: "center",
@@ -528,7 +549,7 @@ React.useEffect(() => {
                 boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
               }}
             >
-              {getInitial(r.actor?.name)}
+              {getInitial(r.usuarioResponsavel?.name)}
             </div>
 
             <div style={{ minWidth: 0, flex: 1 }}>
@@ -542,7 +563,7 @@ React.useEffect(() => {
                   textOverflow: "ellipsis",
                 }}
               >
-                {r.actor?.name ?? "—"}
+                {r.usuarioResponsavel?.name ?? "—"}
               </div>
 
               <div
@@ -555,7 +576,7 @@ React.useEffect(() => {
                   textOverflow: "ellipsis",
                 }}
               >
-                {r.actor?.email ?? ""}
+                {r.usuarioResponsavel?.email ?? ""}
               </div>
             </div>
           </div>
@@ -588,7 +609,8 @@ React.useEffect(() => {
                   fontWeight: 700,
                 }}
               >
-                {new Date(r.createdAt).toLocaleString("pt-BR")}
+                {/* {new Date(r.createdAt).toLocaleString("pt-BR")} */}
+                {r.data}, {r.hora}
               </div>
             </div>
 
@@ -680,7 +702,7 @@ React.useEffect(() => {
                         width: 38,
                         height: 38,
                         borderRadius: "20%",
-                        background: stringToColor(r.actor?.name || ""),
+                        background: stringToColor(r.usuarioResponsavel?.name || ""),
                         color: "#fff",
                         display: "flex",
                         alignItems: "center",
@@ -690,7 +712,7 @@ React.useEffect(() => {
                         flexShrink: 0,
                       }}
                     >
-                      {getInitial(r.actor?.name)}
+                      {getInitial(r.usuarioResponsavel?.name)}
                     </div>
 
                     <div style={{ minWidth: 0 }}>
@@ -704,7 +726,7 @@ React.useEffect(() => {
                           textOverflow: "ellipsis",
                         }}
                       >
-                        {r.actor?.name ?? "—"}
+                        {r.usuarioResponsavel?.name ?? "—"}
                       </div>
 
                       <div
@@ -717,7 +739,7 @@ React.useEffect(() => {
                           textOverflow: "ellipsis",
                         }}
                       >
-                        {r.actor?.email ?? ""}
+                        {r.usuarioResponsavel?.email ?? ""}
                       </div>
                     </div>
                   </div>
@@ -732,7 +754,8 @@ React.useEffect(() => {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {new Date(r.createdAt).toLocaleString("pt-BR")}
+                    {/* {new Date(r.createdAt).toLocaleString("pt-BR")} */}
+                    {r.data}, {r.hora}
                   </div>
                 </td>
 
@@ -743,23 +766,84 @@ React.useEffect(() => {
                   />
                 </td>
 
-                <td style={{ ...tdStyle, ...tdRightStyle }}>
+               <td style={{ ...tdStyle, ...tdRightStyle }}>
                   <div
+                    title={
+                      r.entity === "Company" && r?.nomeEmpresa
+                        ? `${entityLabel[r.entity] ?? r.entity} • ${r.nomeEmpresa}`
+                        : entityLabel[r.entity] ?? r.entity
+                    }
                     style={{
-                      display: "inline-flex",
+                      display: "flex",
                       alignItems: "center",
-                      gap: 8,
-                      padding: "7px 10px",
-                      borderRadius: 999,
+                      gap: isMobile ? 8 : 10,
+
+                      width: "100%",
+                      maxWidth: isMobile ? "100%" : 280,
+
+                      padding: isMobile ? "9px 10px" : "8px 11px",
+
+                      borderRadius: 16,
                       background: visual.bg,
                       border: `1px solid ${visual.border}`,
                       color: visual.color,
-                      fontSize: 12.5,
-                      fontWeight: 700,
+
+                      boxSizing: "border-box",
+                      overflow: "hidden",
                     }}
                   >
-                    <EntityIcon size={13} strokeWidth={2.2} />
-                    {entityLabel[r.entity] ?? r.entity}
+                    <div
+                      style={{
+                        width: isMobile ? 28 : 30,
+                        height: isMobile ? 28 : 30,
+                        borderRadius: 12,
+                        background: "#fff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <EntityIcon size={14} strokeWidth={2.4} />
+                    </div>
+
+                    <div
+                      style={{
+                        minWidth: 0,
+                        flex: 1,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: isMobile ? 12 : 12.5,
+                          fontWeight: 900,
+                          lineHeight: 1.1,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {entityLabel[r.entity] ?? r.entity}
+                      </div>
+
+                      {r.entity === "Company" && r?.nomeEmpresa && (
+                        <div
+                          style={{
+                            marginTop: 4,
+                            fontSize: isMobile ? 11 : 11.5,
+                            fontWeight: 800,
+                            lineHeight: 1.2,
+                            color: "#334155",
+
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {r.nomeEmpresa}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </td>
               </tr>

@@ -145,11 +145,80 @@ export function useExpectationMatrix() {
     loadMatrix();
   }, []);
 
+const rawColumns = optionsData?.columns ?? [];
+const setores = optionsData?.setores ?? [];
+
+// colunas normais da tabela
+const tableColumns = rawColumns.filter(
+  (column: any) => column.type !== "sector-user"
+);
+
+// setores vêm do array setores, não de columns
+const sectorColumns = setores.map((setor: any) => ({
+  key: setor.name,
+  label: `RESP. ${String(setor.name).toUpperCase()}`,
+  type: "sector-user",
+  sectorId: setor.id,
+}));
+
+const COLUMN_SECTIONS = [
+  {
+    name: "Identificação da empresa",
+    keys: [
+      "codigo",
+      "empresa",
+      "cnpjCpf",
+      "grupo",
+      "matrizFilial",
+      "tributacao",
+      "ramo",
+      "perfilComercial",
+      "status",
+    ],
+  },
+  {
+    name: "Acompanhamento e serviços",
+    keys: [
+      "observacoes",
+      "reunioesFechamentos",
+      "consultoria",
+      "fechamentoContabil",
+      "analiseCompliance",
+      "cobrancaServExtras",
+      "complexidadeFiscal",
+      "complexidadeContabil",
+    ],
+  },
+  {
+    name: "Datas",
+    keys: ["entrada", "saida"],
+  },
+];
+
+const sections = COLUMN_SECTIONS.map((section) => {
+  const columns = tableColumns.filter((column: any) =>
+    section.keys.includes(column.key)
+  );
+
   return {
+    name: section.name,
+    columns,
+  };
+}).filter((section) => section.columns.length > 0);
+
+
+
+return {
     optionsData,
-    columns: optionsData?.columns ?? [],
+
+    columns: tableColumns,
+    sections,
+
+    sectorColumns,
+
     options: optionsData?.options ?? {},
     users: optionsData?.users ?? [],
+    setores,
 
     data,
     items,
@@ -185,6 +254,6 @@ export function useExpectationMatrix() {
     closeDetail,
 
     saving,
-    saveMatrix, 
+    saveMatrix,
   };
 }

@@ -200,6 +200,7 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
               <option value="BAIXADA">Baixada</option>
 
               <option value="ENCERRADA">Encerrada</option>
+              <option value="BLOQUEADO">Bloqueado</option>
             </Select>
 
             <Input style={{ height: 48 }} type="date" label="Data status" value={form.dataSituacao} onChange={set("dataSituacao")} />

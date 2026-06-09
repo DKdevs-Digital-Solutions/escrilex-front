@@ -110,6 +110,8 @@ export function CompanyListTable({
     });
   }
 
+  
+
   function renderCompanyCell(company: any, column: Column) {
     const value = company[column.key];
 
@@ -177,45 +179,185 @@ export function CompanyListTable({
       );
     }
 
-    if (column.key === "situacao" || column.key === "status") {
-      const status = company.situacao || company.status;
+   if (column.key === "situacao" || column.key === "status") {
+  const status = company.situacao || company.status;
 
-      return (
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {status ? (
-            <Badge
-              label={status}
-              variant={
-                status === "ATIVA" || status === "ATIVO"
-                  ? "green"
-                  : status === "ENCERRADA" || status === "ENCERRADO"
-                  ? "red"
-                  : "yellow"
-              }
-            />
-          ) : (
-            <EmptyValue />
-          )}
+  const normalizedStatus = String(status || "").toUpperCase();
 
-          {company.active && status !== "ATIVA" && status !== "ATIVO" && (
-            <span
-              onMouseEnter={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                setTooltipPos({
-                  top: rect.bottom + 10,
-                  left: rect.right - 280,
-                  situacao: status,
-                });
-              }}
-              onMouseLeave={() => setTooltipPos(null)}
-              style={activeDotPillStyle}
-            >
-              <span style={activeDotStyle} />
-            </span>
-          )}
-        </div>
-      );
-    }
+  const isBlocked =
+    normalizedStatus === "BLOQUEADO";
+
+  const blockedBy =
+    company?.bloqueadoPor ||
+    company?.blockedBy?.name ||
+    company?.blockedByName;
+
+  const blockedAt =
+    company?.bloqueadoAt ||
+    company?.blockedAt ||
+    company?.dataBloqueio;
+
+  if (isBlocked) {
+    return (
+      <div
+  style={{
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 10,
+
+  maxWidth: 260,
+  padding: "9px 12px",
+
+  borderRadius: 16,
+
+  background:
+    "linear-gradient(135deg, #ffffff 0%, #fffbeb 100%)",
+
+  border: "1px solid rgba(217,119,6,.22)",
+
+  boxShadow:
+    "0 12px 30px rgba(15,23,42,.08)",
+
+  overflow: "hidden",
+}}
+>
+
+  {/* indicador */}
+  <div
+  style={{
+    width: 32,
+    height: 32,
+
+    borderRadius: 12,
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+
+    background:
+      "linear-gradient(135deg,#fef3c7,#ffffff)",
+
+    border:
+      "1px solid rgba(217,119,6,.22)",
+
+    color: "#b45309",
+
+    fontSize: 14,
+    fontWeight: 950,
+
+    boxShadow:
+      "inset 0 1px 0 rgba(255,255,255,.8)",
+
+    flexShrink: 0,
+  }}
+>
+  !
+</div>
+
+
+  <div
+    style={{
+      minWidth: 0,
+    }}
+  >
+
+   <strong
+  style={{
+    display: "block",
+
+    fontSize: 11,
+    fontWeight: 950,
+
+    color: "#92400e",
+
+    textTransform: "uppercase",
+    letterSpacing: ".09em",
+  }}
+>
+  Bloqueado
+</strong>
+
+
+   <div
+  style={{
+    marginTop: 5,
+
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+
+    fontSize: 11,
+    fontWeight: 750,
+
+    color: "#475569",
+  }}
+>
+
+      <span
+        style={{
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          maxWidth: 170,
+        }}
+      >
+        Por: {blockedBy || "Não informado"}
+      </span>
+
+
+      <span>
+        Em:{" "}
+        {blockedAt
+          ? new Date(blockedAt)
+              .toLocaleDateString("pt-BR")
+          : "Sem data"}
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      {status ? (
+        <Badge
+          label={status}
+          variant={
+            status === "ATIVA" || status === "ATIVO"
+              ? "green"
+              : status === "ENCERRADA" || status === "ENCERRADO"
+              ? "red"
+              : "yellow"
+          }
+        />
+      ) : (
+        <EmptyValue />
+      )}
+
+      {company.active && status !== "ATIVA" && status !== "ATIVO" && (
+        <span
+          onMouseEnter={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            setTooltipPos({
+              top: rect.bottom + 10,
+              left: rect.right - 280,
+              situacao: status,
+            });
+          }}
+          onMouseLeave={() => setTooltipPos(null)}
+          style={activeDotPillStyle}
+        >
+          <span style={activeDotStyle} />
+        </span>
+      )}
+    </div>
+  );
+}
+
 
     if (column.type === "date" || column.key.toLowerCase().includes("data")) {
       return (
