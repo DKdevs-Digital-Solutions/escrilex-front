@@ -1167,123 +1167,133 @@ const isExitModal =
   
 
   {/* DIREITA: resumo */}
+
+
+  <div
+  style={{
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: 20,
+    padding: 22,
+    background: "linear-gradient(135deg, #0f172a 0%, #012942 100%)",
+    color: "#fff",
+  }}
+>
   <div
     style={{
-      position: "relative",
-      overflow: "hidden",
-      borderRadius: 20,
-      padding: 22,
-      background: "linear-gradient(135deg, #0f172a 0%, #012942 100%)",
-      color: "#fff",
+      position: "absolute",
+      top: -40,
+      right: -40,
+      width: 130,
+      height: 130,
+      borderRadius: "50%",
+      background: "rgba(56,189,248,.16)",
     }}
-  >
+  />
+
+  <div style={{ position: "relative" }}>
     <div
       style={{
-        position: "absolute",
-        top: -40,
-        right: -40,
-        width: 130,
-        height: 130,
-        borderRadius: "50%",
-        background: "rgba(56,189,248,.16)",
+        width: 46,
+        height: 46,
+        borderRadius: 16,
+        display: "grid",
+        placeItems: "center",
+        background: "rgba(255,255,255,.12)",
+        border: "1px solid rgba(255,255,255,.18)",
+        marginBottom: 14,
       }}
-    />
+    >
+      <ArrowUpRight size={24} color="#7dd3fc" />
+    </div>
 
-    <div style={{ position: "relative" }}>
-      <div
-        style={{
-          width: 46,
-          height: 46,
-          borderRadius: 16,
-          display: "grid",
-          placeItems: "center",
-          background: "rgba(255,255,255,.12)",
-          border: "1px solid rgba(255,255,255,.18)",
-          marginBottom: 14,
-        }}
-      >
-        <ArrowUpRight size={24} color="#7dd3fc" />
+    <h3 style={{ margin: 0, fontSize: 17, fontWeight: 900 }}>
+      Resumo de saidas
+    </h3>
+
+    <p
+      style={{
+        margin: "8px 0 18px",
+        color: "rgba(255,255,255,.72)",
+        fontSize: 13,
+        lineHeight: 1.55,
+      }}
+    >
+      Informações consolidadas do período selecionado.
+    </p>
+
+    <div
+      style={{
+        padding: 15,
+        borderRadius: 16,
+        background: "rgba(255,255,255,.10)",
+        border: "1px solid rgba(255,255,255,.14)",
+        marginBottom: 12,
+      }}
+    >
+      <div style={{ fontSize: 12, color: "#cbd5e1" }}>
+        Cancelamentos
       </div>
 
-      <h3 style={{ margin: 0, fontSize: 17, fontWeight: 900 }}>
-        Resumo do período
-      </h3>
-
-      <p
+      <div
         style={{
-          margin: "8px 0 18px",
-          color: "rgba(255,255,255,.72)",
-          fontSize: 13,
-          lineHeight: 1.55,
+          marginTop: 4,
+          fontSize: 34,
+          fontWeight: 950,
+          letterSpacing: -1,
+          color: "#86efac",
         }}
       >
-        {insightText}
-      </p>
+        {loading
+          ? "..."
+          : `${cancelamentos?.percentual ?? 0}%`}
+      </div>
 
       <div
         style={{
-          padding: 15,
-          borderRadius: 16,
-          background: "rgba(255,255,255,.10)",
-          border: "1px solid rgba(255,255,255,.14)",
-          marginBottom: 12,
+          marginTop: 10,
+          width: "100%",
+          height: 8,
+          borderRadius: 999,
+          background: "rgba(255,255,255,.14)",
+          overflow: "hidden",
         }}
       >
-        <div style={{ fontSize: 12, color: "#cbd5e1" }}>
-          Clientes ativos
-        </div>
-
         <div
           style={{
-            marginTop: 4,
-            fontSize: 34,
-            fontWeight: 950,
-            letterSpacing: -1,
-            color: "#86efac",
-          }}
-        >
-          {loading ? "..." : `${activeRate}%`}
-        </div>
-
-        <div
-          style={{
-            marginTop: 10,
-            width: "100%",
-            height: 8,
+            width: `${cancelamentos?.percentual ?? 0}%`,
+            height: "100%",
             borderRadius: 999,
-            background: "rgba(255,255,255,.14)",
-            overflow: "hidden",
+            background: "linear-gradient(90deg, #22c55e, #7dd3fc)",
           }}
-        >
-          <div
-            style={{
-              width: `${activeRate}%`,
-              height: "100%",
-              borderRadius: 999,
-              background: "linear-gradient(90deg, #22c55e, #7dd3fc)",
-            }}
-          />
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gap: 9,
-        }}
-      >
-        <MiniInfo label="Total de clientes" value={totalClients} />
-        <MiniInfo
-          label="Novos no período"
-          value={data?.cards?.newClients ?? 0}
-        />
-        <MiniInfo
-          label="Saídas no período"
-          value={data?.cards?.inactiveClients ?? 0}
         />
       </div>
     </div>
+
+    <div
+      style={{
+        display: "grid",
+        gap: 9,
+      }}
+    >
+      <MiniInfo
+        label="Motivos agrupados"
+        value={motivosSaida.length}
+      />
+
+      <MiniInfo
+        label="Quantidade"
+        value={cancelamentos?.quantidade ?? 0}
+      />
+
+      <MiniInfo
+        label="Total de empresas"
+        value={cancelamentos?.totalEmpresas ?? 0}
+      />
+    </div>
   </div>
+</div>
+  
   </div>
 
   <div
@@ -1502,40 +1512,7 @@ const isExitModal =
         </div>
       )}
 
-       {isExitModal && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: isMobile
-                ? "1fr"
-                : "repeat(2, minmax(0, 1fr))",
-              gap: 12,
-              marginTop: 18,
-              marginBottom: 16,
-            }}
-          >
-            {/* <AnalyticsMiniCard
-              label="Permanência média"
-              value={`${permanencia?.mediaDias ?? 0} dias`}
-              helper="Tempo médio entre entrada e saída"
-              color="#2563eb"
-            /> */}
-
-            <AnalyticsMiniCard
-              label="Motivos agrupados"
-              value={motivosSaida.length}
-              helper="Motivos diferentes no período"
-              color="#7c3aed"
-            />
-
-            <AnalyticsMiniCard
-              label="Cancelamentos"
-              value={`${cancelamentos?.percentual ?? 0}%`}
-              helper={`${cancelamentos?.quantidade ?? 0} de ${cancelamentos?.totalEmpresas ?? 0} empresas`}
-              color="#dc2626"
-            />
-          </div>
-        )}
+     
 
       <div
         style={{

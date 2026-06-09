@@ -182,144 +182,7 @@ export function CompanyListTable({
    if (column.key === "situacao" || column.key === "status") {
   const status = company.situacao || company.status;
 
-  const normalizedStatus = String(status || "").toUpperCase();
 
-  const isBlocked =
-    normalizedStatus === "BLOQUEADO";
-
-  const blockedBy =
-    company?.bloqueadoPor ||
-    company?.blockedBy?.name ||
-    company?.blockedByName;
-
-  const blockedAt =
-    company?.bloqueadoAt ||
-    company?.blockedAt ||
-    company?.dataBloqueio;
-
-  if (isBlocked) {
-    return (
-      <div
-  style={{
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 10,
-
-  maxWidth: 260,
-  padding: "9px 12px",
-
-  borderRadius: 16,
-
-  background:
-    "linear-gradient(135deg, #ffffff 0%, #fffbeb 100%)",
-
-  border: "1px solid rgba(217,119,6,.22)",
-
-  boxShadow:
-    "0 12px 30px rgba(15,23,42,.08)",
-
-  overflow: "hidden",
-}}
->
-
-  {/* indicador */}
-  <div
-  style={{
-    width: 32,
-    height: 32,
-
-    borderRadius: 12,
-
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-
-    background:
-      "linear-gradient(135deg,#fef3c7,#ffffff)",
-
-    border:
-      "1px solid rgba(217,119,6,.22)",
-
-    color: "#b45309",
-
-    fontSize: 14,
-    fontWeight: 950,
-
-    boxShadow:
-      "inset 0 1px 0 rgba(255,255,255,.8)",
-
-    flexShrink: 0,
-  }}
->
-  !
-</div>
-
-
-  <div
-    style={{
-      minWidth: 0,
-    }}
-  >
-
-   <strong
-  style={{
-    display: "block",
-
-    fontSize: 11,
-    fontWeight: 950,
-
-    color: "#92400e",
-
-    textTransform: "uppercase",
-    letterSpacing: ".09em",
-  }}
->
-  Bloqueado
-</strong>
-
-
-   <div
-  style={{
-    marginTop: 5,
-
-    display: "flex",
-    flexDirection: "column",
-    gap: 3,
-
-    fontSize: 11,
-    fontWeight: 750,
-
-    color: "#475569",
-  }}
->
-
-      <span
-        style={{
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
-          maxWidth: 170,
-        }}
-      >
-        Por: {blockedBy || "Não informado"}
-      </span>
-
-
-      <span>
-        Em:{" "}
-        {blockedAt
-          ? new Date(blockedAt)
-              .toLocaleDateString("pt-BR")
-          : "Sem data"}
-      </span>
-
-    </div>
-
-  </div>
-
-</div>
-    );
-  }
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -356,6 +219,11 @@ export function CompanyListTable({
       )}
     </div>
   );
+}
+
+
+if (column.type === "sector-user") {
+  return <SectorUsersCell value={value} label={getColumnLabel(column)} />;
 }
 
 
@@ -800,3 +668,244 @@ const mobileLabelStyle: React.CSSProperties = {
   letterSpacing: ".07em",
   marginBottom: 4,
 };
+
+
+
+function SectorUsersCell({
+  value,
+  label,
+}: {
+  value: any;
+  label: string;
+}) {
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+
+  const tooltipRef = React.useRef<HTMLDivElement>(null);
+
+  const [tooltip, setTooltip] = React.useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+
+
+  const users = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+    ? value.split(",").map((item) => item.trim()).filter(Boolean)
+    : [];
+
+  if (!users.length) {
+    return <EmptyValue />;
+  }
+
+  const first = users[0];
+  const total = users.length;
+
+function handleMouseEnter() {
+  const rect = wrapperRef.current?.getBoundingClientRect();
+  if (!rect) return;
+
+  const tooltipWidth = 310;
+  const gap = 8;
+  const margin = 12;
+
+  setTooltip({
+    top: rect.bottom + gap,
+    left: Math.max(
+      margin,
+      Math.min(rect.left, window.innerWidth - tooltipWidth - margin)
+    ),
+  });
+}
+
+
+React.useEffect(() => {
+  if (!tooltip || !tooltipRef.current || !wrapperRef.current) return;
+
+  const rect = wrapperRef.current.getBoundingClientRect();
+  const tooltipRect = tooltipRef.current.getBoundingClientRect();
+
+  let top = rect.bottom + 8;
+
+  if (top + tooltipRect.height > window.innerHeight - 12) {
+    top = window.innerHeight - tooltipRect.height - 12;
+  }
+
+  if (top < 12) {
+    top = 12;
+  }
+
+  if (top !== tooltip.top) {
+    setTooltip((prev) =>
+      prev
+        ? {
+            ...prev,
+            top,
+          }
+        : prev
+    );
+  }
+}, [tooltip]);
+
+  return (
+    <div
+      ref={wrapperRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={() => setTooltip(null)}
+      style={{
+        position: "relative",
+        display: "inline-flex",
+        maxWidth: 240,
+      }}
+    >
+      <div
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8,
+          minWidth: 0,
+          maxWidth: 240,
+          padding: "7px 10px",
+          borderRadius: 999,
+          background: "linear-gradient(135deg,#f8fafc,#ffffff)",
+          border: "1px solid #e2e8f0",
+          boxShadow: "0 6px 16px rgba(15,23,42,.04)",
+          cursor: "help",
+        }}
+      >
+        <span
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: 999,
+            display: "grid",
+            placeItems: "center",
+            background: "#012942",
+            color: "#fff",
+            fontSize: 10,
+            fontWeight: 900,
+            flexShrink: 0,
+          }}
+        >
+          {first.slice(0, 1).toUpperCase()}
+        </span>
+
+        <span
+          style={{
+            minWidth: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            fontSize: 12.5,
+            fontWeight: 800,
+            color: "#334155",
+          }}
+        >
+          {first}
+        </span>
+
+        {total > 1 && (
+          <span
+            style={{
+              flexShrink: 0,
+              padding: "3px 7px",
+              borderRadius: 999,
+              background: "rgba(37,99,235,.08)",
+              color: "#2563eb",
+              fontSize: 11,
+              fontWeight: 900,
+              border: "1px solid rgba(37,99,235,.14)",
+            }}
+          >
+            +{total - 1}
+          </span>
+        )}
+      </div>
+
+      {tooltip && (
+        <div
+          ref={tooltipRef}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: "fixed",
+            top: tooltip.top,
+            left: tooltip.left,
+            zIndex: 999999,
+            width: 310,
+            maxHeight: "calc(100vh - 24px)",
+            overflowY: "auto",
+            padding: 14,
+            borderRadius: 20,
+            background: "rgba(15,23,42,.98)",
+            border: "1px solid rgba(255,255,255,.10)",
+            boxShadow: "0 28px 80px rgba(15,23,42,.35)",
+            color: "#fff",
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 950,
+              color: "#93c5fd",
+              textTransform: "uppercase",
+              letterSpacing: ".12em",
+              marginBottom: 10,
+            }}
+          >
+            {label}
+          </div>
+
+          <div style={{ display: "grid", gap: 8 }}>
+            {users.map((user, index) => (
+              <div
+                key={`${user}-${index}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 9,
+                  padding: "9px 10px",
+                  borderRadius: 14,
+                  background: "rgba(255,255,255,.06)",
+                  border: "1px solid rgba(255,255,255,.10)",
+                }}
+              >
+                <div
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 10,
+                    display: "grid",
+                    placeItems: "center",
+                    background: "linear-gradient(135deg,#2563eb,#7c3aed)",
+                    color: "#fff",
+                    fontSize: 11,
+                    fontWeight: 950,
+                    flexShrink: 0,
+                  }}
+                >
+                  {user.slice(0, 1).toUpperCase()}
+                </div>
+
+                <span
+                  style={{
+                    minWidth: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    fontSize: 12.5,
+                    fontWeight: 800,
+                    color: "#e5e7eb",
+                  }}
+                  title={user}
+                >
+                  {user}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

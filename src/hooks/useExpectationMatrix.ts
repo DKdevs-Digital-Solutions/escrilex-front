@@ -11,7 +11,6 @@ import { useToast } from "../toast";
 export function useExpectationMatrix() {
   const [optionsData, setOptionsData] = useState<any>(null);
   const [data, setData] = useState<any>(null);
-  const [items, setItems] = useState<any[]>([]);
   const [detail, setDetail] = useState<any>(null);
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -65,7 +64,6 @@ export function useExpectationMatrix() {
       });
 
       setData(response);
-      setItems(response?.items ?? []);
     } catch (err: any) {
       setError(
         err?.response?.data?.message ||
@@ -221,7 +219,6 @@ return {
     setores,
 
     data,
-    items,
     detail,
     total: data?.total ?? 0,
 

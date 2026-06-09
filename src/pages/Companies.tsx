@@ -124,6 +124,7 @@ export function Companies({
     loadingOptions,
     total,
     setores,
+    data
   } = useExpectationMatrix();
 
   useEffect(() => {
@@ -153,56 +154,76 @@ export function Companies({
     );
   }
 
-  const normalizedItems = useMemo(() => {
-    return items.map((company: any) => ({
-      ...company,
+const matrixItems = useMemo(() => {
+  return data?.items ?? [];
+}, [data]);
 
-      companyId: company.id,
+const normalizedItems = useMemo(() => {
+  return matrixItems.map((item: any) => ({
+    ...item,
 
-      codigo: company.cod,
-      empresa: company.razaoSocial,
-      cnpjCpf: company.cnpj,
-      matrizFilial: company.filial,
-      perfilComercial: company.perfil,
-      status: company.situacao,
-      entrada: company.dataEntrada,
+    id: item.companyId,
+    companyId: item.companyId,
 
-      dataInicioCobrancaFiscal:
-        company.dataInicioCobrancaFiscal || company.dataInicioCobranca,
-      dataFimCobrancaFiscal:
-        company.dataFimCobrancaFiscal || company.dataFimCobranca,
-    }));
-  }, [items]);
+    cod: item.codigo,
+    razaoSocial: item.empresa,
+    cnpj: item.cnpjCpf,
+    filial: item.matrizFilial,
+    perfil: item.perfilComercial,
+    situacao: item.status,
+    dataEntrada: item.entrada,
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    const qNumbers = q.replace(/\D/g, "");
+    Comercial: Array.isArray(item.Comercial)
+      ? item.Comercial.join(", ")
+      : item.Comercial || "—",
 
-    return normalizedItems.filter((c: any) => {
-      if (filterSituacao && c.situacao !== filterSituacao) return false;
-      if (filterGrupo && c.grupo !== filterGrupo) return false;
+    Compliance: Array.isArray(item.Compliance)
+      ? item.Compliance.join(", ")
+      : item.Compliance || "—",
 
-      if (filterStatus !== "all" && String(c.active) !== filterStatus) {
-        return false;
-      }
+    Contábil: Array.isArray(item.Contábil)
+      ? item.Contábil.join(", ")
+      : item.Contábil || "—",
 
-      if (!q) return true;
+    Fiscal: Array.isArray(item.Fiscal)
+      ? item.Fiscal.join(", ")
+      : item.Fiscal || "—",
 
-      const razaoSocial = String(c.razaoSocial || "").toLowerCase();
-      const nomeFantasia = String(c.nomeFantasia || "").toLowerCase();
-      const cnpj = String(c.cnpj || "").replace(/\D/g, "");
-      const cod = String(c.cod || "").toLowerCase();
-      const grupo = String(c.grupo || "").toLowerCase();
+    Societário: Array.isArray(item.Societário)
+      ? item.Societário.join(", ")
+      : item.Societário || "—",
+  }));
+}, [matrixItems]);
 
-      return (
-        razaoSocial.includes(q) ||
-        nomeFantasia.includes(q) ||
-        cod.includes(q) ||
-        grupo.includes(q) ||
-        (qNumbers && cnpj.includes(qNumbers))
-      );
-    });
-  }, [normalizedItems, search, filterSituacao, filterGrupo, filterStatus]);
+const filtered = useMemo(() => {
+  const q = search.toLowerCase().trim();
+  const qNumbers = q.replace(/\D/g, "");
+
+  return normalizedItems.filter((c: any) => {
+    if (filterSituacao && c.status !== filterSituacao) return false;
+    if (filterGrupo && c.grupo !== filterGrupo) return false;
+
+    if (filterStatus !== "all" && String(c.active) !== filterStatus) {
+      return false;
+    }
+
+    if (!q) return true;
+
+    const razaoSocial = String(c.empresa || "").toLowerCase();
+    const nomeFantasia = String(c.nomeFantasia || "").toLowerCase();
+    const cnpj = String(c.cnpjCpf || "").replace(/\D/g, "");
+    const cod = String(c.codigo || "").toLowerCase();
+    const grupo = String(c.grupo || "").toLowerCase();
+
+    return (
+      razaoSocial.includes(q) ||
+      nomeFantasia.includes(q) ||
+      cod.includes(q) ||
+      grupo.includes(q) ||
+      (qNumbers && cnpj.includes(qNumbers))
+    );
+  });
+}, [normalizedItems, search, filterSituacao, filterGrupo, filterStatus]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -403,10 +424,10 @@ export function Companies({
         }}
       >
         <MatrixStats
-          items={items}
-          total={total}
-          visibleColumnsCount={visibleColumns.length}
-        />
+            items={normalizedItems}
+            total={total}
+            visibleColumnsCount={visibleColumns.length}
+          />
         <br />
       </div>
 

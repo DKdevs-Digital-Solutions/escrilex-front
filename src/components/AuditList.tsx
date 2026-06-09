@@ -393,6 +393,273 @@ React.useEffect(() => {
 
 
 
+
+function formatAuditValue(value: unknown) {
+  if (value === null || value === undefined || value === "") return "—";
+
+  if (typeof value === "boolean") {
+    return value ? "Sim" : "Não";
+  }
+
+  if (typeof value === "string") {
+    const isDate = /^\d{4}-\d{2}-\d{2}T/.test(value);
+
+    if (isDate) {
+      return new Date(value).toLocaleString("pt-BR");
+    }
+
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    return `${value.length} registro${value.length === 1 ? "" : "s"}`;
+  }
+
+  if (typeof value === "object") {
+    const obj = value as any;
+
+    if (obj?.name) return obj.name;
+    if (obj?.email) return obj.email;
+    if (obj?.razaoSocial) return obj.razaoSocial;
+    if (obj?.nomeFantasia) return obj.nomeFantasia;
+
+    return "Objeto alterado";
+  }
+
+  return String(value);
+}
+
+function AuditChangesTooltip({ item }: { item: AuditItem }) {
+  const changes = item.camposAlterados || [];
+
+  const [position, setPosition] = React.useState<"top" | "bottom">("bottom");
+
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+
+  function handleMouseEnter() {
+    if (!wrapperRef.current) return;
+
+    const rect = wrapperRef.current.getBoundingClientRect();
+
+    const spaceBottom = window.innerHeight - rect.bottom;
+
+    if (spaceBottom < 420) {
+      setPosition("top");
+    } else {
+      setPosition("bottom");
+    }
+  }
+
+  if (!changes.length) {
+    return (
+      <span style={{ fontSize: 12, fontWeight: 800, color: "#94a3b8" }}>
+        Sem alterações
+      </span>
+    );
+  }
+
+  return (
+   <div
+  ref={wrapperRef}
+  onMouseEnter={handleMouseEnter}
+  className="audit-wrapper"
+  style={{
+    position: "relative",
+    display: "inline-flex",
+
+    paddingTop: position === "top" ? 14 : 0,
+    paddingBottom: position === "bottom" ? 14 : 0,
+  }}
+>
+      <button
+        type="button"
+        style={{
+          padding: "8px 11px",
+          borderRadius: 999,
+          border: "1px solid rgba(37,99,235,.20)",
+          background: "linear-gradient(135deg,#eff6ff,#ffffff)",
+          color: "#1d4ed8",
+          fontSize: 12,
+          fontWeight: 900,
+          cursor: "pointer",
+        }}
+      >
+        {changes.length} alteração{changes.length === 1 ? "" : "es"}
+      </button>
+
+      <div
+          className="audit-tooltip"
+          style={{
+              position: "absolute",
+
+              right: 0,
+
+              ...(position === "bottom"
+                ? {
+                    top: "calc(100% - 4px)",
+                  }
+                : {
+                    bottom: "calc(100% - 4px)",
+                  }),
+
+              zIndex: 999,
+
+              width: 420,
+              maxHeight: 360,
+
+              overflowY: "auto",
+
+              padding: 14,
+
+              borderRadius: 20,
+
+              background: "rgba(15,23,42,.98)",
+
+              border: "1px solid rgba(255,255,255,.10)",
+
+              boxShadow:
+                "0 28px 80px rgba(15,23,42,.35)",
+
+              opacity: 0,
+              visibility: "hidden",
+
+              pointerEvents: "none",
+
+              transform:
+                position === "bottom"
+                  ? "translateY(5px)"
+                  : "translateY(-5px)",
+
+              transition:
+                "opacity .18s ease, transform .18s ease, visibility .18s",
+            }}
+        >
+        <div
+          style={{
+            marginBottom: 12,
+            fontSize: 11,
+            fontWeight: 950,
+            color: "#93c5fd",
+            textTransform: "uppercase",
+            letterSpacing: ".12em",
+          }}
+        >
+          Valores alterados
+        </div>
+
+        <div style={{ display: "grid", gap: 10 }}>
+          {changes.map((change, index) => (
+            <div
+              key={`${change.campo}-${index}`}
+              style={{
+                padding: 12,
+                borderRadius: 16,
+                background: "rgba(255,255,255,.06)",
+                border: "1px solid rgba(255,255,255,.10)",
+              }}
+            >
+              <div
+                style={{
+                  marginBottom: 9,
+                  fontSize: 12,
+                  fontWeight: 950,
+                  color: "#fff",
+                }}
+              >
+                {change.campo}
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 8,
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 900,
+                      color: "#fca5a5",
+                      textTransform: "uppercase",
+                      letterSpacing: ".08em",
+                      marginBottom: 4,
+                    }}
+                  >
+                    Antes
+                  </div>
+
+                  <div
+                    style={{
+                      padding: "8px 9px",
+                      borderRadius: 12,
+                      background: "rgba(239,68,68,.10)",
+                      color: "#fee2e2",
+                      fontSize: 11.5,
+                      fontWeight: 750,
+                      lineHeight: 1.35,
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {formatAuditValue(change.valorAnterior)}
+                  </div>
+                </div>
+
+                <div>
+                  <div
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 900,
+                      color: "#86efac",
+                      textTransform: "uppercase",
+                      letterSpacing: ".08em",
+                      marginBottom: 4,
+                    }}
+                  >
+                    Depois
+                  </div>
+
+                  <div
+                    style={{
+                      padding: "8px 9px",
+                      borderRadius: 12,
+                      background: "rgba(34,197,94,.10)",
+                      color: "#dcfce7",
+                      fontSize: 11.5,
+                      fontWeight: 750,
+                      lineHeight: 1.35,
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {formatAuditValue(change.novoValor)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+     <style>
+        {`
+          .audit-wrapper:hover .audit-tooltip {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            transform: translateY(0) !important;
+          }
+        `}
+      </style>
+    </div>
+  );
+}
+
+
   return (
     <>
       <div
@@ -655,6 +922,10 @@ React.useEffect(() => {
                   {entityLabel[r.entity] ?? r.entity}
                 </span>
               </div>
+
+              <div style={{ marginTop: 12 }}>
+                <AuditChangesTooltip item={r} />
+              </div>
             </div>
           </div>
         </div>
@@ -663,7 +934,7 @@ React.useEffect(() => {
   </div>
 ) : (
   <div style={{ padding: 14 }}>
-    <div style={{ width: "100%", overflowX: "auto" }}>
+    <div style={{ width: "100%" }}>
       <table
         style={{
           width: "100%",
@@ -677,6 +948,7 @@ React.useEffect(() => {
             <th style={thStyle}>Usuário</th>
             <th style={thStyle}>Data / Hora</th>
             <th style={thStyle}>Ação</th>
+            <th style={thStyle}>Alterações</th>
             <th style={thStyle}>Entidade</th>
           </tr>
         </thead>
@@ -764,6 +1036,10 @@ React.useEffect(() => {
                     label={actionLabel[r.action] ?? r.action}
                     variant={actionBadge[r.action] || "gray"}
                   />
+                </td>
+
+                <td style={tdStyle}>
+                  <AuditChangesTooltip item={r} />
                 </td>
 
                <td style={{ ...tdStyle, ...tdRightStyle }}>

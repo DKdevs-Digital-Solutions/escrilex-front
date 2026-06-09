@@ -27,6 +27,45 @@ export function CompanyDetailHeader({ company, onBack }: Props) {
       ? company.razaoSocial
       : null;
 
+const normalizedStatus = String(company?.situacao || "").toUpperCase();
+
+const isBlocked = normalizedStatus === "BLOQUEADO";
+
+const blockedBy =
+  company?.bloqueadoPor ||
+  company?.blockedBy?.name ||
+  company?.blockedByName;
+
+const blockedAt =
+  company?.bloqueadoAt ||
+  company?.blockedAt ||
+  company?.dataBloqueio;      
+
+  const blockedRef = React.useRef<HTMLDivElement>(null);
+
+const [blockedTooltip, setBlockedTooltip] =
+  React.useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+
+
+function openBlockedTooltip() {
+  const rect = blockedRef.current?.getBoundingClientRect();
+  if (!rect) return;
+
+  const tooltipWidth = 260;
+  const margin = 12;
+
+  setBlockedTooltip({
+    top: rect.bottom + 8,
+    left: Math.max(
+      margin,
+      Math.min(rect.left, window.innerWidth - tooltipWidth - margin)
+    ),
+  });
+}
+
   return (
     <div
       style={{
@@ -130,25 +169,170 @@ export function CompanyDetailHeader({ company, onBack }: Props) {
                 justifyContent: "flex-end",
               }}
             >
-              <SituacaoBadge v={company.situacao} />
+             <div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+  }}
+>
+  {isBlocked ? (
+    <div
+  ref={blockedRef}
+  onMouseEnter={openBlockedTooltip}
+  onMouseLeave={() => setBlockedTooltip(null)}
+  style={{
+    position: "relative",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "8px 12px",
+    borderRadius: 15,
 
-              {company.perfil && (
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    padding: "4px 9px",
-                    borderRadius: 999,
-                    fontSize: 11.5,
-                    fontWeight: 800,
-                    background: "#1e293b",
-                    color: "#fff",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {company.perfil}
-                </span>
-              )}
+    background:
+      "linear-gradient(135deg,#fff7ed,#ffffff)",
+
+    border:
+      "1px solid rgba(217,119,6,.22)",
+
+    cursor: "help",
+  }}
+>
+  <div
+    style={{
+      width: 28,
+      height: 28,
+      borderRadius: 10,
+
+      display: "grid",
+      placeItems: "center",
+
+      background:
+        "linear-gradient(135deg,#f59e0b,#b45309)",
+
+      color: "#fff",
+      fontWeight: 950,
+
+      boxShadow:
+        "0 8px 18px rgba(217,119,6,.25)",
+    }}
+  >
+    !
+  </div>
+
+
+  <strong
+    style={{
+      fontSize: 11,
+      fontWeight: 950,
+      color: "#92400e",
+      textTransform: "uppercase",
+      letterSpacing: ".1em",
+    }}
+  >
+    Bloqueado
+  </strong>
+
+
+  {blockedTooltip && (
+    <div
+      style={{
+        position: "fixed",
+        top: blockedTooltip.top,
+        left: blockedTooltip.left,
+
+        zIndex: 999999,
+
+        width: 260,
+        padding: 14,
+
+        borderRadius: 18,
+
+        background:
+          "rgba(15,23,42,.98)",
+
+        color: "#fff",
+
+        boxShadow:
+          "0 25px 70px rgba(15,23,42,.35)",
+
+        border:
+          "1px solid rgba(255,255,255,.12)",
+      }}
+    >
+
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 950,
+          color: "#fbbf24",
+          letterSpacing: ".12em",
+          textTransform: "uppercase",
+          marginBottom: 12,
+        }}
+      >
+        Dados do bloqueio
+      </div>
+
+
+      <div
+        style={{
+          display: "grid",
+          gap: 10,
+          fontSize: 12,
+        }}
+      >
+
+        <div>
+          <span
+            style={{
+              color: "#94a3b8",
+              display: "block",
+              marginBottom: 3,
+            }}
+          >
+            Bloqueado por
+          </span>
+
+          <strong>
+            {blockedBy || "Não informado"}
+          </strong>
+        </div>
+
+
+        <div>
+          <span
+            style={{
+              color: "#94a3b8",
+              display: "block",
+              marginBottom: 3,
+            }}
+          >
+            Data do bloqueio
+          </span>
+
+          <strong>
+            {blockedAt
+              ? new Date(blockedAt)
+                  .toLocaleDateString("pt-BR")
+              : "Sem data"}
+          </strong>
+        </div>
+
+      </div>
+    </div>
+  )}
+</div>
+  ) : (
+    <>
+      <SituacaoBadge v={company.situacao} />
+    </>
+  )}
+</div>
+
+            
             </div>
           </div>
 
@@ -207,6 +391,24 @@ export function CompanyDetailHeader({ company, onBack }: Props) {
                 {company.nomeFantasia}
               </span>
             )}
+
+              {company.perfil && (
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    padding: "4px 9px",
+                    borderRadius: 999,
+                    fontSize: 11.5,
+                    fontWeight: 800,
+                    background: "#1e293b",
+                    color: "#fff",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {company.perfil}
+                </span>
+              )}
           </div>
         </div>
       </div>

@@ -93,47 +93,47 @@ export function ColumnsPanel({
               }}
             >
               <strong
-  style={{
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
 
-    marginBottom: 16,
-    padding: "10px 12px",
+                    marginBottom: 16,
+                    padding: "10px 12px",
 
-    borderRadius: 14,
+                    borderRadius: 14,
 
-    background:
-      "linear-gradient(135deg, rgba(15,23,42,.04), rgba(187,159,88,.12))",
+                    background:
+                      "linear-gradient(135deg, rgba(15,23,42,.04), rgba(187,159,88,.12))",
 
-    border: "1px solid rgba(187,159,88,.20)",
+                    border: "1px solid rgba(187,159,88,.20)",
 
-    boxShadow:
-      "0 10px 24px rgba(15,23,42,.04)",
+                    boxShadow:
+                      "0 10px 24px rgba(15,23,42,.04)",
 
-    fontSize: 11,
-    fontWeight: 950,
+                    fontSize: 11,
+                    fontWeight: 950,
 
-    color: "#0f172a",
+                    color: "#0f172a",
 
-    textTransform: "uppercase",
-    letterSpacing: ".10em",
-  }}
->
-  <span
-    style={{
-      width: 7,
-      height: 7,
-      borderRadius: 999,
-      background: "#BB9F58",
-      boxShadow: "0 0 0 4px rgba(187,159,88,.15)",
-    }}
-  />
+                    textTransform: "uppercase",
+                    letterSpacing: ".10em",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: 999,
+                      background: "#BB9F58",
+                      boxShadow: "0 0 0 4px rgba(187,159,88,.15)",
+                    }}
+                  />
 
-  {section.name}
-</strong>
+                  {section.name}
+                </strong>
 
-              <div style={{ display: "grid", gap: 8, border: "1px solid #e2e8f0", padding: 14,borderRadius:10 }}>
+              <div style={{ display: "grid", gap: 8,borderRadius:10 }}>
                 {(section.columns ?? []).map((column: any) => {
                   const checked = visibleKeys.includes(column.key);
 
