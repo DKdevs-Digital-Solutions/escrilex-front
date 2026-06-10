@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
   ArrowDownRight,
   ArrowUpRight,
   Building2,
   CalendarDays,
+  Info,
   Maximize2,
   RefreshCcw,
   RefreshCw,
@@ -44,6 +45,7 @@ import { useDashboardSummary } from "../hooks/useDashboardSummary";
 import { useDashboardDrilldown } from "../hooks/useDashboardDrilldown";
 import { useCompanies } from "../hooks/useCompanies";
 import { useDashboardAnalytics } from "../hooks/useDashboardAnalytics";
+import { createPortal } from "react-dom";
 
 export type DashboardSummary = {
   period: {
@@ -406,6 +408,22 @@ const periodLabel = useMemo(() => {
     color: "#dc2626",
   },
 ];
+
+  const totalMovement = movementChartData.reduce(
+    (acc, item) => acc + item.value,
+    0
+  );
+
+  const movementChartDataRender =
+    totalMovement === 0
+      ? [
+          {
+            name: "Sem movimentação",
+            value: 1,
+            color: "#cbd5e1",
+          },
+        ]
+      : movementChartData;
 
  const cards = [
   {
@@ -894,32 +912,36 @@ const isExitModal =
       <ResponsiveContainer width="100%" height="100%">
         <PieChart style={{cursor:"pointer"}}>
           <Pie
-            data={movementChartData}
-            dataKey="value"
-            nameKey="name"
-            innerRadius="58%"
-            outerRadius="82%"
-            paddingAngle={5}
-            stroke="#fff"
-            strokeWidth={1}
-            onClick={(entry: any) => {
-              if (entry.name === "Novos") {
-                openModal("clientes", "entradas");
-              }
+                data={movementChartDataRender}
+                dataKey="value"
+                nameKey="name"
+                innerRadius="58%"
+                outerRadius="82%"
+                paddingAngle={5}
+                stroke="#fff"
+                strokeWidth={1}
+                onClick={(entry: any) => {
+                  if (totalMovement === 0) return;
 
-              if (entry.name === "Saíram") {
-                openModal("clientes", "saidas");
-                loadDashboardAnalytics();
-              }
-            }}
-            
-          >
-            {movementChartData.map((entry) => (
-              <Cell key={entry.name} fill={entry.color} />
-            ))}
-          </Pie>
+                  if (entry.name === "Novos") {
+                    openModal("clientes", "entradas");
+                  }
 
-          <Tooltip content={<CustomTooltip />} />
+                  if (entry.name === "Saíram") {
+                    openModal("clientes", "saidas");
+                    loadDashboardAnalytics();
+                  }
+                }}
+              >
+                {movementChartDataRender.map((entry) => (
+                  <Cell
+                    key={entry.name}
+                    fill={entry.color}
+                    cursor={totalMovement === 0 ? "default" : "pointer"}
+                  />
+                ))}
+              </Pie>
+
             </PieChart>
           </ResponsiveContainer>
 
@@ -1276,10 +1298,7 @@ const isExitModal =
         gap: 9,
       }}
     >
-      <MiniInfo
-        label="Motivos agrupados"
-        value={motivosSaida.length}
-      />
+       <MotivosAgrupadosInfo motivos={motivosSaida} />
 
       <MiniInfo
         label="Quantidade"
@@ -2239,7 +2258,7 @@ function CustomTooltip({ active, payload, label }: any) {
             fontWeight: 900,
           }}
         >
-          {data.value.toLocaleString("pt-BR")}%
+          {data.value.toLocaleString("pt-BR")}
         </strong>
       </div>
     </div>
@@ -2986,62 +3005,226 @@ const tableStyle: React.CSSProperties = {
 };
 
 
-function AnalyticsMiniCard({
-  label,
-  value,
-  helper,
-  color,
-}: {
-  label: string;
-  value: string | number;
-  helper: string;
-  color: string;
-}) {
+
+type MotivoSaida = {
+  motivo: string;
+  quantidade: number;
+  percentual: number;
+};
+
+function MotivosAgrupadosInfo({ motivos }: { motivos: MotivoSaida[] }) {
+  const [open, setOpen] = useState(false);
+  const [rect, setRect] = useState<DOMRect | null>(null);
+
+  const showTooltip = (event: React.MouseEvent<HTMLSpanElement>) => {
+    setRect(event.currentTarget.getBoundingClientRect());
+    setOpen(true);
+  };
+
+  const closeTimer = useRef<number | null>(null);
+
+  const clearCloseTimer = () => {
+    if (closeTimer.current) {
+      window.clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+
+  const openTooltip = () => {
+    clearCloseTimer();
+    setOpen(true);
+  };
+
+  const closeTooltip = () => {
+    closeTimer.current = window.setTimeout(() => {
+      setOpen(false);
+    }, 180);
+  };
+
   return (
     <div
       style={{
-        padding: 16,
-        borderRadius: 18,
-        background: "#fff",
-        border: "1px solid #e2e8f0",
-        boxShadow: "0 10px 26px rgba(15,23,42,.06)",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: 10,
+        padding: "10px 12px",
+        borderRadius: 13,
+        background: "rgba(255,255,255,.09)",
+        border: "1px solid rgba(255,255,255,.12)",
+        cursor:"pointer"
       }}
+       onMouseEnter={(event) => {
+          setRect(event.currentTarget.getBoundingClientRect());
+          openTooltip();
+        }}
+        onMouseLeave={closeTooltip}
     >
-      <span
+      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        <span
+          style={{
+            color: "rgba(255,255,255,.72)",
+            fontSize: 12.5,
+            fontWeight: 800,
+          }}
+        >
+          Motivos agrupados
+        </span>
+
+        
+      </div>
+        <span
+          style={{
+            width: 18,
+            height: 18,
+            borderRadius: 999,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "rgba(255,255,255,.10)",
+            border: "1px solid rgba(255,255,255,.14)",
+            cursor: "help",
+          }}
+        >
+          <Info size={12} color="rgba(255,255,255,.78)" />
+        </span>
+      
+
+      {open &&
+        rect &&
+        createPortal(
+          <div
+  onMouseEnter={openTooltip}
+  onMouseLeave={closeTooltip}
+  style={{
+    position: "fixed",
+    left: rect.left - 300,
+    top: rect.bottom + 12,
+    zIndex: 99999,
+    width: 390,
+    padding: 14,
+    borderRadius: 18,
+    background:
+      "linear-gradient(180deg, rgba(15,23,42,.98), rgba(2,6,23,.98))",
+    border: "1px solid rgba(255,255,255,.14)",
+    boxShadow:
+      "0 24px 80px rgba(0,0,0,.52), inset 0 1px 0 rgba(255,255,255,.08)",
+    backdropFilter: "blur(16px)",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12,
+    }}
+  >
+    <div>
+      <div
         style={{
-          display: "block",
-          fontSize: 11,
+          color: "#fff",
+          fontSize: 13,
           fontWeight: 900,
-          color: "#64748b",
-          textTransform: "uppercase",
-          letterSpacing: ".08em",
+          letterSpacing: ".2px",
         }}
       >
-        {label}
-      </span>
+        Motivos de saída
+      </div>
 
-      <strong
+      <div
         style={{
-          display: "block",
-          marginTop: 6,
-          fontSize: 24,
-          fontWeight: 950,
-          color,
-        }}
-      >
-        {value}
-      </strong>
-
-      <p
-        style={{
-          margin: "4px 0 0",
-          fontSize: 12,
-          color: "#64748b",
+          color: "rgba(255,255,255,.52)",
+          fontSize: 11.5,
+          marginTop: 2,
           fontWeight: 700,
         }}
       >
-        {helper}
-      </p>
+        Distribuição agrupada dos cancelamentos
+      </div>
+    </div>
+
+    <div
+      style={{
+        padding: "5px 8px",
+        borderRadius: 999,
+        background: "rgba(59,130,246,.14)",
+        border: "1px solid rgba(96,165,250,.22)",
+        color: "#bfdbfe",
+        fontSize: 11.5,
+        fontWeight: 900,
+      }}
+    >
+      {motivos.length} grupos
+    </div>
+  </div>
+
+  <div style={{ display: "grid", gap: 9 }}>
+    {motivos.map((item) => (
+      <div
+        key={item.motivo}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "42px 1fr 58px",
+          gap: 10,
+          alignItems: "center",
+          padding: "10px 11px",
+          borderRadius: 14,
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,.085), rgba(255,255,255,.035))",
+          border: "1px solid rgba(255,255,255,.09)",
+        }}
+      >
+        <strong
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 10,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#fff",
+            fontSize: 13,
+            background: "rgba(255,255,255,.10)",
+            border: "1px solid rgba(255,255,255,.12)",
+          }}
+        >
+          {item.quantidade}
+        </strong>
+
+        <span
+          style={{
+            color: "rgba(255,255,255,.82)",
+            fontSize: 12.5,
+            lineHeight: 1.35,
+            fontWeight: 700,
+            wordBreak: "break-word",
+          }}
+        >
+          {item.motivo}
+        </span>
+
+        <span
+          style={{
+            justifySelf: "end",
+            padding: "5px 8px",
+            borderRadius: 999,
+            color: "#dbeafe",
+            background: "rgba(59,130,246,.13)",
+            border: "1px solid rgba(96,165,250,.18)",
+            fontSize: 12,
+            fontWeight: 900,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {item.percentual}%
+        </span>
+      </div>
+    ))}
+  </div>
+</div>,
+          document.body
+        )}
     </div>
   );
 }

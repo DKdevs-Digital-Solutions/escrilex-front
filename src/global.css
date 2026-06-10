@@ -646,3 +646,26 @@ div::-webkit-scrollbar-thumb:hover {
 
   color: #94a3b8;
 }
+
+
+
+.audit-tooltip::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .audit-tooltip::-webkit-scrollbar-track {
+      background: rgba(255,255,255,.05);
+      border-radius: 999px;
+    }
+
+    .audit-tooltip::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,.25);
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+
+    .audit-tooltip::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,.4);
+      background-clip: padding-box;
+    }

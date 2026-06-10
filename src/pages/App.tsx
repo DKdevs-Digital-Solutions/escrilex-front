@@ -481,14 +481,16 @@ const topIconBtn: React.CSSProperties = {
 
         {logoutConfirm && (
           <LogoutConfirm
-            onConfirm={() => {
-            setToken(null);
-            localStorage.removeItem("currentPage");
-            localStorage.removeItem("companyId");
-            localStorage.removeItem("runId");
-            setLogoutConfirm(false);
-            setTimeout(() => window.location.reload(), 300);
-          }}
+           onConfirm={() => {
+              setToken(null);
+              setLogoutConfirm(false);
+
+              localStorage.clear();
+
+              setTimeout(() => {
+                window.location.reload();
+              }, 300);
+            }}
             onCancel={() => setLogoutConfirm(false)}
           />
         )}

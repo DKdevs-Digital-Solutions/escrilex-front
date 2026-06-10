@@ -100,9 +100,32 @@ export function Companies({
 
   const [columnsOpen, setColumnsOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
-  const [visibleKeys, setVisibleKeys] = useState<string[]>(
-    DEFAULT_VISIBLE_COLUMNS
-  );
+  const STORAGE_KEY = "expectation-matrix-visible-columns";
+
+  const [visibleKeys, setVisibleKeys] = useState<string[]>(() => {
+  try {
+    const saved = localStorage.getItem(
+      "expectation-matrix-visible-columns"
+    );
+
+    return saved
+      ? JSON.parse(saved)
+      : DEFAULT_VISIBLE_COLUMNS;
+  } catch {
+    return DEFAULT_VISIBLE_COLUMNS;
+  }
+});
+
+
+useEffect(() => {
+  try {
+    localStorage.setItem(
+      "expectation-matrix-visible-columns",
+      JSON.stringify(visibleKeys)
+    );
+  } catch {}
+}, [visibleKeys]);
+
 
   const {
     items,

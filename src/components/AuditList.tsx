@@ -12,6 +12,7 @@ import {
   LayoutPanelTop,
   Activity,
 } from "lucide-react";
+import { createPortal } from "react-dom";
 
 const entityLabel: Record<string, string> = {
   Company: "Empresa",
@@ -438,23 +439,26 @@ function AuditChangesTooltip({ item }: { item: AuditItem }) {
 
   const [position, setPosition] = React.useState<"top" | "bottom">("bottom");
 
+  const [tooltipRect, setTooltipRect] = React.useState<DOMRect | null>(null);
+
   const wrapperRef = React.useRef<HTMLDivElement>(null);
+
+  const [open, setOpen] = React.useState(false);
+
+  const isLogin = item.action?.toUpperCase() === "LOGIN";
 
   function handleMouseEnter() {
     if (!wrapperRef.current) return;
 
     const rect = wrapperRef.current.getBoundingClientRect();
-
     const spaceBottom = window.innerHeight - rect.bottom;
 
-    if (spaceBottom < 420) {
-      setPosition("top");
-    } else {
-      setPosition("bottom");
-    }
+    setTooltipRect(rect);
+    setPosition(spaceBottom < 420 ? "top" : "bottom");
+    setOpen(true);
   }
 
-  if (!changes.length) {
+  if (isLogin || !changes.length) {
     return (
       <span style={{ fontSize: 12, fontWeight: 800, color: "#94a3b8" }}>
         Sem alterações
@@ -464,17 +468,16 @@ function AuditChangesTooltip({ item }: { item: AuditItem }) {
 
   return (
    <div
-  ref={wrapperRef}
-  onMouseEnter={handleMouseEnter}
-  className="audit-wrapper"
-  style={{
-    position: "relative",
-    display: "inline-flex",
-
-    paddingTop: position === "top" ? 14 : 0,
-    paddingBottom: position === "bottom" ? 14 : 0,
-  }}
->
+      ref={wrapperRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={() => setOpen(false)}
+      className="audit-wrapper"
+      style={{
+        position: "relative",
+        display: "inline-flex",
+       
+      }}
+    >
       <button
         type="button"
         style={{
@@ -491,53 +494,48 @@ function AuditChangesTooltip({ item }: { item: AuditItem }) {
         {changes.length} alteração{changes.length === 1 ? "" : "es"}
       </button>
 
-      <div
-          className="audit-tooltip"
-          style={{
-              position: "absolute",
+    {open &&
+  tooltipRect &&
+  createPortal(
+    <div
+      className="audit-tooltip"
+      style={{
+        position: "fixed",
+        right: window.innerWidth - tooltipRect.right,
+        top:
+          position === "bottom"
+            ? tooltipRect.bottom - 4
+            : undefined,
+        bottom:
+          position === "top"
+            ? window.innerHeight - tooltipRect.top - 4
+            : undefined,
 
-              right: 0,
+        zIndex: 99999,
 
-              ...(position === "bottom"
-                ? {
-                    top: "calc(100% - 4px)",
-                  }
-                : {
-                    bottom: "calc(100% - 4px)",
-                  }),
+        width: 420,
+        maxHeight: 360,
+        overflowY: "auto",
 
-              zIndex: 999,
+        padding: 14,
+        borderRadius: 5,
+        background: "rgba(15,23,42,.98)",
+        border: "1px solid rgba(255,255,255,.10)",
+        boxShadow: "0 28px 80px rgba(15,23,42,.35)",
 
-              width: 420,
-              maxHeight: 360,
+        opacity: 1,
+        visibility: "visible",
+        pointerEvents: "auto",
 
-              overflowY: "auto",
+        transform:
+          position === "bottom"
+            ? "translateY(5px)"
+            : "translateY(-5px)",
 
-              padding: 14,
-
-              borderRadius: 20,
-
-              background: "rgba(15,23,42,.98)",
-
-              border: "1px solid rgba(255,255,255,.10)",
-
-              boxShadow:
-                "0 28px 80px rgba(15,23,42,.35)",
-
-              opacity: 0,
-              visibility: "hidden",
-
-              pointerEvents: "none",
-
-              transform:
-                position === "bottom"
-                  ? "translateY(5px)"
-                  : "translateY(-5px)",
-
-              transition:
-                "opacity .18s ease, transform .18s ease, visibility .18s",
-            }}
-        >
+        transition:
+          "opacity .18s ease, transform .18s ease, visibility .18s",
+      }}
+    >
         <div
           style={{
             marginBottom: 12,
@@ -643,18 +641,10 @@ function AuditChangesTooltip({ item }: { item: AuditItem }) {
             </div>
           ))}
         </div>
-      </div>
+      </div>,
+      document.body
+  )}
 
-     <style>
-        {`
-          .audit-wrapper:hover .audit-tooltip {
-            opacity: 1 !important;
-            visibility: visible !important;
-            pointer-events: auto !important;
-            transform: translateY(0) !important;
-          }
-        `}
-      </style>
     </div>
   );
 }
