@@ -441,7 +441,7 @@ const periodLabel = useMemo(() => {
   {
     title: "Saíram no período",
     value: data?.cards?.inactiveClients ?? 0,
-    description: "Clientes inativados no filtro",
+    description: "Clientes encerrados no período",
     icon: <ArrowDownRight size={22} />,
     bg: "linear-gradient(135deg, #fef2f2, #fee2e2)",
     color: "#dc2626",
@@ -1124,7 +1124,7 @@ const isExitModal =
                 fontSize: 13,
               }}
             >
-              Comparativo de clientes ativos e clientes inativos.
+              Comparativo de clientes ativos e clientes encerrados.
             </p>
 
         

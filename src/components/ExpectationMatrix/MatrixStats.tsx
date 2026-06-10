@@ -41,7 +41,7 @@ export function MatrixStats({ items, total, visibleColumnsCount }: Props) {
 
       <StatCard
         icon={<X size={18} />}
-        label="Inativos"
+        label="Encerrados"
         value={inactiveCount}
         color="#ef4444"
         background="rgba(239,68,68,.12)"
