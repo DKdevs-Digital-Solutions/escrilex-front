@@ -159,9 +159,18 @@ function LogoutConfirm({ onConfirm, onCancel }: { onConfirm: () => void; onCance
 
 export function App() {
   // const [me, setMe] = useState<any>(null);
-  const [page, setPage] = useState<Page>("dashboard");
-  const [companyId, setCompanyId] = useState("");
-  const [runId, setRunId] = useState("");
+  const [page, setPage] = useState<Page>(() => {
+  return (localStorage.getItem("currentPage") as Page) || "dashboard";
+  });
+
+  const [companyId, setCompanyId] = useState(() => {
+    return localStorage.getItem("companyId") || "";
+  });
+
+  const [runId, setRunId] = useState(() => {
+    return localStorage.getItem("runId") || "";
+  });
+
   const [collapsed, setCollapsed] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
@@ -180,6 +189,18 @@ export function App() {
   }, []);
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+  localStorage.setItem("currentPage", page);
+  }, [page]);
+
+  useEffect(() => {
+    localStorage.setItem("companyId", companyId);
+  }, [companyId]);
+
+  useEffect(() => {
+    localStorage.setItem("runId", runId);
+  }, [runId]);
 
 
   if (loading)
@@ -354,7 +375,18 @@ export function App() {
   const canEditTemplates = isAdmin || roles.includes("GESTOR_EMPRESA");
 
   function hasAccess(r: string[]) { return r.length === 0 || r.some(x => roles.includes(x)); }
-  function navigate(p: Page) { setPage(p); setCompanyId(""); setRunId(""); setNotifOpen(false); if (isMobile) setMobileMenuOpen(false); }
+  function navigate(p: Page) {
+    setPage(p);
+    setCompanyId("");
+    setRunId("");
+    setNotifOpen(false);
+
+    localStorage.setItem("currentPage", p);
+    localStorage.removeItem("companyId");
+    localStorage.removeItem("runId");
+
+    if (isMobile) setMobileMenuOpen(false);
+  }
 
   const activeSection = (page === "company" || page === "checklistRun") ? "companies" : page;
   const SW = isMobile ? 240 : (collapsed ? 64 : 240);
@@ -449,7 +481,14 @@ const topIconBtn: React.CSSProperties = {
 
         {logoutConfirm && (
           <LogoutConfirm
-            onConfirm={() => { setToken(null); setLogoutConfirm(false); setTimeout(() => window.location.reload(), 300); }}
+            onConfirm={() => {
+            setToken(null);
+            localStorage.removeItem("currentPage");
+            localStorage.removeItem("companyId");
+            localStorage.removeItem("runId");
+            setLogoutConfirm(false);
+            setTimeout(() => window.location.reload(), 300);
+          }}
             onCancel={() => setLogoutConfirm(false)}
           />
         )}
@@ -974,11 +1013,23 @@ const topIconBtn: React.CSSProperties = {
             {/* Content */}
             <main style={{ flex: 1, overflow: "auto", padding: isMobile ? 15 : 28 }}
               onClick={() => setNotifOpen(false)}>
-              {page === "companies" && <Companies onOpenCompany={id => { setCompanyId(id); setPage("company"); }} />}
+              {page === "companies" && <Companies
+                onOpenCompany={id => {
+                  setCompanyId(id);
+                  setPage("company");
+                  localStorage.setItem("companyId", id);
+                  localStorage.setItem("currentPage", "company");
+                }}
+              />}
               {page === "company" && companyId && (
                 <CompanyDetail companyId={companyId} isAdmin={isAdmin} userRoles={roles}
                   onBack={() => { setPage("companies"); setCompanyId(""); }}
-                  onOpenRun={rid => { setRunId(rid); setPage("checklistRun"); }} />
+                  onOpenRun={rid => {
+                    setRunId(rid);
+                    setPage("checklistRun");
+                    localStorage.setItem("runId", rid);
+                    localStorage.setItem("currentPage", "checklistRun");
+                  }} />
               )}
               {page === "audit" && isAdmin && <Audit />}
 
