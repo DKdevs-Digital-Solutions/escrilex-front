@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
+  ArrowDownLeft,
   ArrowDownRight,
   ArrowUpRight,
   Building2,
@@ -352,6 +353,7 @@ function getStatusStyle(status?: string) {
 useEffect(() => {
   loadDashboard();
   load();
+  loadDashboardAnalytics();
 }, []);
 
  
@@ -611,6 +613,23 @@ const isExitModal =
     Math.ceil((saida - entrada) / (1000 * 60 * 60 * 24))
   );
 }
+
+
+const [tipoResumo, setTipoResumo] = useState<"saida" | "entrada">("entrada");
+
+const resumoEntrada = {
+  percentual: data?.comparisons?.entries?.growthPercent ?? 0,
+  quantidade: data?.comparisons?.entries?.current ?? 0,
+  totalEmpresas: data?.cards?.newClients ?? 0,
+};
+
+const motivosEntradaFake:any = [];
+
+const isEntrada = tipoResumo === "entrada";
+
+const resumoAtual = isEntrada ? resumoEntrada : cancelamentos;
+
+const motivosAtual = isEntrada ? motivosEntradaFake : motivosSaida;
 
 
 
@@ -1213,24 +1232,109 @@ const isExitModal =
     }}
   />
 
+  <div
+  style={{
+    display: "inline-flex",
+    padding: 5,
+    borderRadius: 16,
+    background: "rgba(255,255,255,.08)",
+    border: "1px solid rgba(255,255,255,.12)",
+    backdropFilter: "blur(10px)",
+    marginBottom: 18,
+    gap: 4,
+    width:"100%"
+  }}
+>
+  <button
+    onClick={() => setTipoResumo("entrada")}
+    style={{
+      border: 0,
+      cursor: "pointer",
+      borderRadius: 12,
+      padding: "10px 14px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent:"center",
+      gap: 8,
+      fontSize: 12,
+      fontWeight: 900,
+      transition: "all .2s ease",
+      width:"50%",
+
+      background:
+        tipoResumo === "entrada"
+          ? "linear-gradient(135deg,#22c55e,#16a34a)"
+          : "transparent",
+
+      color:
+        tipoResumo === "entrada"
+          ? "#fff"
+          : "rgba(255,255,255,.75)",
+
+      boxShadow:
+        tipoResumo === "entrada"
+          ? "0 8px 24px rgba(34,197,94,.35)"
+          : "none",
+    }}
+  >
+   <>
+  {tipoResumo === "entrada" && (
+    <ArrowUpRight size={15} />
+  )}
+
+    Entradas
+  </>
+  </button>
+
+
+  <button
+    onClick={() => setTipoResumo("saida")}
+    style={{
+      border: 0,
+      cursor: "pointer",
+      borderRadius: 12,
+      padding: "10px 14px",
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      fontSize: 12,
+      fontWeight: 900,
+      transition: "all .2s ease",
+      width:"50%",
+
+      background:
+        tipoResumo === "saida"
+          ? "linear-gradient(135deg,#ef4444,#dc2626)"
+          : "transparent",
+
+      color:
+        tipoResumo === "saida"
+          ? "#fff"
+          : "rgba(255,255,255,.75)",
+
+      boxShadow:
+        tipoResumo === "saida"
+          ? "0 8px 24px rgba(239,68,68,.35)"
+          : "none",
+    }}
+  >
+   <>
+  {tipoResumo === "saida" && (
+    <ArrowDownLeft size={15} />
+  )}
+
+    Cancelamentos
+  </>
+  </button>
+
+  
+</div>
+
   <div style={{ position: "relative" }}>
-    <div
-      style={{
-        width: 46,
-        height: 46,
-        borderRadius: 16,
-        display: "grid",
-        placeItems: "center",
-        background: "rgba(255,255,255,.12)",
-        border: "1px solid rgba(255,255,255,.18)",
-        marginBottom: 14,
-      }}
-    >
-      <ArrowUpRight size={24} color="#7dd3fc" />
-    </div>
+   
 
     <h3 style={{ margin: 0, fontSize: 17, fontWeight: 900 }}>
-      Resumo de saidas
+      {isEntrada ? "Resumo de entradas" : "Resumo de cancelamentos"}
     </h3>
 
     <p
@@ -1254,7 +1358,7 @@ const isExitModal =
       }}
     >
       <div style={{ fontSize: 12, color: "#cbd5e1" }}>
-        Cancelamentos
+        {isEntrada ? "Entradas" : "Cancelamentos"}
       </div>
 
       <div
@@ -1268,7 +1372,7 @@ const isExitModal =
       >
         {loading
           ? "..."
-          : `${cancelamentos?.percentual ?? 0}%`}
+          : `${resumoAtual?.percentual ?? 0}%`}
       </div>
 
       <div
@@ -1283,7 +1387,7 @@ const isExitModal =
       >
         <div
           style={{
-            width: `${cancelamentos?.percentual ?? 0}%`,
+            width: `${resumoAtual?.percentual ?? 0}%`,
             height: "100%",
             borderRadius: 999,
             background: "linear-gradient(90deg, #22c55e, #7dd3fc)",
@@ -1295,19 +1399,24 @@ const isExitModal =
     <div
       style={{
         display: "grid",
-        gap: 9,
+        gap: isEntrada ? 19 : 9,
+        top: isEntrada ? "7px" : "0px",
+        position:"relative"
       }}
     >
-       <MotivosAgrupadosInfo motivos={motivosSaida} />
+      {!isEntrada && (
+       <MotivosAgrupadosInfo motivos={motivosAtual} />
+      )}
+      
 
       <MiniInfo
         label="Quantidade"
-        value={cancelamentos?.quantidade ?? 0}
+        value={resumoAtual?.quantidade ?? 0}
       />
 
       <MiniInfo
         label="Total de empresas"
-        value={cancelamentos?.totalEmpresas ?? 0}
+        value={resumoAtual?.totalEmpresas ?? 0}
       />
     </div>
   </div>
@@ -3060,6 +3169,7 @@ function MotivosAgrupadosInfo({ motivos }: { motivos: MotivoSaida[] }) {
         }}
         onMouseLeave={closeTooltip}
     >
+
       <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
         <span
           style={{
