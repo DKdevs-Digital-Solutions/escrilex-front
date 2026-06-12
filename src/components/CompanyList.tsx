@@ -307,7 +307,6 @@ export function CompanyList({
           items={items}
           visibleColumns={visibleColumns}
           onOpenCompany={onOpenCompany}
-          onToggleActive={onToggleActive}
           onOpenColumns={onOpenColumns}
           onExportExcel={onExportExcel}
         />

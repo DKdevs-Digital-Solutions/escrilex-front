@@ -20,7 +20,6 @@ type Props = {
   items: any[];
   visibleColumns: Column[];
   onOpenCompany: (id: string) => void;
-  onToggleActive: (id: string, active: boolean) => void;
   onOpenColumns?: () => void;
   onExportExcel?: () => void;
 };
@@ -37,7 +36,6 @@ export function CompanyListTable({
   items,
   visibleColumns,
   onOpenCompany,
-  onToggleActive,
   onOpenColumns,
   onExportExcel,
 }: Props) {
@@ -290,20 +288,7 @@ if (column.type === "sector-user") {
                     <Eye size={17} strokeWidth={2.2} />
                   </button>
 
-                  <button
-                    title={company.active ? "Desativar empresa" : "Ativar empresa"}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleActive(company.id, !company.active);
-                    }}
-                    style={actionBtnStyle(company.active ? "#ef4444" : "#16a34a")}
-                  >
-                    {company.active ? (
-                      <PowerOff size={17} strokeWidth={2.2} />
-                    ) : (
-                      <Power size={17} strokeWidth={2.2} />
-                    )}
-                  </button>
+                
                 </div>
               </div>
             </div>
@@ -438,7 +423,7 @@ if (column.type === "sector-user") {
                           padding: "6px",
                         }}
                       >
-                      {/* <button
+                      <button
                         title="Abrir empresa"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -447,9 +432,9 @@ if (column.type === "sector-user") {
                         style={actionBtnStyle("#64748b")}
                       >
                         <Eye size={17} strokeWidth={2.2} />
-                      </button> */}
+                      </button>
 
-                      <button
+                      {/* <button
                         title={company.active ? "Desativar empresa" : "Ativar empresa"}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -473,7 +458,7 @@ if (column.type === "sector-user") {
                             <Power size={17} strokeWidth={3} />
                           </>
                         )}
-                      </button>
+                      </button> */}
                     </div>
                   </Td>
                 </tr>

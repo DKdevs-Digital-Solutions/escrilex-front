@@ -31,6 +31,8 @@ import {
   Building2,
   ShieldCheck,
   History,
+  PowerOff,
+  Power,
 } from "lucide-react";
 import { useConfirm } from "../confirm";
 import { useCompanyDetail } from "../hooks/useCompanyDetail";
@@ -43,6 +45,7 @@ import { CompanyResponsiblesTab } from "../components/CompanyResponsiblesTab";
 import { CompanyChecklistTab } from "../components/CompanyChecklistTab";
 import { CompanyHistoryTab } from "../components/CompanyHistoryTab";
 import { useCompanyResponsibles } from "../hooks/useCompanyResponsibles";
+import { companyRepository } from "../repository/company.repository";
 
 type ItemStatusFull = "PENDENTE" | "CONCLUIDO" | "EM_ANDAMENTO" | "NA";
 type ChecklistType = "ENTRADA" | "SAIDA";
@@ -819,6 +822,23 @@ async function setStatus(
   }
 
 
+async function handleToggleActive(id: string, active: boolean) {
+  try {
+    await updateCompany({
+      active,
+      situacao: active ? "ATIVA" : "ENCERRADA",
+    });
+
+    toast(
+      active ? "Empresa ativada com sucesso" : "Empresa encerrada",
+      "success"
+    );
+  } catch (e: any) {
+    toast(e.message || "Erro ao atualizar status", "error");
+  }
+}
+
+
 
 async function handleSaveResponsibles() {
   setSavingResp(true);
@@ -959,6 +979,86 @@ async function handleSaveResponsibles() {
               ef={ef}
               fmtDate={fmtDate}
             />
+            <div
+              style={{
+                background: company.active
+                  ? "linear-gradient(135deg,#ecfdf5,#f0fdf4)"
+                  : "linear-gradient(135deg,#fef2f2,#fff1f2)",
+
+                border: company.active
+                  ? "1px solid #86efac"
+                  : "1px solid #fca5a5",
+
+                borderRadius: 24,
+                padding: 24,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 20,
+                }}
+              >
+                <div>
+                  <h3
+                    style={{
+                      margin: 0,
+                      fontSize: 18,
+                      fontWeight: 900,
+                      color: "#0f172a",
+                    }}
+                  >
+                    Controle de acesso da empresa
+                  </h3>
+
+                  <p
+                  style={{
+                    marginTop: 6,
+                    color: "#64748b",
+                    fontSize: 14,
+                  }}
+                >
+                  Utilize esta opção para ativar ou desativar a empresa.
+                </p>
+                </div>
+
+                <button
+                  onClick={() =>
+                    handleToggleActive(company._id, !company.active)
+                  }
+                  style={{
+                    border: 0,
+                    cursor: "pointer",
+                    borderRadius: 14,
+                    padding: "12px 18px",
+                    fontWeight: 800,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+
+                    background: company.active
+                      ? "#ef4444"
+                      : "#16a34a",
+
+                    color: "#fff",
+                  }}
+                >
+                  {company.active ? (
+                    <>
+                      <PowerOff size={18} />
+                      Desativar Empresa
+                    </>
+                  ) : (
+                    <>
+                      <Power size={18} />
+                      Ativar Empresa
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

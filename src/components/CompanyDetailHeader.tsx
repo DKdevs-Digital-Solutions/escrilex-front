@@ -322,15 +322,15 @@ function openBlockedTooltip() {
         </div>
 
       </div>
+        </div>
+      )}
     </div>
-  )}
-</div>
-  ) : (
-    <>
-      <SituacaoBadge v={company.situacao} />
-    </>
-  )}
-</div>
+      ) : (
+        <>
+          <SituacaoBadge v={company.situacao} />
+        </>
+      )}
+    </div>
 
             
             </div>
