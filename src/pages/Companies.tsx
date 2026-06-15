@@ -92,11 +92,9 @@ export function Companies({
   const [form, setForm] = useState<CompanyForm>(EMPTY_FORM);
   const [loadingCnpj, setLoadingCnpj] = useState(false);
 
-  const [search, setSearch] = useState("");
   const [filterSituacao, setFilterSituacao] = useState("");
   const [filterGrupo, setFilterGrupo] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [page, setPage] = useState(1);
 
   const [columnsOpen, setColumnsOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
@@ -117,6 +115,8 @@ export function Companies({
 });
 
 
+
+
 useEffect(() => {
   try {
     localStorage.setItem(
@@ -128,35 +128,58 @@ useEffect(() => {
 
 
   const {
-    items,
-    loading,
     create,
     buscarCnpj,
     load,
     modalOpen,
     setModalOpen,
-    saving,
   } = useCompanies();
 
   const {
+    items,
+    total,
+    limit,
+    offset,
+    page,
+    totalPages,
+    loading,
+    loadingOptions,
+    saving,
+    error,
     columns,
-    sections,
-    sectorColumns,
     options,
     users,
-    loadingOptions,
-    total,
-    setores,
-    data
+    search,
+    setSearch,
+    status,
+    setStatus,
+    grupo,
+    setGrupo,
+    tributacao,
+    setTributacao,
+    ramo,
+    setRamo,
+    perfil,
+    setPerfil,
+    loadMatrix,
+    clearFilters,
+    saveMatrix,
+    goToPage,
+    changeLimit,
+    sections,
+    sectorColumns
   } = useExpectationMatrix();
 
-  useEffect(() => {
-    setPage(1);
-  }, [search, filterSituacao, filterGrupo, filterStatus]);
+
+ 
 
   useEffect(() => {
-    load();
-  }, []);
+  const timeout = setTimeout(() => {
+    loadMatrix({ offset: 0 });
+  }, 500);
+
+  return () => clearTimeout(timeout);
+}, [search, grupo]);
 
   const visibleColumns = useMemo(() => {
     const allColumns = [
@@ -178,8 +201,8 @@ useEffect(() => {
   }
 
 const matrixItems = useMemo(() => {
-  return data?.items ?? [];
-}, [data]);
+  return items ?? [];
+}, [items]);
 
 const normalizedItems = useMemo(() => {
   return matrixItems.map((item: any) => ({
@@ -248,8 +271,7 @@ const filtered = useMemo(() => {
   });
 }, [normalizedItems, search, filterSituacao, filterGrupo, filterStatus]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const paginated = filtered;
 
   const grupos = useMemo(
     () =>
@@ -447,10 +469,10 @@ const filtered = useMemo(() => {
         }}
       >
         <MatrixStats
-            items={normalizedItems}
-            total={total}
-            visibleColumnsCount={visibleColumns.length}
-          />
+          items={items}
+          total={total}
+          visibleColumnsCount={visibleColumns.length}
+        />
         <br />
       </div>
 
@@ -636,49 +658,122 @@ const filtered = useMemo(() => {
               onExportExcel={exportCompaniesToExcel}
             />
 
-            {filtered.length > PAGE_SIZE && (
+            {total > limit && (
               <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "14px 20px",
-                  borderTop: "1px solid #eef2f7",
-                  background: "#fafbfc",
-                  gap: 12,
-                  flexWrap: "wrap",
-                }}
-              >
+              style={{
+                marginTop: 18,
+                padding: "14px 18px",
+                borderRadius: 1,
+                border: "2px solid rgba(226,232,240,.9)",
+                background: "linear-gradient(180deg,#ffffff 0%,#f8fafc 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 16,
+                flexWrap: "wrap",
+              }}
+            >
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 <span
                   style={{
-                    fontSize: 12.5,
-                    color: "#64748b",
-                    fontWeight: 600,
+                    fontSize: 11,
+                    fontWeight: 900,
+                    color: "#94a3b8",
+                    textTransform: "uppercase",
+                    letterSpacing: ".08em",
                   }}
                 >
-                  {(page - 1) * PAGE_SIZE + 1}–
-                  {Math.min(page * PAGE_SIZE, filtered.length)} de{" "}
-                  {filtered.length} resultados
+                  Registros
                 </span>
 
-                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <button
-                    disabled={page === 1}
-                    onClick={() => setPage((p) => p - 1)}
-                    style={pageBtn(page === 1)}
-                  >
-                    <ChevronLeft size={14} strokeWidth={2.5} />
-                  </button>
-
-                  <button
-                    disabled={page === totalPages}
-                    onClick={() => setPage((p) => p + 1)}
-                    style={pageBtn(page === totalPages)}
-                  >
-                    <ChevronRight size={14} strokeWidth={2.5} />
-                  </button>
-                </div>
+                <strong style={{ color: "#0f172a", fontSize: 14, fontWeight: 900 }}>
+                  Mostrando{" "}
+                  <span style={{ color: "#BB9F58" }}>
+                    {total === 0 ? 0 : offset + 1}-{Math.min(offset + limit, total)}
+                  </span>{" "}
+                  de {total.toLocaleString("pt-BR")}
+                </strong>
               </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                <select
+                  value={limit}
+                  onChange={(e) => changeLimit(Number(e.target.value))}
+                  style={{
+                    height: 42,
+                    borderRadius: 14,
+                    border: "1px solid #e2e8f0",
+                    padding: "0 14px",
+                    background: "#fff",
+                    fontWeight: 800,
+                    color: "#0f172a",
+                    cursor: "pointer",
+                    outline: "none",
+                  }}
+                >
+                  <option value={25}>25 linhas</option>
+                  <option value={50}>50 linhas</option>
+                  <option value={100}>100 linhas</option>
+                </select>
+
+                <button
+                  disabled={page === 1 || loading}
+                  onClick={() => goToPage(page - 1)}
+                  style={{
+                    height: 42,
+                    minWidth: 42,
+                    borderRadius: 14,
+                    border: "1px solid #e2e8f0",
+                    background: "#ccc",
+                    color: page === 1 || loading ? "#fff" : "#0f172a",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: page === 1 || loading ? "not-allowed" : "pointer",
+                  }}
+                >
+                  <ChevronLeft size={18} strokeWidth={3} />
+                </button>
+
+                <div
+                  style={{
+                    minWidth: 84,
+                    height: 42,
+                    borderRadius: 14,
+                    background:
+                      "linear-gradient(135deg, rgba(187,159,88,.12), rgba(250,204,21,.08))",
+                    border: "1px solid rgba(187,159,88,.25)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 13,
+                    fontWeight: 900,
+                    color: "#7c5c00",
+                  }}
+                >
+                  {page} / {totalPages}
+                </div>
+
+                <button
+                  disabled={page === totalPages || loading}
+                  onClick={() => goToPage(page + 1)}
+                  style={{
+                    height: 42,
+                    minWidth: 42,
+                    borderRadius: 14,
+                    border: "1px solid #e2e8f0",
+                    background: "#ccc",
+                    color: page === totalPages || loading ? "#cbd5e1" : "#0f172a",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: page === totalPages || loading ? "not-allowed" : "pointer",
+                  }}
+                >
+                  <ChevronRight size={18} strokeWidth={3} />
+                </button>
+              </div>
+            </div>
             )}
           </>
         )}

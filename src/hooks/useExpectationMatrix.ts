@@ -27,6 +27,11 @@ export function useExpectationMatrix() {
 
   const [limit, setLimit] = useState(100);
   const [offset, setOffset] = useState(0);
+  const total = data?.total ?? 0;
+  const items = data?.items ?? [];
+
+  const page = Math.floor(offset / limit) + 1;
+  const totalPages = Math.max(1, Math.ceil(total / limit));
 
   const [saving, setSaving] = useState(false);
 
@@ -47,33 +52,52 @@ export function useExpectationMatrix() {
   }
 
   async function loadMatrix(override?: Partial<ExpectationMatrixParams>) {
-    try {
-      setLoading(true);
-      setError("");
+  try {
+    setLoading(true);
+    setError("");
 
-      const response = await getExpectationMatrix({
-        search,
-        status,
-        grupo,
-        tributacao,
-        ramo,
-        perfil,
-        limit,
-        offset,
-        ...override,
-      });
+    const finalParams = {
+      search,
+      status,
+      grupo,
+      tributacao,
+      ramo,
+      perfil,
+      limit,
+      offset,
+      ...override,
+    };
 
-      setData(response);
-    } catch (err: any) {
-      setError(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Erro ao carregar matriz de expectativas."
-      );
-    } finally {
-      setLoading(false);
-    }
+    const response = await getExpectationMatrix(finalParams);
+
+    setData(response);
+
+    setLimit(finalParams.limit ?? 100);
+    setOffset(finalParams.offset ?? 0);
+  } catch (err: any) {
+    setError(
+      err?.response?.data?.message ||
+        err?.message ||
+        "Erro ao carregar matriz de expectativas."
+    );
+  } finally {
+    setLoading(false);
   }
+}
+
+function goToPage(nextPage: number) {
+  const safePage = Math.max(1, Math.min(nextPage, totalPages));
+  const nextOffset = (safePage - 1) * limit;
+
+  setOffset(nextOffset);
+  loadMatrix({ offset: nextOffset });
+}
+
+function changeLimit(nextLimit: number) {
+  setLimit(nextLimit);
+  setOffset(0);
+  loadMatrix({ limit: nextLimit, offset: 0 });
+}
 
   async function openDetail(companyId: string) {
     try {
@@ -220,7 +244,6 @@ return {
 
     data,
     detail,
-    total: data?.total ?? 0,
 
     loading,
     loadingOptions,
@@ -252,5 +275,12 @@ return {
 
     saving,
     saveMatrix,
+
+    goToPage,
+    changeLimit,
+    page,
+    totalPages,
+    items,
+    total
   };
 }

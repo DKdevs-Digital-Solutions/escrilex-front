@@ -24,107 +24,48 @@ import { MatrixFilters } from "../components/ExpectationMatrix/MatrixFilters";
 
 import {
   pageStyle,
-  heroStyle,
-  statsGridStyle,
-  filterPanelStyle,
-  databaseCardStyle,
-  actionThStyle,
+
   avatarStyle,
   statusBadgeStyle,
-  cardCompanyMetaStyle,
-  cardCompanyNameStyle,
-  cardFieldLabelStyle,
-  cardFieldStyle,
-  cardFieldValueStyle,
-  cardFieldsGridStyle,
-  cardItemHeaderStyle,
-  cardOpenButtonStyle,
-  cardsViewStyle,
+
   clearButtonStyle,
-  columnHeaderInnerStyle,
   columnKeyStyle,
   columnLabelStyle,
   columnRowStyle,
   columnTypeBadgeStyle,
-  columnTypeIconStyle,
-  columnsButtonStyle,
+ 
   columnsListStyle,
   columnsPanelActionsStyle,
   columnsPanelHeaderStyle,
   columnsPanelStyle,
-  databaseCardItemStyle,
-  databaseHeaderStyle,
-  databaseMiniIconStyle,
-  databaseSubtitleStyle,
-  databaseTitleStyle,
-  drawerActionBarStyle,
-  drawerCancelButtonStyle,
-  drawerEditButtonStyle,
+ 
   drawerFieldLabelStyle,
   drawerFieldStyle,
   drawerFieldValueStyle,
   drawerFieldsGridStyle,
-  drawerFooterStyle,
   drawerHeaderActionsStyle,
   drawerHeaderStyle,
-  drawerInputStyle,
   drawerKickerStyle,
   drawerOverlayStyle,
-  drawerSaveButtonStyle,
   drawerSectionStyle,
   drawerSectionTitleStyle,
   drawerStyle,
   drawerSubtitleStyle,
   drawerTitleStyle,
-  emptyCardsStyle,
-  emptyStyle,
+
   errorStyle,
-  eyeButtonStyle,
-  fieldLabelStyle,
-  fieldStyle,
-  filterApplyButtonStyle,
-  filterBarStyle,
-  filterGhostButtonStyle,
-  filterHeaderStyle,
-  filterModalFooterStyle,
-  filterModalGridStyle,
-  filterModalHeaderStyle,
-  filterModalKickerStyle,
-  filterModalOverlayStyle,
-  filterModalStyle,
-  filterModalSubtitleStyle,
-  filterModalTitleStyle,
-  filterSubtitleStyle,
-  filterTitleStyle,
-  filtersGridStyle,
-  heroBadgeStyle,
-  heroIconStyle,
-  heroTextStyle,
-  heroTitleStyle,
-  inputStyle,
-  liveDotStyle,
-  miniIconTextStyle,
+
   mutedTextStyle,
-  openFiltersButtonStyle,
   panelKickerStyle,
   panelOverlayStyle,
   panelSubtitleStyle,
   panelTitleStyle,
-  primaryButtonStyle,
-  refreshButtonStyle,
+ 
   selectPillStyle,
   softActionButtonStyle,
-  statCardStyle,
-  statIconStyle,
-  statLabelStyle,
-  statValueStyle,
-  stickyFirstColumnStyle,
-  stickyHeaderFirstColumnStyle,
-  tableScrollStyle,
-  tdStyle,
+
   textareaCellStyle,
-  thStyle,
-  viewButtonStyle
+
 
 } from "../styles/ExpectationMatrix.styled";
 import { AdvancedFiltersModal } from "../components/ExpectationMatrix/AdvancedFiltersModal";
@@ -144,8 +85,7 @@ const DEFAULT_VISIBLE_COLUMNS = [
 export function ExpectationMatrixPage() {
 
 const {
-  items,
-  total,
+    total,
   loading,
   loadingOptions,
   saving,
@@ -168,6 +108,7 @@ const {
   loadMatrix,
   clearFilters,
   saveMatrix,
+  
 } = useExpectationMatrix();
 
   const [columnsOpen, setColumnsOpen] = useState(false);
@@ -191,15 +132,12 @@ const {
   }
 
   useEffect(() => {
-  const timeout = setTimeout(() => {
-    loadMatrix({ offset: 0 });
-  }, 500);
+    const timeout = setTimeout(() => {
+      loadMatrix({ offset: 0 });
+    }, 500);
 
     return () => clearTimeout(timeout);
-    }, [
-    search,
-    grupo,
-    ]);
+  }, [search, grupo]);
 
 
   return (
@@ -208,7 +146,7 @@ const {
       <MatrixHero loading={loading} onRefresh={() => loadMatrix()} />
 
       <MatrixStats
-        items={items}
+        items={[]}
         total={total}
         visibleColumnsCount={visibleColumns.length}
       />
@@ -241,7 +179,7 @@ const {
       {error && <div style={errorStyle}>{error}</div>}
 
       <MatrixDatabase
-        items={items}
+        
         users={users}
         total={total}
         loading={loading}
