@@ -1,6 +1,6 @@
 import React from "react";
 import { Badge, Toggle } from "../ui";
-import { Layers, RefreshCw, FileText } from "lucide-react";
+import { Layers, FileText } from "lucide-react";
 
 function HeaderBtn({
   children,
@@ -62,14 +62,12 @@ function HeaderBtn({
 type Props = {
   template: any;
   onToggleActive: (value: boolean) => void;
-  onNewVersion: () => void;
   onAddSection: () => void;
 };
 
 export function TemplateEditorHeader({
   template,
   onToggleActive,
-  onNewVersion,
   onAddSection,
 }: Props) {
   return (
@@ -184,11 +182,6 @@ export function TemplateEditorHeader({
                   label={template.active ? "Ativo" : "Inativo"}
                 />
               </div>
-
-              <HeaderBtn onClick={onNewVersion}>
-                <RefreshCw size={14} strokeWidth={2.3} />
-                Nova versão
-              </HeaderBtn>
 
               <HeaderBtn onClick={onAddSection} variant="primary">
                 <Layers size={14} strokeWidth={2.3} />

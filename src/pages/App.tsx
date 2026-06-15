@@ -5,7 +5,7 @@ import { AdminUsers } from "./AdminUsers";
 import { AdminSectors } from "./AdminSectors";
 import { Companies } from "./Companies";
 import { CompanyDetail } from "./CompanyDetail";
-import { ChecklistRun } from "./ChecklistRun";
+import { ProcessRun } from "./ProcessRun";
 import { Audit } from "./Audit";
 import { Templates } from "./Templates";
 import { ToastProvider } from "../toast";
@@ -28,7 +28,7 @@ type Page =
   | "users"
   | "sectors"
   | "processos"
-  | "checklistRun"
+  | "processRun"
   | "audit"
   | "emailSettings"
   | "dashboard"
@@ -91,7 +91,7 @@ const PAGE_TITLES: Record<Page, string> = {
   users: "Usuários", 
   sectors: "Setores",
   processos: "Processos", 
-  checklistRun: "Checklist", 
+  processRun: "Processo",
   audit: "Auditoria",
   emailSettings: "Email",
   expectationMatrix: "Matriz",
@@ -388,7 +388,7 @@ export function App() {
     if (isMobile) setMobileMenuOpen(false);
   }
 
-  const activeSection = (page === "company" || page === "checklistRun") ? "companies" : page;
+  const activeSection = (page === "company" || page === "processRun") ? "companies" : page;
   const SW = isMobile ? 240 : (collapsed ? 64 : 240);
 
 
@@ -827,7 +827,7 @@ const topIconBtn: React.CSSProperties = {
           flexWrap: "wrap",
         }}
       >
-        {(page === "company" || page === "checklistRun") && (
+        {(page === "company" || page === "processRun") && (
           <>
             <button
               onClick={() => navigate("companies")}
@@ -855,7 +855,7 @@ const topIconBtn: React.CSSProperties = {
           </>
         )}
 
-        {page === "checklistRun" && companyId && (
+        {page === "processRun" && companyId && (
           <>
             <button
               onClick={() => {
@@ -1028,9 +1028,9 @@ const topIconBtn: React.CSSProperties = {
                   onBack={() => { setPage("companies"); setCompanyId(""); }}
                   onOpenRun={rid => {
                     setRunId(rid);
-                    setPage("checklistRun");
+                    setPage("processRun");
                     localStorage.setItem("runId", rid);
-                    localStorage.setItem("currentPage", "checklistRun");
+                    localStorage.setItem("currentPage", "processRun");
                   }} />
               )}
               {page === "audit" && isAdmin && <Audit />}
@@ -1041,8 +1041,8 @@ const topIconBtn: React.CSSProperties = {
               {page === "processos" && canEditTemplates && <Templates />}
               {page === "users" && isAdmin && <AdminUsers />}
               {page === "sectors" && isAdmin && <AdminSectors />}
-              {page === "checklistRun" && runId && (
-                <ChecklistRun runId={runId} onBack={() => { setRunId(""); setPage(companyId ? "company" : "companies"); }} />
+              {page === "processRun" && runId && (
+                <ProcessRun runId={runId} onBack={() => { setRunId(""); setPage(companyId ? "company" : "companies"); }} />
               )}
               {page === "emailSettings" && isAdmin && <EmailNotificationsPage />}
             </main>

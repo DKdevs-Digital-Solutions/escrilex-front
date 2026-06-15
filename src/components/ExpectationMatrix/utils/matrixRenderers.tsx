@@ -22,7 +22,7 @@ export function renderCell(item: any, column: any, users: any[]) {
         <div>
           <strong>{user.name}</strong>
           <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
-            {user.sector?.name || user.email}
+            {user.sector?.name || ""}
           </div>
         </div>
       </div>

@@ -2,12 +2,12 @@ import React from "react";
 import { SectionCard, Empty, Table, Thead, Th, Tr, Td, IconBtn, Badge } from "../ui";
 import { History, Maximize2, CalendarClock, PlayCircle, TimerReset } from "lucide-react";
 
-type ChecklistType = "ENTRADA" | "SAIDA";
+type ProcessType = "ENTRADA" | "SAIDA";
 
 type Props = {
-  historicoType: ChecklistType;
-  setHistoricoType: (type: ChecklistType) => void;
-  loadHistoricoRuns: (type: ChecklistType) => void | Promise<void>;
+  historicoType: ProcessType;
+  setHistoricoType: (type: ProcessType) => void;
+  loadHistoricoRuns: (type: ProcessType) => void | Promise<void>;
   historicoRuns: any[];
   onOpenRun: (runId: string) => void;
   softButtonStyle: (active?: boolean) => React.CSSProperties;
@@ -111,7 +111,7 @@ function KpiCard({
   );
 }
 
-function getTypeLabel(type: ChecklistType) {
+function getTypeLabel(type: ProcessType) {
   return type === "ENTRADA" ? "Entrada" : "Saída";
 }
 
@@ -233,7 +233,7 @@ export function CompanyHistoryTab({
                 boxShadow: "0 8px 22px rgba(15,23,42,0.06)",
               }}
             >
-              {(["ENTRADA", "SAIDA"] as ChecklistType[]).map((t) => {
+              {(["ENTRADA", "SAIDA"] as ProcessType[]).map((t) => {
                 const active = historicoType === t;
 
                 return (

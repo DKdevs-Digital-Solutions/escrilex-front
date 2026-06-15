@@ -10,7 +10,7 @@ import { TemplateSidebar } from "../components/TemplateSidebar";
 import { TemplateEditorHeader } from "../components/TemplateEditorHeader";
 import { TemplateSections } from "../components/TemplateSections";
 
-type ChecklistType = "ENTRADA" | "SAIDA";
+type ProcessType = "ENTRADA" | "SAIDA";
 type DueRuleType = "OFFSET_DAYS" | "DAY_OF_NEXT_MONTH";
 
 export function Templates() {
@@ -23,7 +23,7 @@ export function Templates() {
 
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newType, setNewType] = useState<ChecklistType>("ENTRADA");
+  const [newType, setNewType] = useState<ProcessType>("ENTRADA");
 
   const [addSectionOpen, setAddSectionOpen] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
@@ -365,9 +365,6 @@ export function Templates() {
             <TemplateEditorHeader
               template={selectedTemplate}
               onToggleActive={(v) => saveTemplateMeta({ active: v })}
-              onNewVersion={() =>
-                saveTemplateMeta({ version: (selectedTemplate.version || 1) + 1 })
-              }
               onAddSection={() => {
                 setNewSectionName("");
                 setAddSectionOpen(true);
@@ -423,14 +420,14 @@ export function Templates() {
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <Input
             label="Nome *"
-            placeholder="Ex: Checklist Entrada Padrão"
+            placeholder="Ex: Processo Entrada Padrão"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
           />
           <Select
             label="Tipo"
             value={newType}
-            onChange={(e) => setNewType(e.target.value as ChecklistType)}
+            onChange={(e) => setNewType(e.target.value as ProcessType)}
           >
             <option value="ENTRADA">Entrada</option>
             <option value="SAIDA">Saída</option>

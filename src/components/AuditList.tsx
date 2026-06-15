@@ -18,11 +18,11 @@ const entityLabel: Record<string, string> = {
   Company: "Empresa",
   User: "Usuário",
   Sector: "Setor",
-  ChecklistRun: "Checklist",
-  ChecklistItemRun: "Item do checklist",
-  ChecklistTemplate: "Template",
-  ChecklistTemplateSection: "Seção",
-  ChecklistTemplateItem: "Item do template",
+  ProcessRun: "Processo",
+  ProcessItemRun: "Item do processo",
+  ProcessTemplate: "Template",
+  ProcessTemplateSection: "Seção",
+  ProcessTemplateItem: "Item do template",
 };
 
 const actionLabel: Record<string, string> = {
@@ -30,8 +30,8 @@ const actionLabel: Record<string, string> = {
   COMPANY_CREATE: "Empresa criada",
   COMPANY_UPDATE: "Empresa atualizada",
   COMPANY_RESPONSIBLES_SET: "Responsáveis alterados",
-  CHECKLIST_START: "Checklist iniciado",
-  CHECKLIST_ITEM_UPDATE: "Checklist atualizado",
+  PROCESS_START: "Processo iniciado",
+  PROCESS_ITEM_UPDATE: "Processo atualizado",
   USER_CREATE: "Usuário criado",
   USER_DISABLE: "Usuário desativado",
   SECTOR_CREATE: "Setor criado",
@@ -53,8 +53,8 @@ const actionBadge: Record<string, any> = {
   USER_CREATE: "blue",
   USER_DISABLE: "red",
   SECTOR_DISABLE: "red",
-  CHECKLIST_START: "yellow",
-  CHECKLIST_ITEM_UPDATE: "green",
+  PROCESS_START: "yellow",
+  PROCESS_ITEM_UPDATE: "green",
 };
 
 type AuditItem = {
@@ -127,31 +127,31 @@ function getEntityVisual(entity: string) {
       color: "#ea580c",
       border: "rgba(234,88,12,0.18)",
     },
-    ChecklistRun: {
+    ProcessRun: {
       icon: ClipboardList,
       bg: "rgba(124,58,237,0.10)",
       color: "#7c3aed",
       border: "rgba(124,58,237,0.18)",
     },
-    ChecklistItemRun: {
+    ProcessItemRun: {
       icon: ClipboardList,
       bg: "rgba(99,102,241,0.10)",
       color: "#4f46e5",
       border: "rgba(99,102,241,0.18)",
     },
-    ChecklistTemplate: {
+    ProcessTemplate: {
       icon: FolderKanban,
       bg: "rgba(8,145,178,0.10)",
       color: "#0891b2",
       border: "rgba(8,145,178,0.18)",
     },
-    ChecklistTemplateSection: {
+    ProcessTemplateSection: {
       icon: LayoutPanelTop,
       bg: "rgba(217,119,6,0.10)",
       color: "#d97706",
       border: "rgba(217,119,6,0.18)",
     },
-    ChecklistTemplateItem: {
+    ProcessTemplateItem: {
       icon: FolderKanban,
       bg: "rgba(190,24,93,0.10)",
       color: "#be185d",

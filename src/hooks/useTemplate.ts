@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import {
   templateRepository,
-  ChecklistType,
+  ProcessType,
   Template,
   CreateTemplatePayload,
   CreateSectionPayload,
@@ -50,7 +50,7 @@ export function useTemplate() {
     }
   }, []);
 
-  const loadDefaultTemplate = useCallback(async (type: ChecklistType) => {
+  const loadDefaultTemplate = useCallback(async (type: ProcessType) => {
     setLoading(true);
     setError(null);
 

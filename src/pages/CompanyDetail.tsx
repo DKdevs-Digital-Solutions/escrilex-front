@@ -36,21 +36,21 @@ import {
 } from "lucide-react";
 import { useConfirm } from "../confirm";
 import { useCompanyDetail } from "../hooks/useCompanyDetail";
-import { useChecklist } from "../hooks/useChecklist";
+import { useProcess } from "../hooks/useProcess";
 import { useTemplate } from "../hooks/useTemplate";
 import { CompanyDetailHeader } from "../components/CompanyDetailHeader";
 import { CompanyDataTab } from "../components/CompanyDataTab";
 import { CompanyPartnersTab } from "../components/CompanyPartnersTab";
 import { CompanyResponsiblesTab } from "../components/CompanyResponsiblesTab";
-import { CompanyChecklistTab } from "../components/CompanyChecklistTab";
+import { CompanyProcessTab } from "../components/CompanyProcessTab";
 import { CompanyHistoryTab } from "../components/CompanyHistoryTab";
 import { useCompanyResponsibles } from "../hooks/useCompanyResponsibles";
 import { companyRepository } from "../repository/company.repository";
 
 type ItemStatusFull = "PENDENTE" | "CONCLUIDO" | "EM_ANDAMENTO" | "NA";
-type ChecklistType = "ENTRADA" | "SAIDA";
+type ProcessType = "ENTRADA" | "SAIDA";
 type ItemStatus = "EM_ANDAMENTO" | "PENDENTE" | "CONCLUIDO" | "NA";
-type TabId = "dados" | "socios" | "responsaveis" | "checklist" | "historico";
+type TabId = "dados" | "socios" | "responsaveis" | "process" | "historico";
 
 const UI = {
   bg: "#f8fafc",
@@ -443,8 +443,8 @@ export function CompanyDetail({
   const { toast } = useToast();
   const confirm = useConfirm();
 
-  const [checklistType, setChecklistType] = useState<ChecklistType>("ENTRADA");
-  const [historicoType, setHistoricoType] = useState<ChecklistType>("ENTRADA");
+  const [processType, setProcessType] = useState<ProcessType>("ENTRADA");
+  const [historicoType, setHistoricoType] = useState<ProcessType>("ENTRADA");
   const [historicoRuns, setHistoricoRuns] = useState<any[]>([]);
   const [savingItem, setSavingItem] = useState<string>("");
   const [draftObs, setDraftObs] = useState<Record<string, string>>({});
@@ -455,7 +455,7 @@ export function CompanyDetail({
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
   const [savingEdit, setSavingEdit] = useState(false);
-  const [checklistTemplate, setChecklistTemplate] = useState<any>(null);
+  const [processTemplate, setProcessTemplate] = useState<any>(null);
   const [socioModal, setSocioModal] = useState(false);
   const [editSocio, setEditSocio] = useState<any>(null);
   const [socioForm, setSocioForm] = useState({
@@ -494,13 +494,13 @@ export function CompanyDetail({
     loadRuns,
     run,
     startRun,
-    loading: loadingChecklist,
-    setLoadingChecklist,
-  } = useChecklist(companyId);
+    loading: loadingProcess,
+    setLoadingProcess,
+  } = useProcess(companyId);
 
-  const { defaultTemplate, loadDefaultTemplate } = useTemplate();
+  const { loadDefaultTemplate } = useTemplate();
 
-  async function loadHistoricoRuns(nextType: ChecklistType) {
+  async function loadHistoricoRuns(nextType: ProcessType) {
     const r = await loadRuns(nextType);
     setHistoricoRuns(r);
     return r;
@@ -510,8 +510,8 @@ export function CompanyDetail({
   loadResponsibles();
   }, [loadResponsibles]);
 
-async function refreshForType(nextType: ChecklistType) {
-  setLoadingChecklist(true);
+async function refreshForType(nextType: ProcessType) {
+  setLoadingProcess(true);
 
   try {
     const [rlist, defT] = await Promise.all([
@@ -519,60 +519,62 @@ async function refreshForType(nextType: ChecklistType) {
       loadDefaultTemplate(nextType),
     ]);
 
+    // A estrutura exibida vem SEMPRE do template ativo.
+    if (!defT?.sections?.length) {
+      setProcessTemplate(null);
+      return;
+    }
+
+    // Quando existe um run, carregamos apenas para sobrepor status/observação
+    // (mapeados por templateItemId) sobre a estrutura do template ativo.
     const latest = rlist?.[0];
+    const runItemByTemplateItemId = new Map<string, any>();
 
-    if (!latest?.id) {
-      if (defT?.sections?.length) {
-        const sections = defT.sections.map((s: any) => ({
-          ...s,
-          items: s.items.map((it: any) => ({
-            ...it,
-            templateItemId: it.id,
-            itemRunId: null,
-            status: null,
-            observation: "",
-          })),
-        }));
-
-        setChecklistTemplate({
-          ...defT,
-          type: nextType,
-          sections,
-        });
-
-        setDraftObs(extractObs(sections));
-      } else {
-        setChecklistTemplate(null);
+    if (latest?.id) {
+      const r = await getRun(latest.id);
+      for (const s of r?.template?.sections ?? []) {
+        for (const it of s.items ?? []) {
+          if (it.templateItemId) runItemByTemplateItemId.set(it.templateItemId, it);
+        }
       }
-
-      return;
     }
 
-    const r = await getRun(latest.id);
+    const sections = defT.sections.map((s: any) => ({
+      ...s,
+      items: s.items.map((it: any) => {
+        const runItem = runItemByTemplateItemId.get(it.id);
 
-    if (r?.template?.sections?.length) {
-      setChecklistTemplate({
-        ...r.template,
-        type: nextType,
-      });
+        return {
+          ...it,
+          templateItemId: it.id,
+          itemRunId: runItem?.itemRunId ?? null,
+          status: runItem?.status ?? null,
+          observation: runItem?.observation ?? "",
+          dueDate: runItem?.dueDate ?? null,
+          doneAt: runItem?.doneAt ?? null,
+        };
+      }),
+    }));
 
-      setDraftObs(extractObs(r.template.sections));
-      return;
-    }
+    setProcessTemplate({
+      ...defT,
+      type: nextType,
+      sections,
+    });
 
-    setChecklistTemplate(null);
+    setDraftObs(extractObs(sections));
   } finally {
-    setLoadingChecklist(false);
+    setLoadingProcess(false);
   }
 }
 
 
   useEffect(() => {
-    if (activeTab === "checklist") refreshForType(checklistType);
-  }, [checklistType, companyId]);
+    if (activeTab === "process") refreshForType(processType);
+  }, [processType, companyId]);
 
   useEffect(() => {
-    if (activeTab === "checklist") refreshForType(checklistType);
+    if (activeTab === "process") refreshForType(processType);
     else if (activeTab === "historico") loadHistoricoRuns(historicoType);
   }, [activeTab]);
 
@@ -585,7 +587,7 @@ function setResponsible(
 }
 
 
-  async function ensureRunExists(type: ChecklistType) {
+  async function ensureRunExists(type: ProcessType) {
   const rlist = await loadRuns(type);
   const latest = rlist?.[0];
 
@@ -671,10 +673,10 @@ async function setStatus(
     let id = itemRunId;
 
     if (!id) {
-      const ensured = await ensureRunExists(checklistType);
+      const ensured = await ensureRunExists(processType);
 
       console.log("ensureRunExists", {
-        checklistType,
+        processType,
         templateItemId,
         ensured,
       });
@@ -682,7 +684,7 @@ async function setStatus(
       id = ensured?.itemRunMap?.[templateItemId];
 
       if (!id) {
-        toast("Não foi possível iniciar o checklist de saída.", "error");
+        toast("Não foi possível iniciar o processo de saída.", "error");
         return;
       }
     }
@@ -691,7 +693,7 @@ async function setStatus(
 
     toast("Status atualizado", "success");
 
-    await refreshForType(checklistType);
+    await refreshForType(processType);
   } catch (e: any) {
     toast(e.message || "Erro ao atualizar status", "error");
   } finally {
@@ -713,7 +715,7 @@ async function setStatus(
       await updateItem(itemRunId, {
         observation: draftObs[itemRunId] ?? "",
       });
-      await refreshForType(checklistType);
+      await refreshForType(processType);
     } catch (e: any) {
       toast(e.message || "Erro", "error");
     } finally {
@@ -865,12 +867,8 @@ async function handleSaveResponsibles() {
   if (loadingDetails) return <Loading message="Carregando empresa..." />;
   if (!company) return <Loading message="Carregando..." />;
 
-  const rawSections = run?.template?.sections ?? [];
-  const sections = (() => {
-    if (rawSections.length > 0) return rawSections;
-    if (!defaultTemplate?.sections) return [];
-    return defaultTemplate.sections;
-  })();
+  // Os KPIs refletem a mesma estrutura exibida: template ativo + status do run.
+  const sections = processTemplate?.sections ?? [];
 
   const totalItems = sections.reduce((a: number, s: any) => a + s.items.length, 0);
   const doneItems = sections.reduce(
@@ -884,7 +882,7 @@ async function handleSaveResponsibles() {
     { id: "dados", label: "Dados" },
     { id: "socios", label: "Sócios", count: socios.length },
     { id: "responsaveis", label: "Responsáveis", count: sectors.length },
-    { id: "checklist", label: "Processos" },
+    { id: "process", label: "Processos" },
     ...(isAdmin
       ? [{ id: "historico" as TabId, label: "Histórico", count: historicoRuns.length }]
       : []),
@@ -935,7 +933,7 @@ async function handleSaveResponsibles() {
             <SummaryCard
               variant="green" // Foco em conclusão/sucesso
               icon={<ClipboardCheck size={18} />}
-              label="Checklist"
+              label="Processo"
               value={`${pct}%`}
               hint={`${doneItems}/${totalItems} concluídos`}
             />
@@ -1110,11 +1108,11 @@ async function handleSaveResponsibles() {
         />
       )}
 
-        {activeTab === "checklist" && (
-        <CompanyChecklistTab
-          checklistType={checklistType}
-          setChecklistType={setChecklistType}
-          loadingChecklist={loadingChecklist}
+        {activeTab === "process" && (
+        <CompanyProcessTab
+          processType={processType}
+          setProcessType={setProcessType}
+          loadingProcess={loadingProcess}
           run={run}
           onOpenRun={onOpenRun}
           doneItems={doneItems}
@@ -1133,7 +1131,7 @@ async function handleSaveResponsibles() {
           ghostButtonStyle={ghostButtonStyle}
           cardShellStyle={cardShellStyle}
           UI={UI}
-          checklistTemplate={checklistTemplate}
+          processTemplate={processTemplate}
         />
       )}
 

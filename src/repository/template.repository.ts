@@ -1,6 +1,6 @@
 import api from "../services/api";
 
-export type ChecklistType = "ENTRADA" | "SAIDA";
+export type ProcessType = "ENTRADA" | "SAIDA";
 export type DueRuleType = "OFFSET_DAYS" | "DAY_OF_NEXT_MONTH";
 
 export interface TemplateItem {
@@ -25,7 +25,7 @@ export interface TemplateSection {
 export interface Template {
   id: string;
   name: string;
-  type: ChecklistType;
+  type: ProcessType;
   version: number;
   active: boolean;
   sections?: TemplateSection[];
@@ -33,7 +33,7 @@ export interface Template {
 
 export interface CreateTemplatePayload {
   name: string;
-  type: ChecklistType;
+  type: ProcessType;
 }
 
 export interface CreateSectionPayload {
@@ -68,7 +68,7 @@ export interface UpdateItemPayload {
 }
 
 export const templateRepository = {
-  async getDefaultByType(type: ChecklistType): Promise<Template> {
+  async getDefaultByType(type: ProcessType): Promise<Template> {
     const { data } = await api.get(`/api/templates/default/by-type/${type}`);
     return data;
   },

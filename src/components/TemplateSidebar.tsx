@@ -111,7 +111,7 @@ export function TemplateSidebar({
                   lineHeight: 1.5,
                 }}
               >
-                Gerencie os modelos de checklist da operação.
+                Gerencie os modelos de processo da operação.
               </div>
             </div>
 
