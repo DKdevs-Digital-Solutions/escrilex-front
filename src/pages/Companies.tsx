@@ -29,6 +29,8 @@ interface CompanyForm {
   cod: string;
   filial: string;
   grupo: string;
+  municipio: string;
+  uf: string;
   tributacao: string;
   ieAtual: string;
   dataTributacao: string;
@@ -54,6 +56,8 @@ const EMPTY_FORM: CompanyForm = {
   cod: "",
   filial: "",
   grupo: "",
+  municipio: "",
+  uf: "",
   tributacao: "",
   ieAtual: "",
   dataTributacao: "",
@@ -260,12 +264,16 @@ const filtered = useMemo(() => {
     const cnpj = String(c.cnpjCpf || "").replace(/\D/g, "");
     const cod = String(c.codigo || "").toLowerCase();
     const grupo = String(c.grupo || "").toLowerCase();
+    const municipio = String(c.municipio || "").toLowerCase();
+    const uf = String(c.uf || "").toLowerCase();
 
     return (
       razaoSocial.includes(q) ||
       nomeFantasia.includes(q) ||
       cod.includes(q) ||
       grupo.includes(q) ||
+      municipio.includes(q) ||
+      uf.includes(q) ||
       (qNumbers && cnpj.includes(qNumbers))
     );
   });

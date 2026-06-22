@@ -4,6 +4,12 @@ import { Input, Select, FormGrid } from "../ui";
 import { Plus, Search, Loader2 } from "lucide-react";
 import { useToast } from "../toast";
 
+const UF_OPTIONS = [
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+  "RS", "RO", "RR", "SC", "SP", "SE", "TO",
+];
+
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -141,6 +147,17 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
           <FormGrid>
             <Input label="Nome fantasia" style={{ height: 48 }} value={form.nomeFantasia} onChange={set("nomeFantasia")} />
             <Input label="Grupo" style={{ height: 48 }} value={form.grupo} onChange={set("grupo")} />
+          </FormGrid>
+
+          <FormGrid>
+            <Input label="Município" style={{ height: 48 }} value={form.municipio} onChange={set("municipio")} />
+
+            <Select label="UF" value={form.uf} style={{ height: 48 }} onChange={set("uf")}>
+              <option value="">Selecione...</option>
+              {UF_OPTIONS.map((uf) => (
+                <option key={uf} value={uf}>{uf}</option>
+              ))}
+            </Select>
           </FormGrid>
 
           <FormGrid>

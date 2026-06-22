@@ -4,6 +4,8 @@ export type ExpectationMatrixParams = {
   search?: string;
   status?: string;
   grupo?: string;
+  municipio?: string;
+  uf?: string;
   tributacao?: string;
   ramo?: string;
   perfil?: string;
@@ -22,6 +24,8 @@ export async function getExpectationMatrix(params: ExpectationMatrixParams) {
       search: params.search || undefined,
       status: params.status || undefined,
       grupo: params.grupo || undefined,
+      municipio: params.municipio || undefined,
+      uf: params.uf || undefined,
       tributacao: params.tributacao || undefined,
       ramo: params.ramo || undefined,
       perfil: params.perfil || undefined,
