@@ -83,6 +83,8 @@ const DEFAULT_VISIBLE_COLUMNS = [
   "empresa",
   "cnpjCpf",
   "grupo",
+  "municipio",
+  "uf",
   "status",
 ];
 

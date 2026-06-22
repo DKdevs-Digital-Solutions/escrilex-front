@@ -730,6 +730,8 @@ async function setStatus(
       cod: company.cod || "",
       filial: company.filial || "",
       grupo: company.grupo || "",
+      municipio: company.municipio || "",
+      uf: company.uf || "",
       tributacao: company.tributacao || "",
       ieAtual: company.ieAtual || "",
       dataTributacao: company.dataTributacao?.slice(0, 10) || "",

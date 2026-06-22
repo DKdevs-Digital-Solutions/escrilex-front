@@ -342,6 +342,15 @@ const perfilOptions = [
   { value: "Light", label: "Light" },
 ];
 
+const ufOptions = [
+  ...selectDefault,
+  ...[
+    "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+    "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+    "RS", "RO", "RR", "SC", "SP", "SE", "TO",
+  ].map((uf) => ({ value: uf, label: uf })),
+];
+
 const periodicidadeOptions = [
   ...selectDefault,
   { value: "Mensal", label: "Mensal" },
@@ -498,6 +507,8 @@ export function CompanyDataTab({
           <DataField label="CNPJ/CPF" value={<span style={{ fontFamily: "monospace" }}>{company.cnpj}</span>} editing={editing} editValue={editForm.cnpj} onEditChange={ef("cnpj")} />
           <DataField label="IE" value={company.ieAtual} editing={editing} editValue={editForm.ieAtual} onEditChange={ef("ieAtual")} />
           <DataField label="Grupo" value={company.grupo} editing={editing} editValue={editForm.grupo} onEditChange={ef("grupo")} />
+          <DataField label="Município" value={company.municipio} editing={editing} editValue={editForm.municipio} onEditChange={ef("municipio")} />
+          <DataSelectField label="UF" value={company.uf} editing={editing} editValue={editForm.uf} onEditChange={ef("uf")} options={ufOptions} />
           <DataSelectField label="Matriz / Filial" value={company.filial} editing={editing} editValue={editForm.filial} onEditChange={ef("filial")} options={matrizFilialOptions} />
           <DataSelectField label="Tributação" value={company.tributacao} editing={editing} editValue={editForm.tributacao} onEditChange={ef("tributacao")} options={tributacaoOptions} />
           <DataSelectField label="Ramo" value={company.ramo} editing={editing} editValue={editForm.ramo} onEditChange={ef("ramo")} options={ramoOptions} />

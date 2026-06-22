@@ -191,6 +191,8 @@ const COLUMN_SECTIONS = [
       "empresa",
       "cnpjCpf",
       "grupo",
+      "municipio",
+      "uf",
       "matrizFilial",
       "tributacao",
       "ramo",
