@@ -78,6 +78,12 @@ const EMPTY_FORM: CompanyForm = {
 
 const PAGE_SIZE = 20;
 
+const UF_LIST = [
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+  "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+  "RS", "RO", "RR", "SC", "SP", "SE", "TO",
+];
+
 const DEFAULT_VISIBLE_COLUMNS = [
   "codigo",
   "empresa",
@@ -99,6 +105,7 @@ export function Companies({
   const [loadingCnpj, setLoadingCnpj] = useState(false);
 
   const [filterSituacao, setFilterSituacao] = useState("");
+  const [filterUf, setFilterUf] = useState("");
   const [filterGrupo, setFilterGrupo] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -253,6 +260,7 @@ const filtered = useMemo(() => {
 
   return normalizedItems.filter((c: any) => {
     if (filterSituacao && c.status !== filterSituacao) return false;
+    if (filterUf && String(c.uf || "").toUpperCase() !== filterUf) return false;
     if (filterGrupo && c.grupo !== filterGrupo) return false;
 
     if (filterStatus !== "all" && String(c.active) !== filterStatus) {
@@ -279,7 +287,7 @@ const filtered = useMemo(() => {
       (qNumbers && cnpj.includes(qNumbers))
     );
   });
-}, [normalizedItems, search, filterSituacao, filterGrupo, filterStatus]);
+}, [normalizedItems, search, filterSituacao, filterUf, filterGrupo, filterStatus]);
 
   const paginated = filtered;
 
@@ -292,6 +300,7 @@ const filtered = useMemo(() => {
   const hasFilters = !!(
     search ||
     filterSituacao ||
+    filterUf ||
     filterGrupo ||
     filterStatus !== "all"
   );
@@ -593,6 +602,16 @@ const filtered = useMemo(() => {
             { value: "BAIXADA", label: "Baixada" },
             { value: "PENDENTE", label: "Pendente de Documentação" },
             { value: "BLOQUEADO", label: "Bloqueado" },
+          ]}
+        />
+
+        <PremiumSelect
+          label="UF"
+          value={filterUf}
+          onChange={setFilterUf}
+          options={[
+            { value: "", label: "Todas UFs" },
+            ...UF_LIST.map((uf) => ({ value: uf, label: uf })),
           ]}
         />
 
