@@ -972,6 +972,9 @@ function PremiumSelect({
   options: { value: string; label: string }[];
   variant?: "status" | "group";
 }) {
+  const [open, setOpen] = useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+
   const selectedLabel =
     options.find((opt) => opt.value === value)?.label ||
     options[0]?.label ||
@@ -984,14 +987,25 @@ function PremiumSelect({
         ? statusTheme[value] ?? defaultTheme
         : getGroupTheme(value);
 
+  // Fecha ao clicar fora.
+  React.useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
   return (
-    <div style={{ position: "relative", minWidth: 215, height: 52 }}>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+    <div ref={ref} style={{ position: "relative", minWidth: 215, height: 52 }}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
         style={{
           width: "100%",
           height: "100%",
+          textAlign: "left",
           padding: "20px 46px 7px 48px",
           borderRadius: 14,
           border: `1px solid ${theme.border}`,
@@ -1001,18 +1015,16 @@ function PremiumSelect({
           color: "#0f172a",
           outline: "none",
           fontFamily: "inherit",
-          appearance: "none",
           boxShadow: theme.shadow,
           transition: "all 0.18s ease",
           cursor: "pointer",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
         }}
       >
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value} style={{ color: "#0f172a" }}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
+        {selectedLabel}
+      </button>
 
       <div
         style={{
@@ -1068,10 +1080,70 @@ function PremiumSelect({
           color: theme.text,
           pointerEvents: "none",
           border: "1px solid #e2e8f0",
+          transition: "transform 0.18s ease",
         }}
       >
-        <ChevronDown size={16} strokeWidth={2.4} />
+        <ChevronDown
+          size={16}
+          strokeWidth={2.4}
+          style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.18s ease" }}
+        />
       </div>
+
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 6px)",
+            left: 0,
+            right: 0,
+            zIndex: 1000,
+            background: "#fff",
+            border: "1px solid #e2e8f0",
+            borderRadius: 14,
+            boxShadow: "0 20px 40px rgba(15,23,42,0.14)",
+            maxHeight: 260,
+            overflowY: "auto",
+            padding: 6,
+          }}
+        >
+          {options.map((opt) => {
+            const active = opt.value === value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                }}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  border: "none",
+                  background: active ? "#f1f5f9" : "transparent",
+                  color: "#0f172a",
+                  fontSize: 13.5,
+                  fontWeight: active ? 800 : 600,
+                  fontFamily: "inherit",
+                  cursor: "pointer",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = "#f8fafc";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = active ? "#f1f5f9" : "transparent";
+                }}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
