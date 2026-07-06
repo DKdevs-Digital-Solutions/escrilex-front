@@ -1,13 +1,13 @@
 import React from "react";
-import { EmailNotificationsSettings } from "../components/FormEmail";
-import { useEmailAccount } from "../hooks/useEmailAccount";
+import { TeamsNotificationsSettings } from "../components/FormTeams";
+import { useNotificationConfig } from "../hooks/useNotificationConfig";
 
-export default function EmailNotificationsPage() {
-  const emailAccount = useEmailAccount();
+export default function TeamsNotificationsPage() {
+  const config = useNotificationConfig();
 
   return (
     <main style={{ minHeight: "100vh", padding: 0 }}>
-      <EmailNotificationsSettings {...emailAccount} />
+      <TeamsNotificationsSettings {...config} />
     </main>
   );
 }

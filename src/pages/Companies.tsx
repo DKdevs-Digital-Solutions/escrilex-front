@@ -586,7 +586,6 @@ const filtered = useMemo(() => {
           options={[
             { value: "", label: "Todas situações" },
             { value: "ATIVA", label: "Ativa" },
-            { value: "SAIDA", label: "Saída" },
             { value: "SUSPENSA", label: "Suspensa" },
             { value: "ENCERRADA", label: "Encerrada" },
             { value: "SEM_MOVIMENTO", label: "Sem Movimento" },

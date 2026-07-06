@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useMe } from "../hooks/useMe";
 import Logo from "../assets/logo.png";
-import EmailNotificationsPage from "./Emailpage";
+import TeamsNotificationsPage from "./Emailpage";
 import { DashboardPage } from "./Dashboard";
 import { ExpectationMatrixPage } from "./Matriz";
 
@@ -71,7 +71,7 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
       { id: "processos", label: "Processos", icon: <FileText size={15} strokeWidth={1.8} />, roles: ["ADMIN", "GESTOR_EMPRESA"] },
        {
         id: "emailSettings",
-        label: "E-mail",
+        label: "Notificações",
         icon: <Mail size={15} strokeWidth={1.8} />,
         roles: ["ADMIN","GESTOR_EMPRESA"],
       },
@@ -93,7 +93,7 @@ const PAGE_TITLES: Record<Page, string> = {
   processos: "Processos", 
   processRun: "Processo",
   audit: "Auditoria",
-  emailSettings: "Email",
+  emailSettings: "Notificações",
   expectationMatrix: "Matriz",
 };
 
@@ -1044,7 +1044,7 @@ const topIconBtn: React.CSSProperties = {
               {page === "processRun" && runId && (
                 <ProcessRun runId={runId} onBack={() => { setRunId(""); setPage(companyId ? "company" : "companies"); }} />
               )}
-              {page === "emailSettings" && isAdmin && <EmailNotificationsPage />}
+              {page === "emailSettings" && isAdmin && <TeamsNotificationsPage />}
             </main>
           </div>
         </div>

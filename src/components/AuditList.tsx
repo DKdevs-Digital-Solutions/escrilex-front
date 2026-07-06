@@ -29,13 +29,26 @@ const actionLabel: Record<string, string> = {
   LOGIN: "Login",
   COMPANY_CREATE: "Empresa criada",
   COMPANY_UPDATE: "Empresa atualizada",
+  COMPANY_STATUS_UPDATE: "Status da empresa atualizado",
+  COMPANY_INACTIVATE: "Empresa inativada",
   COMPANY_RESPONSIBLES_SET: "Responsáveis alterados",
+  COMPANY_PARTNER_CREATE: "Sócio adicionado",
+  COMPANY_PARTNER_UPDATE: "Sócio atualizado",
+  COMPANY_PARTNER_DELETE: "Sócio removido",
+  COMPANY_CLIENT_CONTACT_CREATE: "Contato do cliente adicionado",
+  COMPANY_CLIENT_CONTACT_UPDATE: "Contato do cliente atualizado",
+  COMPANY_CLIENT_CONTACT_DELETE: "Contato do cliente removido",
+  EXPECTATION_MATRIX_UPDATE: "Matriz atualizada",
   PROCESS_START: "Processo iniciado",
   PROCESS_ITEM_UPDATE: "Processo atualizado",
   USER_CREATE: "Usuário criado",
+  USER_UPDATE: "Usuário atualizado",
   USER_DISABLE: "Usuário desativado",
+  USER_ENABLE: "Usuário reativado",
   SECTOR_CREATE: "Setor criado",
+  SECTOR_UPDATE: "Setor atualizado",
   SECTOR_DISABLE: "Setor desativado",
+  SECTOR_ENABLE: "Setor reativado",
   TEMPLATE_CREATE: "Template criado",
   TEMPLATE_UPDATE: "Template atualizado",
   TEMPLATE_SECTION_CREATE: "Seção criada",
@@ -45,6 +58,100 @@ const actionLabel: Record<string, string> = {
   TEMPLATE_ITEM_UPDATE: "Item atualizado",
   TEMPLATE_ITEM_DELETE: "Item excluído",
 };
+
+// Rótulos amigáveis para os nomes de campo exibidos nas alterações da auditoria.
+const fieldLabel: Record<string, string> = {
+  razaoSocial: "Razão social",
+  nomeFantasia: "Nome fantasia",
+  cnpj: "CNPJ",
+  cod: "Código",
+  grupo: "Grupo",
+  municipio: "Município",
+  uf: "UF",
+  filial: "Matriz / Filial",
+  matrizFilial: "Matriz / Filial",
+  tributacao: "Tributação",
+  ieAtual: "Inscrição estadual",
+  ie: "Inscrição estadual",
+  ramo: "Ramo",
+  perfil: "Perfil comercial",
+  perfilComercial: "Perfil comercial",
+  consultoria: "Consultoria",
+  banco: "Banco",
+  licitacao: "Licitação",
+  responsavelComercial: "Responsável comercial",
+  situacao: "Status",
+  status: "Status",
+  dataCadastro: "Data de cadastro",
+  dataEntrada: "Data de entrada",
+  entrada: "Data de entrada",
+  dataSituacao: "Data do status",
+  dataTributacao: "Data da tributação",
+  dataInicioCobranca: "Início da cobrança",
+  dataFimCobranca: "Fim da cobrança",
+  motivoEntrada: "Motivo da entrada",
+  motivoSaida: "Motivo da saída",
+  motivoSaidaResumo: "Motivo da saída",
+  observacoes: "Observações",
+  active: "Empresa ativa",
+  inactivatedAt: "Inativada em",
+  bloqueadoAt: "Bloqueada em",
+  bloqueadoPor: "Bloqueada por",
+  statusBloqueadoAt: "Bloqueada em",
+  qtdeInicialFolha: "Qtde. inicial de folha",
+  quantidadeFolha: "Quantidade de folha",
+  qtdeFolha: "Quantidade de folha",
+  reunioesFechamentos: "Reuniões de fechamento",
+  fechamentoContabil: "Fechamento contábil",
+  analiseCompliance: "Análise de compliance",
+  cobrancaServExtras: "Cobrança de serviços extras",
+  complexidadeFiscal: "Complexidade fiscal",
+  complexidadeContabil: "Complexidade contábil",
+  dataSaida: "Data de saída",
+  dataEntradaFiscal: "Entrada — Fiscal",
+  dataSaidaFiscal: "Saída — Fiscal",
+  dataEntradaContabil: "Entrada — Contábil",
+  dataSaidaContabil: "Saída — Contábil",
+  dataEntradaFolha: "Entrada — Folha",
+  dataSaidaFolha: "Saída — Folha",
+  dataEntradaConsultoria: "Entrada — Consultoria",
+  dataSaidaConsultoria: "Saída — Consultoria",
+  dataInicioCobrancaFiscal: "Início cobrança — Fiscal",
+  dataFimCobrancaFiscal: "Fim cobrança — Fiscal",
+  dataInicioCobrancaContabil: "Início cobrança — Contábil",
+  dataFimCobrancaContabil: "Fim cobrança — Contábil",
+  dataInicioCobrancaFolha: "Início cobrança — Folha",
+  dataFimCobrancaFolha: "Fim cobrança — Folha",
+  dataInicioCobrancaConsultoria: "Início cobrança — Consultoria",
+  dataFimCobrancaConsultoria: "Fim cobrança — Consultoria",
+  responsibles: "Responsáveis",
+  updated: "Responsáveis",
+  name: "Nome",
+  email: "E-mail",
+  acessos: "Acessos",
+};
+
+// Converte um código técnico (SNAKE_CASE ou camelCase) em texto legível.
+function humanizeCode(code: string) {
+  if (!code) return "";
+  return String(code)
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .toLowerCase()
+    .replace(/^./, (c) => c.toUpperCase());
+}
+
+function getActionLabel(action: string) {
+  return actionLabel[action] ?? humanizeCode(action);
+}
+
+function getFieldLabel(campo: string) {
+  if (fieldLabel[campo]) return fieldLabel[campo];
+  // Ignora índices numéricos (ex.: diffs de arrays) exibindo um rótulo genérico.
+  if (/^\d+$/.test(campo)) return `Item ${Number(campo) + 1}`;
+  return humanizeCode(campo);
+}
 
 const actionBadge: Record<string, any> = {
   LOGIN: "gray",
@@ -417,21 +524,48 @@ function formatAuditValue(value: unknown) {
   }
 
   if (Array.isArray(value)) {
+    if (value.length === 0) return "—";
+    // Resumo legível: tenta extrair nomes/e-mails de cada item.
+    const parts = value
+      .map((item) => summarizeEntry(item))
+      .filter(Boolean);
+    if (parts.length) return parts.join(", ");
     return `${value.length} registro${value.length === 1 ? "" : "s"}`;
   }
 
   if (typeof value === "object") {
-    const obj = value as any;
-
-    if (obj?.name) return obj.name;
-    if (obj?.email) return obj.email;
-    if (obj?.razaoSocial) return obj.razaoSocial;
-    if (obj?.nomeFantasia) return obj.nomeFantasia;
-
-    return "Objeto alterado";
+    const summary = summarizeEntry(value);
+    if (summary) return summary;
+    return "—";
   }
 
   return String(value);
+}
+
+// Extrai um texto curto e legível de um item (objeto) de alteração,
+// evitando exibir "Objeto alterado" sempre que possível.
+function summarizeEntry(item: unknown): string {
+  if (item === null || item === undefined) return "";
+  if (typeof item === "string" || typeof item === "number") return String(item);
+
+  const obj = item as any;
+
+  // Responsável por setor: "Setor: Fulano"
+  const sectorName = obj?.sector?.name ?? obj?.sectorName;
+  const userName = obj?.user?.name ?? obj?.user?.email ?? obj?.name ?? obj?.email;
+  if (sectorName && userName) return `${sectorName}: ${userName}`;
+
+  return (
+    obj?.name ??
+    obj?.email ??
+    obj?.razaoSocial ??
+    obj?.nomeFantasia ??
+    obj?.label ??
+    obj?.title ??
+    sectorName ??
+    userName ??
+    ""
+  );
 }
 
 function AuditChangesTooltip({ item }: { item: AuditItem }) {
@@ -568,7 +702,7 @@ function AuditChangesTooltip({ item }: { item: AuditItem }) {
                   color: "#fff",
                 }}
               >
-                {change.campo}
+                {getFieldLabel(change.campo)}
               </div>
 
               <div
@@ -881,7 +1015,7 @@ function AuditChangesTooltip({ item }: { item: AuditItem }) {
               }}
             >
               <Badge
-                label={actionLabel[r.action] ?? r.action}
+                label={getActionLabel(r.action)}
                 variant={actionBadge[r.action] || "gray"}
               />
 
@@ -1023,7 +1157,7 @@ function AuditChangesTooltip({ item }: { item: AuditItem }) {
 
                 <td style={tdStyle}>
                   <Badge
-                    label={actionLabel[r.action] ?? r.action}
+                    label={getActionLabel(r.action)}
                     variant={actionBadge[r.action] || "gray"}
                   />
                 </td>

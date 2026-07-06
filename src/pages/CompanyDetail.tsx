@@ -724,6 +724,8 @@ async function setStatus(
   }
 
   function startEdit() {
+    const d = (v?: string | null) => (v ? String(v).slice(0, 10) : "");
+
     setEditForm({
       razaoSocial: company.razaoSocial || "",
       nomeFantasia: company.nomeFantasia || "",
@@ -734,10 +736,10 @@ async function setStatus(
       uf: company.uf || "",
       tributacao: company.tributacao || "",
       ieAtual: company.ieAtual || "",
-      dataTributacao: company.dataTributacao?.slice(0, 10) || "",
+      dataTributacao: d(company.dataTributacao),
       motivoEntrada: company.motivoEntrada || "",
       situacao: company.situacao || "",
-      dataSituacao: company.dataSituacao?.slice(0, 10) || "",
+      dataSituacao: d(company.dataSituacao),
       ramo: company.ramo || "",
       consultoria: company.consultoria || "",
       banco: company.banco || "",
@@ -745,9 +747,48 @@ async function setStatus(
       licitacao: company.licitacao || "",
       qtdeFolha: company.qtdeFolha ?? "",
       responsavelComercial: company.responsavelComercial || "",
-      dataEntrada: company.dataEntrada?.slice(0, 10) || "",
-      dataInicioCobranca: company.dataInicioCobranca?.slice(0, 10) || "",
-      dataFimCobranca: company.dataFimCobranca?.slice(0, 10) || "",
+      dataEntrada: d(company.dataEntrada),
+      dataInicioCobranca: d(company.dataInicioCobranca),
+      dataFimCobranca: d(company.dataFimCobranca),
+
+      // Marketing / particularidades
+      motivoSaida: company.motivoSaida || "",
+      observacoes: company.observacoes || "",
+
+      // Financeiro (matriz)
+      reunioesFechamentos: company.reunioesFechamentos || "",
+      fechamentoContabil: company.fechamentoContabil || "",
+      analiseCompliance: company.analiseCompliance || "",
+      cobrancaServExtras: company.cobrancaServExtras || "",
+      complexidadeFiscal: company.complexidadeFiscal || "",
+      complexidadeContabil: company.complexidadeContabil || "",
+
+      // Datas por departamento (matriz)
+      dataSaida: d(company.dataSaida),
+      dataEntradaFiscal: d(company.dataEntradaFiscal),
+      dataSaidaFiscal: d(company.dataSaidaFiscal),
+      dataEntradaContabil: d(company.dataEntradaContabil),
+      dataSaidaContabil: d(company.dataSaidaContabil),
+      dataEntradaFolha: d(company.dataEntradaFolha),
+      dataSaidaFolha: d(company.dataSaidaFolha),
+      dataEntradaConsultoria: d(company.dataEntradaConsultoria),
+      dataSaidaConsultoria: d(company.dataSaidaConsultoria),
+      dataInicioCobrancaFiscal: d(company.dataInicioCobrancaFiscal),
+      dataFimCobrancaFiscal: d(company.dataFimCobrancaFiscal),
+      dataInicioCobrancaContabil: d(company.dataInicioCobrancaContabil),
+      dataFimCobrancaContabil: d(company.dataFimCobrancaContabil),
+      dataInicioCobrancaFolha: d(company.dataInicioCobrancaFolha),
+      dataFimCobrancaFolha: d(company.dataFimCobrancaFolha),
+      dataInicioCobrancaConsultoria: d(company.dataInicioCobrancaConsultoria),
+      dataFimCobrancaConsultoria: d(company.dataFimCobrancaConsultoria),
+
+      // Acessos
+      prefeitura: company.prefeitura || "",
+      prefeituraLogin: company.prefeituraLogin || "",
+      prefeituraSenha: company.prefeituraSenha || "",
+      sefaz: company.sefaz || "",
+      sefazLogin: company.sefazLogin || "",
+      sefazSenha: company.sefazSenha || "",
     });
     setEditing(true);
   }
