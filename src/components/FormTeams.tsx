@@ -246,7 +246,7 @@ const BASE_FIELDS: { key: string; desc: string }[] = [
   { key: "titulo",       desc: "Título legível (ex.: Novo cliente cadastrado)" },
   { key: "data",         desc: "Data/hora do disparo" },
   { key: "responsaveis", desc: "Todos os responsáveis, separados por vírgula - nulo quando não há" },
-  { key: "mencionar",    desc: "Responsáveis SEM quem fez a alteração - use este para @menções" },
+  { key: "mencionar",    desc: "Responsáveis SEM quem fez a ação - use este para @menções" },
   { key: "alterado_por", desc: "E-mail de quem fez a alteração" },
   { key: "descricao",    desc: "Texto livre - preenchido apenas no envio de teste" },
 ];
