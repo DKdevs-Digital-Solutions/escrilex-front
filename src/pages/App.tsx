@@ -13,12 +13,12 @@ import { ConfirmProvider } from "../confirm";
 import {
   Briefcase, FileText, Users, Layers, Search, Bell, LogOut,
   ChevronLeft, ChevronRight, Menu, ClipboardList, AlertTriangle,
-  Mail,
+  MessageSquare,
   Activity,
 } from "lucide-react";
 import { useMe } from "../hooks/useMe";
 import Logo from "../assets/logo.png";
-import TeamsNotificationsPage from "./Emailpage";
+import TeamsNotificationsPage from "./TeamsPage";
 import { DashboardPage } from "./Dashboard";
 import { ExpectationMatrixPage } from "./Matriz";
 
@@ -30,7 +30,7 @@ type Page =
   | "processos"
   | "processRun"
   | "audit"
-  | "emailSettings"
+  | "teamsSettings"
   | "dashboard"
   | "expectationMatrix";
 
@@ -70,9 +70,9 @@ const NAV_GROUPS: { label?: string; items: NavItem[] }[] = [
       
       { id: "processos", label: "Processos", icon: <FileText size={15} strokeWidth={1.8} />, roles: ["ADMIN", "GESTOR_EMPRESA"] },
        {
-        id: "emailSettings",
+        id: "teamsSettings",
         label: "Notificações",
-        icon: <Mail size={15} strokeWidth={1.8} />,
+        icon: <MessageSquare size={15} strokeWidth={1.8} />,
         roles: ["ADMIN","GESTOR_EMPRESA"],
       },
        {
@@ -93,7 +93,7 @@ const PAGE_TITLES: Record<Page, string> = {
   processos: "Processos", 
   processRun: "Processo",
   audit: "Auditoria",
-  emailSettings: "Notificações",
+  teamsSettings: "Notificações",
   expectationMatrix: "Matriz",
 };
 
@@ -160,7 +160,10 @@ function LogoutConfirm({ onConfirm, onCancel }: { onConfirm: () => void; onCance
 export function App() {
   // const [me, setMe] = useState<any>(null);
   const [page, setPage] = useState<Page>(() => {
-  return (localStorage.getItem("currentPage") as Page) || "dashboard";
+    const stored = localStorage.getItem("currentPage");
+    // "emailSettings" era o id antigo da página de notificações do Teams.
+    if (stored === "emailSettings") return "teamsSettings";
+    return (stored as Page) || "dashboard";
   });
 
   const [companyId, setCompanyId] = useState(() => {
@@ -1044,7 +1047,7 @@ const topIconBtn: React.CSSProperties = {
               {page === "processRun" && runId && (
                 <ProcessRun runId={runId} onBack={() => { setRunId(""); setPage(companyId ? "company" : "companies"); }} />
               )}
-              {page === "emailSettings" && isAdmin && <TeamsNotificationsPage />}
+              {page === "teamsSettings" && isAdmin && <TeamsNotificationsPage />}
             </main>
           </div>
         </div>

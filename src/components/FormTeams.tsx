@@ -254,9 +254,9 @@ const EVENT_FIELDS: { event: string; label: string; fields: string[] }[] = [
   { event: "process_started",     label: "Processo iniciado",       fields: ["empresa", "cnpj", "tipo", "template"] },
   { event: "process_completed",   label: "Processo concluído",      fields: ["empresa", "cnpj", "tipo"] },
   { event: "process_overdue",     label: "Processo atrasado",       fields: ["empresa", "cnpj", "setor", "responsavel", "item?", "vencimento?"] },
-  { event: "responsible_changed", label: "Alteração de responsável", fields: ["empresa", "cnpj"] },
-  { event: "company_blocked",     label: "Empresa bloqueada",       fields: ["empresa", "cnpj", "alterado_por?"] },
-  { event: "company_unblocked",   label: "Empresa desbloqueada",    fields: ["empresa", "cnpj"] },
+  { event: "responsible_changed", label: "Alteração de responsável", fields: ["empresa", "cnpj", "alterado_por"] },
+  { event: "company_blocked",     label: "Empresa bloqueada",       fields: ["empresa", "cnpj", "alterado_por"] },
+  { event: "company_unblocked",   label: "Empresa desbloqueada",    fields: ["empresa", "cnpj", "alterado_por"] },
 ];
 
 function PayloadReference() {
