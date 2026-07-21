@@ -3,6 +3,7 @@ import api from "../services/api";
 export type NotificationConfigPayload = {
   webhookUrl: string;
   active: boolean;
+  enabledEvents?: string[];
 };
 
 // GET - buscar configuração de notificações (Teams)
@@ -26,5 +27,11 @@ export async function updateNotificationConfig(payload: Partial<NotificationConf
 // DELETE - remover configuração
 export async function deleteNotificationConfig() {
   const response = await api.delete("/api/admin/notification-config");
+  return response.data;
+}
+
+// POST - enviar mensagem de teste
+export async function testNotificationConfig() {
+  const response = await api.post("/api/admin/notification-config/test");
   return response.data;
 }

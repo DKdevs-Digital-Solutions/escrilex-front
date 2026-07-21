@@ -4,20 +4,26 @@ import {
   createNotificationConfig,
   updateNotificationConfig,
   deleteNotificationConfig,
+  testNotificationConfig,
   type NotificationConfigPayload,
 } from "../repository/notificationConfig.repository";
 import { useToast } from "../toast";
 
+export interface AvailableEvent { key: string; label: string; }
+
 const initialForm: NotificationConfigPayload = {
   webhookUrl: "",
   active: true,
+  enabledEvents: [],
 };
 
 export function useNotificationConfig() {
   const [form, setForm] = useState<NotificationConfigPayload>(initialForm);
+  const [availableEvents, setAvailableEvents] = useState<AvailableEvent[]>([]);
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [hasConfig, setHasConfig] = useState(false);
@@ -40,7 +46,9 @@ export function useNotificationConfig() {
         setForm({
           webhookUrl: data.webhookUrl ?? "",
           active: data.active ?? true,
+          enabledEvents: data.enabledEvents ?? [],
         });
+        setAvailableEvents(data.availableEvents ?? []);
         setHasConfig(true);
       } else {
         setHasConfig(false);
@@ -115,14 +123,33 @@ export function useNotificationConfig() {
     }
   }
 
+  async function sendTest() {
+    setTesting(true);
+    setSuccess("");
+    setError("");
+    try {
+      await testNotificationConfig();
+      setSuccess("Mensagem de teste enviada com sucesso.");
+      toast("Mensagem de teste enviada", "success");
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || "Erro ao enviar mensagem de teste.";
+      setError(msg);
+      toast(msg, "error");
+    } finally {
+      setTesting(false);
+    }
+  }
+
   useEffect(() => {
     loadConfig();
   }, []);
 
   return {
     form,
+    availableEvents,
     loading,
     saving,
+    testing,
     success,
     error,
     hasConfig,
@@ -130,5 +157,6 @@ export function useNotificationConfig() {
     saveConfig,
     removeConfig,
     loadConfig,
+    sendTest,
   };
 }

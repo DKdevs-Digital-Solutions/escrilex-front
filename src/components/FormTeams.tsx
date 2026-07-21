@@ -1,11 +1,14 @@
 import React from "react";
-import { Info, Save, ShieldCheck, Link2, Webhook } from "lucide-react";
+import { Info, Save, ShieldCheck, Link2, Webhook, Send } from "lucide-react";
 import type { NotificationConfigPayload } from "../repository/notificationConfig.repository";
+import type { AvailableEvent } from "../hooks/useNotificationConfig";
 
 type Props = {
   form: NotificationConfigPayload;
+  availableEvents?: AvailableEvent[];
   loading: boolean;
   saving: boolean;
+  testing?: boolean;
   success: string;
   error: string;
   hasConfig: boolean;
@@ -15,18 +18,29 @@ type Props = {
   ) => void;
   saveConfig: () => void;
   removeConfig: () => void;
+  sendTest?: () => void;
 };
 
 export function TeamsNotificationsSettings({
   form,
+  availableEvents = [],
   saving,
+  testing = false,
   success,
   error,
   hasConfig,
   updateForm,
   saveConfig,
   removeConfig,
+  sendTest,
 }: Props) {
+
+  function toggleEvent(key: string) {
+    const current = form.enabledEvents ?? [];
+    const next = current.includes(key) ? current.filter((k) => k !== key) : [...current, key];
+    updateForm("enabledEvents", next);
+  }
+
   return (
     <div style={{ minHeight: "100%", padding: 0, fontFamily: "Inter, system-ui, sans-serif" }}>
       <style>
@@ -124,7 +138,42 @@ export function TeamsNotificationsSettings({
               onChange={(checked) => updateForm("active", checked)}
             />
 
-            <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
+            {availableEvents.length > 0 && (
+              <div style={{ display: "grid", gap: 10 }}>
+                <div>
+                  <strong style={{ fontSize: 13, color: "#1e293b" }}>Eventos que disparam notificações</strong>
+                  <p style={{ fontSize: 12, color: "#94a3b8", margin: "4px 0 10px" }}>
+                    Sem seleção: todos os eventos são notificados.
+                  </p>
+                </div>
+                {availableEvents.map((ev) => (
+                  <label
+                    key={ev.key}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "10px 14px",
+                      borderRadius: 10,
+                      border: "1px solid #e2e8f0",
+                      background: (form.enabledEvents ?? []).includes(ev.key) ? "#f0fdf4" : "#f8fafc",
+                      cursor: "pointer",
+                      fontSize: 13.5,
+                      color: "#334155",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={(form.enabledEvents ?? []).includes(ev.key)}
+                      onChange={() => toggleEvent(ev.key)}
+                    />
+                    {ev.label}
+                  </label>
+                ))}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 12, marginTop: 4, flexWrap: "wrap" }}>
               <button
                 type="button"
                 style={{ ...primaryButton, opacity: saving ? 0.75 : 1, cursor: saving ? "not-allowed" : "pointer" }}
@@ -134,6 +183,19 @@ export function TeamsNotificationsSettings({
                 <Save size={16} color="#7dd3fc" />
                 {saving ? "Salvando..." : hasConfig ? "Atualizar configurações" : "Salvar configurações"}
               </button>
+
+              {sendTest && (
+                <button
+                  type="button"
+                  style={{ ...secondaryButton, opacity: testing || !form.webhookUrl ? 0.6 : 1, cursor: testing || !form.webhookUrl ? "not-allowed" : "pointer" }}
+                  disabled={testing || !form.webhookUrl}
+                  onClick={sendTest}
+                  title={!form.webhookUrl ? "Informe a URL do webhook primeiro" : undefined}
+                >
+                  <Send size={15} />
+                  {testing ? "Enviando..." : "Enviar teste"}
+                </button>
+              )}
 
               {hasConfig && (
                 <button

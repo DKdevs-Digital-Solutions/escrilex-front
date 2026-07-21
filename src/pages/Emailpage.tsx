@@ -7,7 +7,12 @@ export default function TeamsNotificationsPage() {
 
   return (
     <main style={{ minHeight: "100vh", padding: 0 }}>
-      <TeamsNotificationsSettings {...config} />
+      <TeamsNotificationsSettings
+        {...config}
+        availableEvents={config.availableEvents}
+        testing={config.testing}
+        sendTest={config.sendTest}
+      />
     </main>
   );
 }
