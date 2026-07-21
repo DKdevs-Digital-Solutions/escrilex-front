@@ -126,7 +126,7 @@ export function MatrixTable({
   }
 
   function formatDateBR(value: any) {
-    if (!value) return "—";
+    if (!value) return "-";
 
     if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
       const [year, month, day] = value.slice(0, 10).split("-");
@@ -134,7 +134,7 @@ export function MatrixTable({
     }
 
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "—";
+    if (Number.isNaN(date.getTime())) return "-";
 
     return date.toLocaleDateString("pt-BR", {
       day: "2-digit",

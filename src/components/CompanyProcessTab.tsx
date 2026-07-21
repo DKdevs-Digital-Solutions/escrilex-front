@@ -229,7 +229,7 @@ function ProcessRow({
             
           }}
         >
-          {item.code ?? "—"}
+          {item.code ?? "-"}
         </span>
       </Td>
 

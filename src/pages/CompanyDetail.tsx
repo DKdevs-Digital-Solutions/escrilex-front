@@ -957,7 +957,7 @@ async function handleSaveResponsibles() {
               variant="blue" // Foco institucional
               icon={<Building2 size={18} />}
               label="Empresa"
-              value={company.nomeFantasia || company.razaoSocial || "—"}
+              value={company.nomeFantasia || company.razaoSocial || "-"}
               hint={company.grupo || "Sem grupo informado"}
             />
           </div>

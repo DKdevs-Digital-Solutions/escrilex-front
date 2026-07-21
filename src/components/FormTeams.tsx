@@ -245,8 +245,8 @@ const BASE_FIELDS: { key: string; desc: string }[] = [
   { key: "evento",       desc: "Chave do evento (ex.: company_created)" },
   { key: "titulo",       desc: "Título legível (ex.: Novo cliente cadastrado)" },
   { key: "data",         desc: "Data/hora do disparo" },
-  { key: "responsaveis", desc: "E-mails separados por vírgula — nulo quando não há" },
-  { key: "descricao",    desc: "Texto livre — preenchido apenas no envio de teste" },
+  { key: "responsaveis", desc: "E-mails separados por vírgula - nulo quando não há" },
+  { key: "descricao",    desc: "Texto livre - preenchido apenas no envio de teste" },
 ];
 
 const EVENT_FIELDS: { event: string; label: string; fields: string[] }[] = [

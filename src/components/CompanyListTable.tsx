@@ -90,7 +90,7 @@ export function CompanyListTable({
   }
 
   function formatDateBR(value: any) {
-    if (!value) return "—";
+    if (!value) return "-";
 
     if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
       const [year, month, day] = value.slice(0, 10).split("-");
@@ -99,7 +99,7 @@ export function CompanyListTable({
 
     const date = new Date(value);
 
-    if (Number.isNaN(date.getTime())) return "—";
+    if (Number.isNaN(date.getTime())) return "-";
 
     return date.toLocaleDateString("pt-BR", {
       day: "2-digit",
@@ -117,7 +117,7 @@ export function CompanyListTable({
       return (
         <div style={codePillStyle}>
           <Hash size={12} strokeWidth={2.2} color="#94a3b8" />
-          <span style={monoTextStyle}>{company.cod || company.codigo || "—"}</span>
+          <span style={monoTextStyle}>{company.cod || company.codigo || "-"}</span>
         </div>
       );
     }
@@ -138,7 +138,7 @@ export function CompanyListTable({
             }}
             title={company.razaoSocial || company.empresa}
           >
-            {company.razaoSocial || company.empresa || "—"}
+            {company.razaoSocial || company.empresa || "-"}
           </div>
 
           <div
@@ -161,7 +161,7 @@ export function CompanyListTable({
     if (column.key === "cnpj" || column.key === "cnpjCpf") {
       return (
         <div style={simplePillStyle}>
-          <span style={monoTextStyle}>{company.cnpj || company.cnpjCpf || "—"}</span>
+          <span style={monoTextStyle}>{company.cnpj || company.cnpjCpf || "-"}</span>
         </div>
       );
     }
@@ -510,7 +510,7 @@ if (column.type === "sector-user") {
 }
 
 function EmptyValue() {
-  return <span style={{ color: "#cbd5e1", fontWeight: 700 }}>—</span>;
+  return <span style={{ color: "#cbd5e1", fontWeight: 700 }}>-</span>;
 }
 
 function actionBtnStyle(color: string): React.CSSProperties {

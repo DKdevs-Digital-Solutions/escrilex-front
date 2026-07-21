@@ -234,23 +234,23 @@ const normalizedItems = useMemo(() => {
 
     Comercial: Array.isArray(item.Comercial)
       ? item.Comercial.join(", ")
-      : item.Comercial || "—",
+      : item.Comercial || "-",
 
     Compliance: Array.isArray(item.Compliance)
       ? item.Compliance.join(", ")
-      : item.Compliance || "—",
+      : item.Compliance || "-",
 
     Contábil: Array.isArray(item.Contábil)
       ? item.Contábil.join(", ")
-      : item.Contábil || "—",
+      : item.Contábil || "-",
 
     Fiscal: Array.isArray(item.Fiscal)
       ? item.Fiscal.join(", ")
-      : item.Fiscal || "—",
+      : item.Fiscal || "-",
 
     Societário: Array.isArray(item.Societário)
       ? item.Societário.join(", ")
-      : item.Societário || "—",
+      : item.Societário || "-",
   }));
 }, [matrixItems]);
 

@@ -301,7 +301,7 @@ export function Tr({ children, style }: { children: React.ReactNode; style?: CSS
 export function Empty({ message }: { message: string }) {
   return (
     <div style={{ textAlign: "center", padding: "56px 24px", color: "#94a3b8" }}>
-      <div style={{ width: 48, height: 48, borderRadius: 12, background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px", fontSize: 22 }}>—</div>
+      <div style={{ width: 48, height: 48, borderRadius: 12, background: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px", fontSize: 22 }}>-</div>
       <div style={{ fontSize: 13.5, fontWeight: 500 }}>{message}</div>
     </div>
   );
@@ -400,7 +400,7 @@ export function InfoRow({ label, value }: { label: string; value: React.ReactNod
           wordBreak: "break-word",
         }}
       >
-        {value || <span style={{ color: "#cbd5e1" }}>—</span>}
+        {value || <span style={{ color: "#cbd5e1" }}>-</span>}
       </span>
     </div>
   );

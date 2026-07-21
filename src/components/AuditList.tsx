@@ -108,22 +108,22 @@ const fieldLabel: Record<string, string> = {
   complexidadeFiscal: "Complexidade fiscal",
   complexidadeContabil: "Complexidade contábil",
   dataSaida: "Data de saída",
-  dataEntradaFiscal: "Entrada — Fiscal",
-  dataSaidaFiscal: "Saída — Fiscal",
-  dataEntradaContabil: "Entrada — Contábil",
-  dataSaidaContabil: "Saída — Contábil",
-  dataEntradaFolha: "Entrada — Folha",
-  dataSaidaFolha: "Saída — Folha",
-  dataEntradaConsultoria: "Entrada — Consultoria",
-  dataSaidaConsultoria: "Saída — Consultoria",
-  dataInicioCobrancaFiscal: "Início cobrança — Fiscal",
-  dataFimCobrancaFiscal: "Fim cobrança — Fiscal",
-  dataInicioCobrancaContabil: "Início cobrança — Contábil",
-  dataFimCobrancaContabil: "Fim cobrança — Contábil",
-  dataInicioCobrancaFolha: "Início cobrança — Folha",
-  dataFimCobrancaFolha: "Fim cobrança — Folha",
-  dataInicioCobrancaConsultoria: "Início cobrança — Consultoria",
-  dataFimCobrancaConsultoria: "Fim cobrança — Consultoria",
+  dataEntradaFiscal: "Entrada - Fiscal",
+  dataSaidaFiscal: "Saída - Fiscal",
+  dataEntradaContabil: "Entrada - Contábil",
+  dataSaidaContabil: "Saída - Contábil",
+  dataEntradaFolha: "Entrada - Folha",
+  dataSaidaFolha: "Saída - Folha",
+  dataEntradaConsultoria: "Entrada - Consultoria",
+  dataSaidaConsultoria: "Saída - Consultoria",
+  dataInicioCobrancaFiscal: "Início cobrança - Fiscal",
+  dataFimCobrancaFiscal: "Fim cobrança - Fiscal",
+  dataInicioCobrancaContabil: "Início cobrança - Contábil",
+  dataFimCobrancaContabil: "Fim cobrança - Contábil",
+  dataInicioCobrancaFolha: "Início cobrança - Folha",
+  dataFimCobrancaFolha: "Fim cobrança - Folha",
+  dataInicioCobrancaConsultoria: "Início cobrança - Consultoria",
+  dataFimCobrancaConsultoria: "Fim cobrança - Consultoria",
   responsibles: "Responsáveis",
   updated: "Responsáveis",
   name: "Nome",
@@ -503,7 +503,7 @@ React.useEffect(() => {
 
 
 function formatAuditValue(value: unknown) {
-  if (value === null || value === undefined || value === "") return "—";
+  if (value === null || value === undefined || value === "") return "-";
 
   if (typeof value === "boolean") {
     return value ? "Sim" : "Não";
@@ -524,7 +524,7 @@ function formatAuditValue(value: unknown) {
   }
 
   if (Array.isArray(value)) {
-    if (value.length === 0) return "—";
+    if (value.length === 0) return "-";
     // Resumo legível: tenta extrair nomes/e-mails de cada item.
     const parts = value
       .map((item) => summarizeEntry(item))
@@ -536,7 +536,7 @@ function formatAuditValue(value: unknown) {
   if (typeof value === "object") {
     const summary = summarizeEntry(value);
     if (summary) return summary;
-    return "—";
+    return "-";
   }
 
   return String(value);
@@ -954,7 +954,7 @@ function AuditChangesTooltip({ item }: { item: AuditItem }) {
                   textOverflow: "ellipsis",
                 }}
               >
-                {r.usuarioResponsavel?.name ?? "—"}
+                {r.usuarioResponsavel?.name ?? "-"}
               </div>
 
               <div
@@ -1122,7 +1122,7 @@ function AuditChangesTooltip({ item }: { item: AuditItem }) {
                           textOverflow: "ellipsis",
                         }}
                       >
-                        {r.usuarioResponsavel?.name ?? "—"}
+                        {r.usuarioResponsavel?.name ?? "-"}
                       </div>
 
                       <div

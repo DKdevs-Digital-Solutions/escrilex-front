@@ -229,7 +229,7 @@ function ChecklistRow({
             
           }}
         >
-          {item.code ?? "—"}
+          {item.code ?? "-"}
         </span>
       </Td>
 

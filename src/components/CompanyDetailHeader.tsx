@@ -3,7 +3,7 @@ import { Badge } from "../ui";
 import { ArrowLeft, Building2 } from "lucide-react";
 
 function SituacaoBadge({ v }: { v?: string }) {
-  if (!v) return <span style={{ color: "#d1d5db" }}>—</span>;
+  if (!v) return <span style={{ color: "#d1d5db" }}>-</span>;
 
   const variant =
     v === "SAIDA" || v === "ENCERRADA"

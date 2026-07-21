@@ -398,7 +398,7 @@ export function AdminUsers() {
       <Modal
         open={!!editUser}
         onClose={() => setEditUser(null)}
-        title={`Editar — ${editUser?.name || ""}`}
+        title={`Editar - ${editUser?.name || ""}`}
         width={540}
         footer={
           <>

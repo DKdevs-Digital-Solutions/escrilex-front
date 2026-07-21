@@ -311,7 +311,7 @@ export function CompanyHistoryTab({
             value={
               latestRun?.createdAt
                 ? new Date(latestRun.createdAt).toLocaleDateString("pt-BR")
-                : "—"
+                : "-"
             }
             hint="Última execução criada"
             UI={UI}
@@ -416,7 +416,7 @@ export function CompanyHistoryTab({
                               </span>
                             </div>
                           ) : (
-                            <span style={{ color: "#cbd5e1" }}>—</span>
+                            <span style={{ color: "#cbd5e1" }}>-</span>
                           )}
                         </Td>
 
@@ -446,7 +446,7 @@ export function CompanyHistoryTab({
                               </span>
                             </div>
                           ) : (
-                            <span style={{ color: "#cbd5e1" }}>—</span>
+                            <span style={{ color: "#cbd5e1" }}>-</span>
                           )}
                         </Td>
 

@@ -66,7 +66,7 @@ function MetaItem({
             textOverflow: "ellipsis",
           }}
         >
-          {value ?? <span style={{ color: "#cbd5e1" }}>—</span>}
+          {value ?? <span style={{ color: "#cbd5e1" }}>-</span>}
         </div>
       </div>
     </div>
@@ -92,8 +92,8 @@ export function ProcessRunMeta({ run }: { run: any }) {
         label="Template"
         value={
           run.template?.name
-            ? `${run.template.name} v${run.template.version ?? "—"}`
-            : "—"
+            ? `${run.template.name} v${run.template.version ?? "-"}`
+            : "-"
         }
       />
 
@@ -103,7 +103,7 @@ export function ProcessRunMeta({ run }: { run: any }) {
         value={
           run.createdAt
             ? new Date(run.createdAt).toLocaleString("pt-BR")
-            : "—"
+            : "-"
         }
       />
 

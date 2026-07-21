@@ -236,7 +236,7 @@ export function AdminSectors() {
         <Input label="Nome do setor" placeholder="Ex: Financeiro, TI, Operações..." value={name} onChange={e => setName(e.target.value)} />
       </Modal>
 
-      <Modal open={!!editItem} onClose={() => setEditItem(null)} title={`Editar — ${editItem?.name || ""}`}
+      <Modal open={!!editItem} onClose={() => setEditItem(null)} title={`Editar - ${editItem?.name || ""}`}
         footer={
           <>
             <button onClick={() => setEditItem(null)} style={{ padding: "8px 16px", fontSize: 13.5, fontWeight: 600, borderRadius: 9, border: "2px solid #ccc", background: "#fff", color: "#475569", cursor: "pointer", fontFamily: "inherit" }}>Cancelar</button>

@@ -89,7 +89,7 @@ function DataField({
             wordBreak: "break-word",
           }}
         >
-          {value ?? <span style={{ color: "#cbd5e1" }}>—</span>}
+          {value ?? <span style={{ color: "#cbd5e1" }}>-</span>}
         </div>
       )}
     </div>
@@ -165,7 +165,7 @@ function DataSelectField({
             wordBreak: "break-word",
           }}
         >
-          {value ?? <span style={{ color: "#cbd5e1" }}>—</span>}
+          {value ?? <span style={{ color: "#cbd5e1" }}>-</span>}
         </div>
       )}
     </div>

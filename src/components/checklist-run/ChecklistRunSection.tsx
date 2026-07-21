@@ -146,7 +146,7 @@ export function ChecklistRunSection({
                           color: "#334155",
                         }}
                       >
-                        {it.code ?? "—"}
+                        {it.code ?? "-"}
                       </span>
                     </Td>
 
@@ -200,7 +200,7 @@ export function ChecklistRunSection({
                             textOverflow: "ellipsis",
                           }}
                         >
-                          {it.sector?.name ?? "—"}
+                          {it.sector?.name ?? "-"}
                         </span>
                       </div>
                     </Td>
@@ -231,7 +231,7 @@ export function ChecklistRunSection({
                           {overdue && <Badge label="Vencido" variant="red" />}
                         </div>
                       ) : (
-                        <span style={{ color: "#d1d5db" }}>—</span>
+                        <span style={{ color: "#d1d5db" }}>-</span>
                       )}
                     </Td>
 

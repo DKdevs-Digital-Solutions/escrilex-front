@@ -557,7 +557,7 @@ function renderCell(item: any, column: any, users: any[]) {
   if (column.type === "user") {
     const user = users.find((u: any) => u.id === value);
 
-    if (!user) return <span style={mutedTextStyle}>—</span>;
+    if (!user) return <span style={mutedTextStyle}>-</span>;
 
     return (
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -573,7 +573,7 @@ function renderCell(item: any, column: any, users: any[]) {
   }
 
   if (column.type === "date") {
-    return value ? new Date(value).toLocaleDateString("pt-BR") : <span style={mutedTextStyle}>—</span>;
+    return value ? new Date(value).toLocaleDateString("pt-BR") : <span style={mutedTextStyle}>-</span>;
   }
 
   if (column.key === "status") {
@@ -587,16 +587,16 @@ function renderCell(item: any, column: any, users: any[]) {
   if (column.type === "textarea") {
     return (
       <span style={textareaCellStyle}>
-        {value || "—"}
+        {value || "-"}
       </span>
     );
   }
 
-  return value || <span style={mutedTextStyle}>—</span>;
+  return value || <span style={mutedTextStyle}>-</span>;
 }
 
 function SelectPill({ value }: { value: string }) {
-  if (!value) return <span style={mutedTextStyle}>—</span>;
+  if (!value) return <span style={mutedTextStyle}>-</span>;
 
   return <span style={selectPillStyle}>{value}</span>;
 }
@@ -622,7 +622,7 @@ function StatusBadge({ status }: { status: string }) {
           background: isActive ? "#22c55e" : "#ef4444",
         }}
       />
-      {status || "—"}
+      {status || "-"}
     </span>
   );
 }
