@@ -1,5 +1,5 @@
 import React from "react";
-import { Info, Save, ShieldCheck, Link2, Webhook, Send } from "lucide-react";
+import { Info, Save, ShieldCheck, Link2, Webhook, Send, Braces } from "lucide-react";
 import type { NotificationConfigPayload } from "../repository/notificationConfig.repository";
 import type { AvailableEvent } from "../hooks/useNotificationConfig";
 
@@ -233,9 +233,114 @@ export function TeamsNotificationsSettings({
           </div>
         </aside>
       </div>
+
+      <PayloadReference />
     </div>
   );
 }
+
+// ── Referência do payload enviado ao webhook ─────────────────────────────────
+// Mantido em sincronia com src/teams.js (buildPayload) e os hooks das rotas.
+const BASE_FIELDS: { key: string; desc: string }[] = [
+  { key: "evento",       desc: "Chave do evento (ex.: company_created)" },
+  { key: "titulo",       desc: "Título legível (ex.: Novo cliente cadastrado)" },
+  { key: "data",         desc: "Data/hora do disparo" },
+  { key: "responsaveis", desc: "E-mails separados por vírgula — nulo quando não há" },
+  { key: "descricao",    desc: "Texto livre — preenchido apenas no envio de teste" },
+];
+
+const EVENT_FIELDS: { event: string; label: string; fields: string[] }[] = [
+  { event: "company_created",     label: "Novo cliente cadastrado", fields: ["empresa", "cnpj"] },
+  { event: "process_started",     label: "Processo iniciado",       fields: ["empresa", "cnpj", "tipo", "template"] },
+  { event: "process_completed",   label: "Processo concluído",      fields: ["empresa", "cnpj", "tipo"] },
+  { event: "process_overdue",     label: "Processo atrasado",       fields: ["empresa", "cnpj", "setor", "responsavel", "item?", "vencimento?"] },
+  { event: "responsible_changed", label: "Alteração de responsável", fields: ["empresa", "cnpj"] },
+  { event: "company_blocked",     label: "Empresa bloqueada",       fields: ["empresa", "cnpj", "alterado_por?"] },
+  { event: "company_unblocked",   label: "Empresa desbloqueada",    fields: ["empresa", "cnpj"] },
+];
+
+function PayloadReference() {
+  return (
+    <div style={{ padding: 24, borderRadius: 15, background: "#fff", border: "2px solid #e2e8f0", marginBottom: 25 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+        <Braces size={18} color="#2563eb" />
+        <strong style={{ color: "#0f172a", fontSize: 15, fontWeight: 900 }}>Dados enviados ao webhook</strong>
+      </div>
+      <p style={{ margin: "0 0 18px", color: "#64748b", fontSize: 13, lineHeight: 1.55 }}>
+        O sistema envia um JSON plano. No Power Automate, use{" "}
+        <code style={codeStyle}>{"@{triggerBody()?['campo']}"}</code> para inserir um valor no meio de um texto.
+        Campos marcados com <strong>?</strong> podem não vir preenchidos.
+      </p>
+
+      <div style={{ marginBottom: 20 }}>
+        <strong style={{ fontSize: 13, color: "#1e293b" }}>Sempre presentes</strong>
+        <div style={{ display: "grid", gap: 6, marginTop: 10 }}>
+          {BASE_FIELDS.map((f) => (
+            <div
+              key={f.key}
+              style={{
+                display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap",
+                padding: "8px 12px", borderRadius: 10, background: "#f8fafc", border: "1px solid #e2e8f0",
+              }}
+            >
+              <code style={codeStyle}>{f.key}</code>
+              <span style={{ fontSize: 12.5, color: "#64748b" }}>{f.desc}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <strong style={{ fontSize: 13, color: "#1e293b" }}>Campos adicionais por evento</strong>
+        <div style={{ display: "grid", gap: 8, marginTop: 10 }}>
+          {EVENT_FIELDS.map((e) => (
+            <div
+              key={e.event}
+              style={{ padding: "10px 14px", borderRadius: 10, background: "#f8fafc", border: "1px solid #e2e8f0" }}
+            >
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#334155", marginBottom: 6 }}>
+                {e.label}{" "}
+                <code style={{ ...codeStyle, fontWeight: 600, background: "#eef2ff", color: "#4338ca" }}>{e.event}</code>
+              </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {e.fields.map((f) => (
+                  <code key={f} style={codeStyle}>{f}</code>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ marginTop: 20 }}>
+        <strong style={{ fontSize: 13, color: "#1e293b" }}>Exemplo de mensagem no fluxo</strong>
+        <pre
+          style={{
+            marginTop: 10, padding: "14px 16px", borderRadius: 10, overflowX: "auto",
+            background: "#0f172a", color: "#e2e8f0", fontSize: 12.5, lineHeight: 1.7,
+            fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+          }}
+        >{`Situação: @{triggerBody()?['titulo']}
+Empresa: @{triggerBody()?['empresa']}
+CNPJ: @{triggerBody()?['cnpj']}
+Data: @{triggerBody()?['data']}
+Responsáveis: @{coalesce(triggerBody()?['responsaveis'], 'Não informado')}`}</pre>
+      </div>
+    </div>
+  );
+}
+
+const codeStyle: React.CSSProperties = {
+  padding: "2px 7px",
+  borderRadius: 6,
+  background: "#eef6ff",
+  border: "1px solid #dbeafe",
+  color: "#1d4ed8",
+  fontSize: 12,
+  fontWeight: 800,
+  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+  whiteSpace: "nowrap",
+};
 
 function Field({
   label,
