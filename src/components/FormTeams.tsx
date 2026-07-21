@@ -245,7 +245,9 @@ const BASE_FIELDS: { key: string; desc: string }[] = [
   { key: "evento",       desc: "Chave do evento (ex.: company_created)" },
   { key: "titulo",       desc: "Título legível (ex.: Novo cliente cadastrado)" },
   { key: "data",         desc: "Data/hora do disparo" },
-  { key: "responsaveis", desc: "E-mails separados por vírgula - nulo quando não há" },
+  { key: "responsaveis", desc: "Todos os responsáveis, separados por vírgula - nulo quando não há" },
+  { key: "mencionar",    desc: "Responsáveis SEM quem fez a alteração - use este para @menções" },
+  { key: "alterado_por", desc: "E-mail de quem fez a alteração" },
   { key: "descricao",    desc: "Texto livre - preenchido apenas no envio de teste" },
 ];
 
@@ -253,10 +255,10 @@ const EVENT_FIELDS: { event: string; label: string; fields: string[] }[] = [
   { event: "company_created",     label: "Novo cliente cadastrado", fields: ["empresa", "cnpj"] },
   { event: "process_started",     label: "Processo iniciado",       fields: ["empresa", "cnpj", "tipo", "template"] },
   { event: "process_completed",   label: "Processo concluído",      fields: ["empresa", "cnpj", "tipo"] },
-  { event: "process_overdue",     label: "Processo atrasado",       fields: ["empresa", "cnpj", "setor", "responsavel", "item?", "vencimento?"] },
-  { event: "responsible_changed", label: "Alteração de responsável", fields: ["empresa", "cnpj", "alterado_por"] },
-  { event: "company_blocked",     label: "Empresa bloqueada",       fields: ["empresa", "cnpj", "alterado_por"] },
-  { event: "company_unblocked",   label: "Empresa desbloqueada",    fields: ["empresa", "cnpj", "alterado_por"] },
+  { event: "process_overdue",     label: "Processo atrasado",       fields: ["empresa", "cnpj", "setor", "item?", "vencimento?"] },
+  { event: "responsible_changed", label: "Alteração de responsável", fields: ["empresa", "cnpj"] },
+  { event: "company_blocked",     label: "Empresa bloqueada",       fields: ["empresa", "cnpj"] },
+  { event: "company_unblocked",   label: "Empresa desbloqueada",    fields: ["empresa", "cnpj", "novo_status"] },
 ];
 
 function PayloadReference() {
