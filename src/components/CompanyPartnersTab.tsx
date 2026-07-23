@@ -170,6 +170,8 @@ export function CompanyPartnersTab({
                       ? new Date(s.dataNascimento).toLocaleDateString("pt-BR")
                       : null,
                   },
+                  { label: "Instagram", value: s.instagram },
+                  { label: "Facebook", value: s.facebook },
                   { label: "Outros", value: s.outros },
                 ]
                   .filter((f) => f.value)

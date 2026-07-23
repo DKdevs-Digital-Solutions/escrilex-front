@@ -176,9 +176,12 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
           <FormGrid cols={3}>
             <Select label="Tributação" style={{height:48}} value={form.tributacao} onChange={set("tributacao")}>
               <option value="">Selecione...</option>
-              <option value="SIMPLES">Simples</option>
-              <option value="PRESUMIDO">Presumido</option>
-              <option value="REAL">Real</option>
+              <option value="Simples Nacional">Simples Nacional</option>
+              <option value="Simples Híbrido">Simples Híbrido</option>
+              <option value="Lucro Presumido">Lucro Presumido</option>
+              <option value="Lucro Real Trimestral">Lucro Real Trimestral</option>
+              <option value="Lucro Real Anual (Estimativa Mensal)">Lucro Real Anual (Estimativa Mensal)</option>
+              <option value="MEI/Doméstica">MEI/Doméstica</option>
             </Select>
 
             <Input style={{ height: 48 }} label="IE Atual" value={form.ieAtual} onChange={set("ieAtual")} />

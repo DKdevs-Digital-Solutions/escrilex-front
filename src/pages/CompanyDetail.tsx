@@ -464,6 +464,8 @@ export function CompanyDetail({
     email: "",
     telefoneEmpresa: "",
     dataNascimento: "",
+    instagram: "",
+    facebook: "",
     outros: "",
   });
   const [savingSocio, setSavingSocio] = useState(false);
@@ -823,6 +825,8 @@ async function setStatus(
       email: socioForm.email.trim() || null,
       telefoneEmpresa: socioForm.telefoneEmpresa.trim() || null,
       dataNascimento: socioForm.dataNascimento || null,
+      instagram: socioForm.instagram.trim() || null,
+      facebook: socioForm.facebook.trim() || null,
       outros: socioForm.outros.trim() || null,
     };
 
@@ -839,6 +843,8 @@ async function setStatus(
         email: "",
         telefoneEmpresa: "",
         dataNascimento: "",
+        instagram: "",
+        facebook: "",
         outros: "",
       });
     } catch (e: any) {
@@ -1115,6 +1121,8 @@ async function handleSaveResponsibles() {
                   email: "",
                   telefoneEmpresa: "",
                   dataNascimento: "",
+                  instagram: "",
+                  facebook: "",
                   outros: "",
                 });
                 setSocioModal(true);
@@ -1129,6 +1137,8 @@ async function handleSaveResponsibles() {
                   dataNascimento: s.dataNascimento
                     ? new Date(s.dataNascimento).toISOString().slice(0, 10)
                     : "",
+                  instagram: s.instagram || "",
+                  facebook: s.facebook || "",
                   outros: s.outros || "",
                 });
                 setSocioModal(true);
@@ -1271,6 +1281,25 @@ async function handleSaveResponsibles() {
               value={socioForm.dataNascimento}
               onChange={(e) =>
                 setSocioForm((p) => ({ ...p, dataNascimento: e.target.value }))
+              }
+            />
+          </FormGrid>
+
+          <FormGrid>
+            <Input
+              label="Instagram"
+              placeholder="@usuario ou link"
+              value={socioForm.instagram}
+              onChange={(e) =>
+                setSocioForm((p) => ({ ...p, instagram: e.target.value }))
+              }
+            />
+            <Input
+              label="Facebook"
+              placeholder="usuário ou link do perfil"
+              value={socioForm.facebook}
+              onChange={(e) =>
+                setSocioForm((p) => ({ ...p, facebook: e.target.value }))
               }
             />
           </FormGrid>

@@ -312,12 +312,14 @@ const matrizFilialOptions = [
 const tributacaoOptions = [
   ...selectDefault,
   { value: "Simples Nacional", label: "Simples Nacional" },
+  { value: "Simples Híbrido", label: "Simples Híbrido" },
   { value: "Lucro Presumido", label: "Lucro Presumido" },
   { value: "Lucro Real Trimestral", label: "Lucro Real Trimestral" },
   {
     value: "Lucro Real Anual (Estimativa Mensal)",
     label: "Lucro Real Anual (Estimativa Mensal)",
   },
+  { value: "MEI/Doméstica", label: "MEI/Doméstica" },
 ];
 
 const ramoOptions = [

@@ -23,9 +23,11 @@ const FIELD_OPTIONS: Record<string, string[]> = {
   matrizFilial: ["Matriz", "Filial", "Matriz-Filial", "Pessoa Física"],
   tributacao: [
     "Simples Nacional",
+    "Simples Híbrido",
     "Lucro Presumido",
     "Lucro Real Trimestral",
     "Lucro Real Anual (Estimativa Mensal)",
+    "MEI/Doméstica",
   ],
   ramo: [
     "Serviço",
