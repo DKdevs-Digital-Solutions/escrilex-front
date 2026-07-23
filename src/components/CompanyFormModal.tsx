@@ -200,8 +200,6 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
 
               <option value="ATIVA">Ativa</option>
 
-              <option value="SAIDA">Saída</option>
-
               <option value="EM_SAIDA">Em Saída</option>
 
               <option value="SUSPENSA">Suspensa</option>

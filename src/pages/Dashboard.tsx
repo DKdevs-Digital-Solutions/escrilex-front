@@ -739,6 +739,14 @@ function TaxationDistributionChart({
     fill: TAX_COLORS[index % TAX_COLORS.length],
   }));
 
+  // A fatia sob o cursor é exibida NO CENTRO do donut — não há tooltip flutuante,
+  // então nada pode ficar à frente ou atrás do valor central.
+  const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
+  const active = activeIndex != null ? chartData[activeIndex] : null;
+  const activePercent = active && total
+    ? Math.round((Number(active.value || 0) / total) * 100)
+    : 0;
+
   return (
     <div style={premiumChartCardStyle}>
       <ChartHeader
@@ -780,59 +788,9 @@ function TaxationDistributionChart({
             shape={MyCustomPie}
             isAnimationActive
             onClick={(item) => onItemClick(item)}
+            onMouseEnter={(_, index) => setActiveIndex(index)}
+            onMouseLeave={() => setActiveIndex(null)}
             style={{ cursor: "pointer" }}
-          />
-
-          <Tooltip
-          
-            cursor={false}
-            content={({ active, payload }) => {
-              if (!active || !payload?.length) return null;
-
-              const item = payload[0].payload;
-              const percent = total
-                ? Math.round((Number(item.value || 0) / total) * 100)
-                : 0;
-
-              return (
-                <div
-                  style={{
-                    background: "#fff",
-                    border: "1px solid #e2e8f0",
-                    borderRadius: 16,
-                    padding: "10px 12px",
-                    boxShadow: "0 18px 45px rgba(15,23,42,.14)",
-                    fontSize: 12,
-                    position: "relative",
-
-                  }}
-                >
-                  <strong
-                    style={{
-                      display: "block",
-                      color: "#0f172a",
-                      marginBottom: 4,
-                    }}
-                  >
-                    {item.name}
-                  </strong>
-
-                  <span style={{ color: "#64748b" }}>
-                    {Number(item.value || 0).toLocaleString("pt-BR")} empresas
-                  </span>
-
-                  <div
-                    style={{
-                      marginTop: 4,
-                      fontWeight: 900,
-                      color: item.fill,
-                    }}
-                  >
-                    {percent}% 
-                  </div>
-                </div>
-              );
-            }}
           />
         </PieChart>
 
@@ -846,18 +804,21 @@ function TaxationDistributionChart({
             pointerEvents: "none",
           }}
         >
-          <div style={{ textAlign: "center" }}>
+          <div style={{ textAlign: "center", maxWidth: "70%" }}>
             <span
               style={{
                 display: "block",
                 fontSize: 10,
                 fontWeight: 900,
-                color: "#94a3b8",
+                color: active ? active.fill : "#94a3b8",
                 textTransform: "uppercase",
                 letterSpacing: ".08em",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
-              Total
+              {active ? active.name : "Total"}
             </span>
 
             <strong
@@ -869,8 +830,22 @@ function TaxationDistributionChart({
                 lineHeight: 1,
               }}
             >
-              {total.toLocaleString("pt-BR")}
+              {active
+                ? Number(active.value || 0).toLocaleString("pt-BR")
+                : total.toLocaleString("pt-BR")}
             </strong>
+
+            <span
+              style={{
+                display: "block",
+                marginTop: 4,
+                fontSize: 12,
+                fontWeight: 800,
+                color: active ? active.fill : "#94a3b8",
+              }}
+            >
+              {active ? `${activePercent}% • empresas` : "empresas"}
+            </span>
           </div>
         </div>
       </div>

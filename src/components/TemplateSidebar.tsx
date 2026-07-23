@@ -203,7 +203,6 @@ export function TemplateSidebar({
                         label={t.type}
                         variant={t.type === "ENTRADA" ? "green" : "blue"}
                       />
-                      <Badge label={`v${t.version}`} variant="gray" />
                       {!t.active && <Badge label="Inativo" variant="red" />}
                     </div>
                   </button>

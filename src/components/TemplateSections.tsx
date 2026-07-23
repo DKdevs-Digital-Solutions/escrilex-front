@@ -1,17 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { SectionCard, Table, Thead, Th, Tr, Td, Empty, Toggle, IconBtn, Badge } from "../ui";
-import { Trash2, FilePlus, FolderTree, Hash, CalendarClock, ShieldCheck } from "lucide-react";
+import { Trash2, FilePlus, FolderTree, Hash, CalendarClock, ShieldCheck, GripVertical } from "lucide-react";
 
 type Props = {
   sections: any[];
   sectors: any[];
   inlineInput: React.CSSProperties;
-  onSectionOrderChange: (sectionId: string, value: number) => void;
+  onReorderSections: (orderedIds: string[]) => void;
+  onReorderItems: (sectionId: string, orderedIds: string[]) => void;
   onAddItem: (sectionId: string) => void;
   onDeleteSection: (sectionId: string) => void;
   onUpdateItem: (itemId: string, patch: any) => void;
   onDeleteItem: (itemId: string) => void;
 };
+
+// Move o id arrastado para a posição do id alvo; devolve a nova ordem de ids.
+function reorderIds(list: { id: string }[], fromId: string, toId: string): string[] | null {
+  const ids = list.map((s) => s.id);
+  const from = ids.indexOf(fromId);
+  const to = ids.indexOf(toId);
+  if (from === -1 || to === -1 || from === to) return null;
+  ids.splice(to, 0, ids.splice(from, 1)[0]);
+  return ids;
+}
 
 const thStyle: React.CSSProperties = {
   fontSize: 11.5,
@@ -65,12 +76,38 @@ export function TemplateSections({
   sections,
   sectors,
   inlineInput,
-  onSectionOrderChange,
+  onReorderSections,
+  onReorderItems,
   onAddItem,
   onDeleteSection,
   onUpdateItem,
   onDeleteItem,
 }: Props) {
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
+
+  // Drag de itens (apenas dentro da mesma seção).
+  const [dragItem, setDragItem] = useState<{ sectionId: string; itemId: string } | null>(null);
+  const [overItem, setOverItem] = useState<string | null>(null);
+
+  function handleDrop(targetId: string) {
+    if (dragId && dragId !== targetId) {
+      const next = reorderIds(sections, dragId, targetId);
+      if (next) onReorderSections(next);
+    }
+    setDragId(null);
+    setOverId(null);
+  }
+
+  function handleItemDrop(section: any, targetItemId: string) {
+    if (dragItem && dragItem.sectionId === section.id && dragItem.itemId !== targetItemId) {
+      const next = reorderIds(section.items, dragItem.itemId, targetItemId);
+      if (next) onReorderItems(section.id, next);
+    }
+    setDragItem(null);
+    setOverItem(null);
+  }
+
   if (!sections?.length) {
     return (
       <SectionCard title="Seções">
@@ -82,11 +119,44 @@ export function TemplateSections({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 18,  }}>
       {sections.map((s: any, index: number) => (
+        <div
+          key={s.id}
+          onDragOver={(e) => { if (dragId) { e.preventDefault(); setOverId(s.id); } }}
+          onDrop={(e) => { e.preventDefault(); handleDrop(s.id); }}
+          style={{
+            borderRadius: 16,
+            outline: overId === s.id && dragId !== s.id ? "2px dashed #BB9F58" : "2px solid transparent",
+            outlineOffset: 2,
+            opacity: dragId === s.id ? 0.5 : 1,
+            transition: "opacity 0.16s ease",
+          }}
+        >
         <SectionCard
         style={{border: "2px solid #e2e8f0", boxShadow:"none"}}
-          key={s.id}
           title={
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                draggable
+                onDragStart={(e) => {
+                  setDragId(s.id);
+                  e.dataTransfer.effectAllowed = "move";
+                  e.dataTransfer.setData("text/plain", s.id);
+                }}
+                onDragEnd={() => { setDragId(null); setOverId(null); }}
+                title="Arraste para reordenar a seção"
+                style={{
+                  width: 26,
+                  height: 34,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#94a3b8",
+                  cursor: "grab",
+                  flexShrink: 0,
+                }}
+              >
+                <GripVertical size={16} strokeWidth={2} />
+              </div>
               <div
                 style={{
                   width: 34,
@@ -134,35 +204,19 @@ export function TemplateSections({
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 8,
+                  gap: 6,
                   padding: "7px 10px",
                   borderRadius: 10,
                   border: "1px solid #e2e8f0",
                   background: "#f8fafc",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "#64748b",
                 }}
+                title="A ordem das seções define a contagem de prazo em cascata"
               >
-                <span
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "#64748b",
-                  }}
-                >
-                  Ordem
-                </span>
-                <input
-                  type="number"
-                  value={s.order}
-                  title="Ordem"
-                  style={{
-                    ...inlineInput,
-                    width: 56,
-                    textAlign: "center",
-                    padding: "6px 8px",
-                    background: "#fff",
-                  }}
-                  onChange={(e) => onSectionOrderChange(s.id, Number(e.target.value))}
-                />
+                <CalendarClock size={13} strokeWidth={2} />
+                {index + 1}ª a contar
               </div>
 
               <PrimaryMiniBtn onClick={() => onAddItem(s.id)}>
@@ -199,10 +253,17 @@ export function TemplateSections({
                 {s.items.map((it: any) => (
                   <Tr
                     key={it.id}
+                    onDragOver={(e) => {
+                      if (dragItem && dragItem.sectionId === s.id) { e.preventDefault(); setOverItem(it.id); }
+                    }}
+                    onDrop={(e) => { e.preventDefault(); handleItemDrop(s, it.id); }}
                     style={{
                       transition: "all 0.16s ease",
+                      opacity: dragItem?.itemId === it.id ? 0.4 : 1,
+                      boxShadow: overItem === it.id && dragItem?.itemId !== it.id
+                        ? "inset 0 2px 0 #BB9F58"
+                        : undefined,
                     }}
-                   
                   >
                     <Td
                       style={{
@@ -212,13 +273,26 @@ export function TemplateSections({
                         borderBottomLeftRadius: 14,
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span
+                          draggable
+                          onDragStart={(e) => {
+                            setDragItem({ sectionId: s.id, itemId: it.id });
+                            e.dataTransfer.effectAllowed = "move";
+                            e.dataTransfer.setData("text/plain", it.id);
+                          }}
+                          onDragEnd={() => { setDragItem(null); setOverItem(null); }}
+                          title="Arraste para reordenar o item"
+                          style={{ display: "flex", alignItems: "center", color: "#cbd5e1", cursor: "grab" }}
+                        >
+                          <GripVertical size={14} strokeWidth={2} />
+                        </span>
                         <Hash size={13} strokeWidth={2.2} color="#94a3b8" />
                         <input
                           defaultValue={it.code || ""}
                           style={{
                             ...inlineInput,
-                            width: 76,
+                            width: 68,
                             background: "#fff",
                           }}
                           onBlur={(e) =>
@@ -364,6 +438,7 @@ export function TemplateSections({
             </Table>
           </div>
         </SectionCard>
+        </div>
       ))}
     </div>
   );

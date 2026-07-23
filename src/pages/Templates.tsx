@@ -54,12 +54,13 @@ export function Templates() {
     updateTemplate,
     addSection,
     removeSection,
+    reorderSections,
+    reorderItems,
     editItem,
     removeItem,
     loading,
     setLoading,
     addItem,
-    editSection,
   } = useTemplate();
 
   async function loadAll() {
@@ -105,7 +106,7 @@ export function Templates() {
 
       if (!t) return;
 
-      toast("Template criado", "success");
+      toast("Processo criado", "success");
       setNewName("");
       setCreateOpen(false);
 
@@ -148,11 +149,21 @@ export function Templates() {
     }
   }
 
-  async function updateSectionOrder(sectionId: string, value: number) {
+  async function reorderSectionsHandler(orderedIds: string[]) {
     try {
-      await editSection(selectedId, sectionId, { order: value });
+      await reorderSections(selectedId, orderedIds);
+      toast("Ordem das seções atualizada", "success");
     } catch (e: any) {
-      toast(e.message || "Erro ao salvar seção", "error");
+      toast(e.message || "Erro ao reordenar seções", "error");
+    }
+  }
+
+  async function reorderItemsHandler(sectionId: string, orderedIds: string[]) {
+    try {
+      await reorderItems(selectedId, sectionId, orderedIds);
+      toast("Ordem dos itens atualizada", "success");
+    } catch (e: any) {
+      toast(e.message || "Erro ao reordenar itens", "error");
     }
   }
 
@@ -375,7 +386,8 @@ export function Templates() {
               sections={selectedTemplate.sections || []}
               sectors={sectors}
               inlineInput={inlineInput}
-              onSectionOrderChange={updateSectionOrder}
+              onReorderSections={reorderSectionsHandler}
+              onReorderItems={reorderItemsHandler}
               onAddItem={(sectionId) => {
                 setNewItemCode("");
                 setNewItemDesc("");

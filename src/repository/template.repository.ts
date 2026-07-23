@@ -107,6 +107,14 @@ export const templateRepository = {
     await api.delete(`/api/templates/sections/${sectionId}`);
   },
 
+  async reorderSections(templateId: string, order: string[]): Promise<void> {
+    await api.put(`/api/templates/${templateId}/sections/reorder`, { order });
+  },
+
+  async reorderItems(sectionId: string, order: string[]): Promise<void> {
+    await api.put(`/api/templates/sections/${sectionId}/items/reorder`, { order });
+  },
+
   async createItem(templateId: string, payload: CreateItemPayload): Promise<TemplateItem> {
     const { data } = await api.post(`/api/templates/${templateId}/items`, payload);
     return data;

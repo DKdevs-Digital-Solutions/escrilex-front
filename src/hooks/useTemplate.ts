@@ -155,6 +155,30 @@ export function useTemplate() {
     }
   }, [loadTemplateById]);
 
+  const reorderSections = useCallback(async (templateId: string, order: string[]) => {
+    setError(null);
+    try {
+      await templateRepository.reorderSections(templateId, order);
+      await loadTemplateById(templateId);
+      return true;
+    } catch (e: any) {
+      setError(e.message || "Erro ao reordenar seções");
+      return false;
+    }
+  }, [loadTemplateById]);
+
+  const reorderItems = useCallback(async (templateId: string, sectionId: string, order: string[]) => {
+    setError(null);
+    try {
+      await templateRepository.reorderItems(sectionId, order);
+      await loadTemplateById(templateId);
+      return true;
+    } catch (e: any) {
+      setError(e.message || "Erro ao reordenar itens");
+      return false;
+    }
+  }, [loadTemplateById]);
+
   const addItem = useCallback(async (templateId: string, payload: CreateItemPayload) => {
     setLoading(true);
     setError(null);
@@ -218,6 +242,8 @@ export function useTemplate() {
     addSection,
     editSection,
     removeSection,
+    reorderSections,
+    reorderItems,
     addItem,
     editItem,
     removeItem,

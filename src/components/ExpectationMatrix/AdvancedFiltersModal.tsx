@@ -111,8 +111,6 @@ function formatStatusLabel(value: string) {
 
             <option value="ATIVA">Ativa</option>
 
-            <option value="SAIDA">Saída</option>
-
             <option value="SUSPENSA">Suspensa</option>
 
             <option value="ENCERRADA">Encerrada</option>

@@ -127,7 +127,6 @@ export function TemplateEditorHeader({
                 label={template.type}
                 variant={template.type === "ENTRADA" ? "green" : "blue"}
               />
-              <Badge label={`Versão ${template.version}`} variant="gray" />
               <Badge
                 label={template.active ? "Ativo" : "Inativo"}
                 variant={template.active ? "green" : "red"}
@@ -207,9 +206,17 @@ export function TemplateEditorHeader({
             lineHeight: 1.6,
           }}
         >
-          <strong>Prazo:</strong> use <strong>D+N</strong> para contar dias após a
-          data âncora, ou <strong>Dia X do mês seguinte</strong> para definir um
-          vencimento fixo no próximo mês.
+          <strong>Início da contagem:</strong>{" "}
+          {template.type === "ENTRADA" ? (
+            <>a régua e as notificações deste processo começam <strong>na data de cadastro da empresa</strong>.</>
+          ) : (
+            <>a régua e as notificações deste processo começam <strong>quando o status da empresa muda para “Em Saída”</strong>.</>
+          )}
+          <br />
+          <strong>Prazo em cascata:</strong> arraste as seções (e os itens) pela
+          alça para definir a ordem. Cada seção só começa a contar quando a
+          anterior é concluída. Use <strong>D+N</strong> para dias após o início
+          da seção, ou <strong>Dia X do mês seguinte</strong> para vencimento fixo.
         </div>
       </div>
     </div>

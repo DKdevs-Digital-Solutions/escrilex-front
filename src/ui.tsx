@@ -287,9 +287,9 @@ export function Th({ children, align, style }: { children?: React.ReactNode; ali
 export function Td({ children, align, style }: { children?: React.ReactNode; align?: "left" | "right" | "center"; style?: CSSProperties }) {
   return <td style={{ padding: "13px 18px", color: "#334155", verticalAlign: "middle", borderBottom: "1px solid #f1f5f9", textAlign: align, ...style }}>{children}</td>;
 }
-export function Tr({ children, style }: { children: React.ReactNode; style?: CSSProperties }) {
+export function Tr({ children, style, ...rest }: { children: React.ReactNode; style?: CSSProperties } & React.HTMLAttributes<HTMLTableRowElement>) {
   return (
-    <tr style={{ transition: "background 0.1s", ...style }}
+    <tr {...rest} style={{ transition: "background 0.1s", ...style }}
       onMouseOver={e => { (e.currentTarget as HTMLTableRowElement).style.background = "#f8fafc"; }}
       onMouseOut={e => { (e.currentTarget as HTMLTableRowElement).style.background = ""; }}>
       {children}
