@@ -425,12 +425,19 @@ const filtered = useMemo(() => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        minHeight: 720,
+      }}
+    >
       <div
         style={{
           flexShrink: 0,
-          marginBottom: 20,
-          padding: "22px 24px",
+          marginBottom: 12,
+          padding: "16px 20px",
           borderRadius: 20,
           border: "2px solid #e2e8f0",
           background:
@@ -505,18 +512,18 @@ const filtered = useMemo(() => {
 
       <div
         style={{
-          marginBottom: 0,
+          flexShrink: 0,
+          marginBottom: 12,
           padding: "0px",
           borderRadius: 20,
-         
         }}
       >
         <MatrixStats
           items={items}
           total={total}
           visibleColumnsCount={visibleColumns.length}
+          compact
         />
-        <br />
       </div>
 
 
@@ -526,8 +533,9 @@ const filtered = useMemo(() => {
           background: "#fff",
           border: "2px solid #e2e8f0",
           borderRadius: 18,
-          padding: "18px 20px",
-          marginBottom: 20,
+          padding: "14px 18px",
+          marginBottom: 12,
+          flexShrink: 0,
           display: "flex",
           gap: 12,
           flexWrap: "wrap",
