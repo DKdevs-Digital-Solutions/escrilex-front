@@ -270,39 +270,6 @@ export function CompanyList({
               <Columns3 size={16} />
             </button>
           )}
-
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "5px 10px",
-              borderRadius: 999,
-              background: "#f8fafc",
-              color: "#475569",
-              fontSize: 12,
-              fontWeight: 500,
-              border: "1px solid #e2e8f0",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 700,
-                color: "#0f172a",
-                background: "#e2e8f0",
-                padding: "2px 6px",
-                borderRadius: 999,
-                lineHeight: 1,
-              }}
-            >
-              {items.length}
-            </span>
-
-            <span style={{ opacity: 0.85 }}>
-              {items.length === 1 ? "empresa" : "empresas"}
-            </span>
-          </div>
         </div>
       </div>
         </div>
