@@ -430,7 +430,7 @@ const filtered = useMemo(() => {
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        minHeight: 720,
+        minHeight: 860,
       }}
     >
       <div
@@ -526,172 +526,6 @@ const filtered = useMemo(() => {
         />
       </div>
 
-
-
-      <div
-        style={{
-          background: "#fff",
-          border: "2px solid #e2e8f0",
-          borderRadius: 18,
-          padding: "14px 18px",
-          marginBottom: 12,
-          flexShrink: 0,
-          display: "flex",
-          gap: 12,
-          flexWrap: "wrap",
-          alignItems: "flex-end",
-        }}
-      >
-        <div style={{ width: "100%", marginBottom: 4 }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              fontSize: 13,
-              fontWeight: 800,
-              color: "#334155",
-            }}
-          >
-            Filtros da listagem
-          </div>
-
-          <div
-            style={{
-              marginTop: 4,
-              fontSize: 13,
-              color: "#64748b",
-            }}
-          >
-            Refine a busca por empresa, situação ou grupo.
-          </div>
-        </div>
-
-        <div
-          style={{
-            flex: 1,
-            minWidth: 240,
-            maxWidth: 500,
-            position: "relative",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              left: 12,
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#94a3b8",
-              pointerEvents: "none",
-            }}
-          >
-            <Search size={15} />
-          </div>
-
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por empresa, código, CNPJ ou grupo..."
-            style={{
-              ...iStyle,
-              width: "100%",
-              paddingLeft: 36,
-              boxSizing: "border-box",
-            }}
-          />
-
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              style={{
-                position: "absolute",
-                right: 15,
-                top: "50%",
-                transform: "translateY(-50%)",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "#94a3b8",
-                display: "flex",
-              }}
-            >
-              <X size={14} />
-            </button>
-          )}
-        </div>
-
-        <PremiumSelect
-          label="Status"
-          value={filterSituacao}
-          onChange={setFilterSituacao}
-          options={[
-            { value: "", label: "Todas situações" },
-            { value: "ATIVA", label: "Ativa" },
-            { value: "SUSPENSA", label: "Suspensa" },
-            { value: "ENCERRADA", label: "Encerrada" },
-            { value: "SEM_MOVIMENTO", label: "Sem Movimento" },
-            { value: "EM_SAIDA", label: "Em Saída" },
-            { value: "BAIXADA", label: "Baixada" },
-            { value: "PENDENTE", label: "Pendente de Documentação" },
-            { value: "BLOQUEADO", label: "Bloqueado" },
-          ]}
-        />
-
-        <PremiumSelect
-          label="UF"
-          value={filterUf}
-          onChange={setFilterUf}
-          options={[
-            { value: "", label: "Todas UFs" },
-            ...UF_LIST.map((uf) => ({ value: uf, label: uf })),
-          ]}
-        />
-
-        {/* {grupos.length > 0 && (
-          <PremiumSelect
-            label="Grupo"
-            value={filterGrupo}
-            onChange={setFilterGrupo}
-            variant="group"
-            options={[
-              { value: "", label: "Todos grupos" },
-              ...grupos.map((g) => ({ value: g, label: g })),
-            ]}
-          />
-        )} */}
-
-        {/* {hasFilters && (
-          <button
-            type="button"
-            onClick={() => {
-              setSearch("");
-              setFilterSituacao("");
-              setFilterGrupo("");
-              setFilterStatus("all");
-            }}
-            style={{
-              height: 52,
-              padding: "0 16px",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              borderRadius: 14,
-              border: "1px solid rgba(239,68,68,0.25)",
-              background:
-                "linear-gradient(135deg, rgba(239,68,68,0.08), rgba(248,113,113,0.08))",
-              color: "#ef4444",
-              fontSize: 13.5,
-              fontWeight: 800,
-              cursor: "pointer",
-              fontFamily: "inherit",
-            }}
-          >
-            <X size={14} />
-            Limpar
-          </button>
-        )} */}
-      </div>
-
       <Card
         style={{
           borderRadius: 20,
@@ -714,6 +548,89 @@ const filtered = useMemo(() => {
             <CompanyList
               items={paginated}
               loading={loading}
+              filters={
+                <>
+              <div
+                style={{
+                  flex: 1,
+                  minWidth: 240,
+                  maxWidth: 500,
+                  position: "relative",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 12,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "#94a3b8",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <Search size={15} />
+                </div>
+
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar por empresa, código, CNPJ ou grupo..."
+                  style={{
+                    ...iStyle,
+                    width: "100%",
+                    paddingLeft: 36,
+                    boxSizing: "border-box",
+                  }}
+                />
+
+                {search && (
+                  <button
+                    onClick={() => setSearch("")}
+                    style={{
+                      position: "absolute",
+                      right: 15,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "#94a3b8",
+                      display: "flex",
+                    }}
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              <PremiumSelect
+                label="Status"
+                value={filterSituacao}
+                onChange={setFilterSituacao}
+                options={[
+                  { value: "", label: "Todas situações" },
+                  { value: "ATIVA", label: "Ativa" },
+                  { value: "SUSPENSA", label: "Suspensa" },
+                  { value: "ENCERRADA", label: "Encerrada" },
+                  { value: "SEM_MOVIMENTO", label: "Sem Movimento" },
+                  { value: "EM_SAIDA", label: "Em Saída" },
+                  { value: "BAIXADA", label: "Baixada" },
+                  { value: "PENDENTE", label: "Pendente de Documentação" },
+                  { value: "BLOQUEADO", label: "Bloqueado" },
+                ]}
+              />
+
+              <PremiumSelect
+                label="UF"
+                value={filterUf}
+                onChange={setFilterUf}
+                options={[
+                  { value: "", label: "Todas UFs" },
+                  ...UF_LIST.map((uf) => ({ value: uf, label: uf })),
+                ]}
+              />
+                </>
+              }
               visibleColumns={visibleColumns}
               users={users}
               onOpenCompany={onOpenCompany}

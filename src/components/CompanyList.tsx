@@ -5,6 +5,8 @@ type Props = {
   items: any[];
   loading: boolean;
 
+  filters?: React.ReactNode;
+
   visibleColumns: any[];
   users?: any[];
 
@@ -18,6 +20,7 @@ type Props = {
 export function CompanyList({
   items,
   loading,
+  filters,
   visibleColumns,
   users = [],
   onOpenCompany,
@@ -131,7 +134,7 @@ export function CompanyList({
     <div
       style={{
         background: "linear-gradient(180deg, #ffffff 0%, #fcfdff 100%)",
-        overflow: "hidden",
+        overflow: "visible",
         display: "flex",
         flexDirection: "column",
         flex: 1,
@@ -199,33 +202,29 @@ export function CompanyList({
             </div>
           </div>
 
-          
-
+          {filters && <div style={filtersBarStyle}>{filters}</div>}
 
           <div style={toolbarStyle}>
         <div style={toolbarActionsStyle}>
           {onExportExcel && (  
         <button
           onClick={onExportExcel}
+          title="Exportar Excel"
+          aria-label="Exportar Excel"
           style={{
+            width: 40,
             height: 40,
-            padding: "0 16px",
+            padding: 0,
 
             display: "inline-flex",
             alignItems: "center",
-            gap: 8,
+            justifyContent: "center",
 
             borderRadius: 14,
             border: "2px solid #ccc",
 
             background:
               "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
-
-            color: "#065f46",
-
-            fontSize: 13,
-            fontWeight: 800,
-            letterSpacing: ".02em",
 
             cursor: "pointer",
 
@@ -235,7 +234,6 @@ export function CompanyList({
             transition:
               "all .18s ease",
           }}
-          
         >
           <div
             style={{
@@ -258,8 +256,6 @@ export function CompanyList({
           >
             <FileSpreadsheet size={14} />
           </div>
-
-          Exportar Excel
         </button>
           )}
 
@@ -320,6 +316,15 @@ export function CompanyList({
   );
 }
 
+
+const filtersBarStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  flexWrap: "wrap",
+  flex: 1,
+  minWidth: 280,
+};
 
 const toolbarStyle: React.CSSProperties = {
   display: "flex",
