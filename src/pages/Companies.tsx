@@ -11,6 +11,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 
+import { Modal } from "../Modal";
+
 import { useCompanies } from "../hooks/useCompanies";
 import { useExpectationMatrix } from "../hooks/useExpectationMatrix";
 
@@ -110,6 +112,9 @@ export function Companies({
   const [filterStatus, setFilterStatus] = useState("all");
 
   const [columnsOpen, setColumnsOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [draftSituacao, setDraftSituacao] = useState("");
+  const [draftUf, setDraftUf] = useState("");
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const STORAGE_KEY = "expectation-matrix-visible-columns";
 
@@ -313,6 +318,8 @@ const filtered = useMemo(() => {
       );
     });
   }, [filtered]);
+
+  const hasActiveFilters = !!(filterSituacao || filterUf);
 
   const grupos = useMemo(
     () =>
@@ -603,32 +610,50 @@ const filtered = useMemo(() => {
                 )}
               </div>
 
-              <PremiumSelect
-                label="Status"
-                value={filterSituacao}
-                onChange={setFilterSituacao}
-                options={[
-                  { value: "", label: "Todas situações" },
-                  { value: "ATIVA", label: "Ativa" },
-                  { value: "SUSPENSA", label: "Suspensa" },
-                  { value: "ENCERRADA", label: "Encerrada" },
-                  { value: "SEM_MOVIMENTO", label: "Sem Movimento" },
-                  { value: "EM_SAIDA", label: "Em Saída" },
-                  { value: "BAIXADA", label: "Baixada" },
-                  { value: "PENDENTE", label: "Pendente de Documentação" },
-                  { value: "BLOQUEADO", label: "Bloqueado" },
-                ]}
-              />
+              <button
+                type="button"
+                onClick={() => {
+                  setDraftSituacao(filterSituacao);
+                  setDraftUf(filterUf);
+                  setFiltersOpen(true);
+                }}
+                title="Filtros"
+                aria-label="Filtros"
+                style={{
+                  position: "relative",
+                  width: 50,
+                  height: 50,
+                  flexShrink: 0,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 14,
+                  border: `1px solid ${hasActiveFilters ? "#BB9F58" : "#e2e8f0"}`,
+                  background: hasActiveFilters
+                    ? "linear-gradient(135deg, rgba(187,159,88,.14), rgba(250,204,21,.10))"
+                    : "#fff",
+                  color: hasActiveFilters ? "#7c5c00" : "#334155",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  transition: "all .18s ease",
+                }}
+              >
+                <SlidersHorizontal size={18} strokeWidth={2.4} />
 
-              <PremiumSelect
-                label="UF"
-                value={filterUf}
-                onChange={setFilterUf}
-                options={[
-                  { value: "", label: "Todas UFs" },
-                  ...UF_LIST.map((uf) => ({ value: uf, label: uf })),
-                ]}
-              />
+                {hasActiveFilters && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      width: 8,
+                      height: 8,
+                      borderRadius: 999,
+                      background: "#BB9F58",
+                    }}
+                  />
+                )}
+              </button>
                 </>
               }
               visibleColumns={visibleColumns}
@@ -760,6 +785,111 @@ const filtered = useMemo(() => {
           </>
         )}
       </Card>
+
+      <Modal
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        title="Filtros da listagem"
+        width={460}
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => {
+                setDraftSituacao("");
+                setDraftUf("");
+              }}
+              style={{
+                marginRight: "auto",
+                height: 40,
+                padding: "0 14px",
+                borderRadius: 12,
+                border: "1px solid #e2e8f0",
+                background: "#fff",
+                color: "#64748b",
+                fontSize: 13.5,
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              Limpar
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setFiltersOpen(false)}
+              style={{
+                height: 40,
+                padding: "0 16px",
+                borderRadius: 12,
+                border: "1px solid #e2e8f0",
+                background: "#fff",
+                color: "#334155",
+                fontSize: 13.5,
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setFilterSituacao(draftSituacao);
+                setFilterUf(draftUf);
+                setFiltersOpen(false);
+              }}
+              style={{
+                height: 40,
+                padding: "0 18px",
+                borderRadius: 12,
+                border: "none",
+                background: "#012942",
+                color: "#fff",
+                fontSize: 13.5,
+                fontWeight: 800,
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              Aplicar
+            </button>
+          </>
+        }
+      >
+        {/* altura reservada para os dropdowns abrirem sem cortar */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 14, minHeight: 380 }}>
+          <PremiumSelect
+            label="Status"
+            value={draftSituacao}
+            onChange={setDraftSituacao}
+            options={[
+              { value: "", label: "Todas situações" },
+              { value: "ATIVA", label: "Ativa" },
+              { value: "SUSPENSA", label: "Suspensa" },
+              { value: "ENCERRADA", label: "Encerrada" },
+              { value: "SEM_MOVIMENTO", label: "Sem Movimento" },
+              { value: "EM_SAIDA", label: "Em Saída" },
+              { value: "BAIXADA", label: "Baixada" },
+              { value: "PENDENTE", label: "Pendente de Documentação" },
+              { value: "BLOQUEADO", label: "Bloqueado" },
+            ]}
+          />
+
+          <PremiumSelect
+            label="UF"
+            value={draftUf}
+            onChange={setDraftUf}
+            options={[
+              { value: "", label: "Todas UFs" },
+              ...UF_LIST.map((uf) => ({ value: uf, label: uf })),
+            ]}
+          />
+        </div>
+      </Modal>
 
       {columnsOpen && (
         <ColumnsPanel

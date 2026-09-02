@@ -197,7 +197,7 @@ export function CompanyList({
                   color: "#546e7a",
                 }}
               >
-                Visualize e acesse rapidamente os registros cadastrados
+                Visualize os registros cadastrados
               </div>
             </div>
           </div>
@@ -260,9 +260,14 @@ export function CompanyList({
           )}
 
           {onOpenColumns && (
-            <button type="button" onClick={onOpenColumns} style={columnsButtonStyle}>
-              <Columns3 size={15} />
-              Gerenciar colunas
+            <button
+              type="button"
+              onClick={onOpenColumns}
+              title="Gerenciar colunas"
+              aria-label="Gerenciar colunas"
+              style={columnsButtonStyle}
+            >
+              <Columns3 size={16} />
             </button>
           )}
 
@@ -364,5 +369,9 @@ const excelButtonStyle: React.CSSProperties = {
 
 const columnsButtonStyle: React.CSSProperties = {
   ...baseToolbarButton,
+  width: 40,
+  height: 40,
+  padding: 0,
+  justifyContent: "center",
   color: "#fff",
 };
