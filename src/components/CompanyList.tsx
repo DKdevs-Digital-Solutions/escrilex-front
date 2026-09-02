@@ -160,7 +160,7 @@ export function CompanyList({
             flexWrap: "wrap",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 220 }}>
             <div
               style={{
                 width: 42,
@@ -325,17 +325,20 @@ export function CompanyList({
 const filtersBarStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
+  justifyContent: "center",
   gap: 10,
   flexWrap: "wrap",
-  flex: 1,
-  minWidth: 280,
+  flex: "0 1 560px",
+  minWidth: 260,
 };
 
 const toolbarStyle: React.CSSProperties = {
   display: "flex",
   alignItems: "center",
+  justifyContent: "flex-end",
   gap: 10,
-  marginLeft: "auto",
+  flex: 1,
+  minWidth: 220,
 };
 
 const toolbarActionsStyle: React.CSSProperties = {

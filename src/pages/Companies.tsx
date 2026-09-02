@@ -436,8 +436,10 @@ const filtered = useMemo(() => {
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100%",
-        minHeight: 860,
+        // header do app (70px) + padding vertical do <main> (28px x2)
+        height: "calc(100vh - 126px)",
+        maxHeight: "calc(100vh - 126px)",
+        minHeight: 420,
       }}
     >
       <div
