@@ -1,5 +1,5 @@
 import React from "react";
-import { Table, Thead, Th, Td, Badge, Empty } from "../ui";
+import { Thead, Th, Td, Badge, Empty } from "../ui";
 import {
   Eye,
   Hash,
@@ -255,11 +255,18 @@ if (column.type === "sector-user") {
   }
 
   return (
-    <div>
-      
-
+    <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
       {isMobile ? (
-        <div style={{ display: "grid", gap: 12 }}>
+        <div
+          style={{
+            display: "grid",
+            gap: 12,
+            flex: 1,
+            minHeight: 0,
+            overflowY: "auto",
+            padding: "12px",
+          }}
+        >
           {items.map((company) => (
             <div
               key={company.id}
@@ -295,18 +302,23 @@ if (column.type === "sector-user") {
           ))}
         </div>
       ) : (
-       <div
+        <div
           style={{
-            width: "100%",
-            overflowX: "auto",
+            flex: 1,
+            minHeight: 0,
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <div
             style={{
-              minWidth: "100%",
+              flex: 1,
+              minHeight: 0,
+              width: "100%",
+              overflow: "auto",
             }}
           >
-            <Table>
+            <table style={tableStyle}>
             <Thead>
               <tr>
                 {columns.map((column) => (
@@ -317,8 +329,9 @@ if (column.type === "sector-user") {
 
                 <Th
                   style={{
-                    borderBottom: "1px solid rgba(226,232,240,0.7)",
-                    textAlign:"center"
+                    ...thStyle,
+                    borderRight: "none",
+                    textAlign: "center",
                   }}
                 >
                   ação
@@ -464,7 +477,7 @@ if (column.type === "sector-user") {
                 </tr>
               ))}
             </tbody>
-              </Table>
+              </table>
   </div>
 
           {tooltipPos && (
@@ -548,7 +561,19 @@ function tooltipStyle(pos: { top: number; left: number }): React.CSSProperties {
 }
 
 
+const tableStyle: React.CSSProperties = {
+  width: "100%",
+  minWidth: "100%",
+  borderCollapse: "separate",
+  borderSpacing: 0,
+  fontSize: 13.5,
+};
+
 const thStyle: React.CSSProperties = {
+  position: "sticky",
+  top: 0,
+  zIndex: 3,
+  background: "#f8fafc",
   fontSize: 11,
   fontWeight: 900,
   color: "#64748b",

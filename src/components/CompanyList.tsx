@@ -132,10 +132,15 @@ export function CompanyList({
       style={{
         background: "linear-gradient(180deg, #ffffff 0%, #fcfdff 100%)",
         overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+        minHeight: 0,
       }}
     >
       <div
         style={{
+          flexShrink: 0,
           padding: "18px 22px",
           borderBottom: "2px solid #e2e8f0",
 
@@ -302,7 +307,7 @@ export function CompanyList({
         </div>
       </div>
 
-      <div style={{ padding:"20px 0px", position:"relative", bottom:"20px" }}>
+      <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
         <CompanyListTable
           items={items}
           visibleColumns={visibleColumns}

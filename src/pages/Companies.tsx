@@ -289,7 +289,30 @@ const filtered = useMemo(() => {
   });
 }, [normalizedItems, search, filterSituacao, filterUf, filterGrupo, filterStatus]);
 
-  const paginated = filtered;
+  // Código exibido sempre do menor para o maior (numérico; não numéricos por último)
+  const paginated = useMemo(() => {
+    const codeOf = (c: any) => {
+      const digits = String(c.codigo ?? c.cod ?? "").replace(/[^0-9]/g, "");
+      return digits ? Number(digits) : Number.POSITIVE_INFINITY;
+    };
+
+    return [...filtered].sort((a: any, b: any) => {
+      const codeA = codeOf(a);
+      const codeB = codeOf(b);
+
+      const numericA = Number.isFinite(codeA);
+      const numericB = Number.isFinite(codeB);
+
+      if (numericA && numericB && codeA !== codeB) return codeA - codeB;
+      if (numericA !== numericB) return numericA ? -1 : 1;
+
+      return String(a.codigo ?? a.cod ?? "").localeCompare(
+        String(b.codigo ?? b.cod ?? ""),
+        "pt-BR",
+        { numeric: true }
+      );
+    });
+  }, [filtered]);
 
   const grupos = useMemo(
     () =>
@@ -402,9 +425,10 @@ const filtered = useMemo(() => {
   };
 
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
       <div
         style={{
+          flexShrink: 0,
           marginBottom: 20,
           padding: "22px 24px",
           borderRadius: 20,
@@ -667,6 +691,10 @@ const filtered = useMemo(() => {
           background: "linear-gradient(180deg, #ffffff 0%, #fcfdff 100%)",
           overflow: "hidden",
           padding: 0,
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          minHeight: 0,
         }}
       >
         {loading || loadingOptions ? (
@@ -689,7 +717,8 @@ const filtered = useMemo(() => {
             {total > limit && (
               <div
               style={{
-                marginTop: 18,
+                flexShrink: 0,
+                marginTop: 0,
                 padding: "14px 18px",
                 borderRadius: 1,
                 border: "2px solid rgba(226,232,240,.9)",

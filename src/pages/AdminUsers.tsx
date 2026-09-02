@@ -36,6 +36,19 @@ export function AdminUsers() {
     load();
   }, []);
 
+  const EMPTY_FORM = {
+    name: "",
+    email: "",
+    password: "",
+    sectorId: "",
+    roles: ["OPERADOR"] as string[],
+  };
+
+  function openCreate() {
+    setForm({ ...EMPTY_FORM, roles: [...EMPTY_FORM.roles] });
+    setCreateOpen(true);
+  }
+
   async function create() {
     setSaving(true);
     try {
@@ -260,7 +273,7 @@ export function AdminUsers() {
           </div>
 
           <button
-            onClick={() => setCreateOpen(true)}
+            onClick={openCreate}
             title="Adicionar usuário"
             style={{
               display: "inline-flex",
@@ -342,6 +355,8 @@ export function AdminUsers() {
           <FormGrid>
             <Input
               label="Nome *"
+              name="novo-usuario-nome"
+              autoComplete="off"
               placeholder="Nome completo"
               value={form.name}
               onChange={(e) =>
@@ -351,6 +366,8 @@ export function AdminUsers() {
             <Input
               label="E-mail *"
               type="email"
+              name="novo-usuario-email"
+              autoComplete="off"
               placeholder="email@exemplo.com"
               value={form.email}
               onChange={(e) =>
@@ -363,6 +380,8 @@ export function AdminUsers() {
             <Input
               label="Senha * (mín. 6 caracteres)"
               type="password"
+              name="novo-usuario-senha"
+              autoComplete="new-password"
               placeholder="••••••"
               value={form.password}
               onChange={(e) =>
@@ -423,6 +442,8 @@ export function AdminUsers() {
           <FormGrid>
             <Input
               label="Nome *"
+              name="editar-usuario-nome"
+              autoComplete="off"
               value={edit.name || ""}
               onChange={(e) =>
                 setEdit((v: any) => ({ ...v, name: e.target.value }))
@@ -431,6 +452,8 @@ export function AdminUsers() {
             <Input
               label="E-mail *"
               type="email"
+              name="editar-usuario-email"
+              autoComplete="off"
               value={edit.email || ""}
               onChange={(e) =>
                 setEdit((v: any) => ({ ...v, email: e.target.value }))
@@ -442,6 +465,8 @@ export function AdminUsers() {
             <Input
               label="Nova senha"
               type="password"
+              name="editar-usuario-senha"
+              autoComplete="new-password"
               placeholder="Deixe em branco para não alterar"
               value={edit.password || ""}
               onChange={(e) =>
