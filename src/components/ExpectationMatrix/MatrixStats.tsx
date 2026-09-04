@@ -16,11 +16,18 @@ type Props = {
 };
 
 export function MatrixStats({ items, total, visibleColumnsCount, compact = false }: Props) {
-  const activeCount = items.filter(
-  (item: any) => item.active === true
-).length;
+  // "situacao" da empresa (ATIVA/ENCERRADA/...), não o flag "active" do sistema:
+  // uma empresa pode estar ENCERRADA e continuar ativa no cadastro.
+  const situacaoOf = (item: any) =>
+    String(item?.status ?? item?.situacao ?? "").trim().toUpperCase();
 
-  const inactiveCount = items.length - activeCount;
+  const activeCount = items.filter((item: any) =>
+    ["ATIVA", "ATIVO"].includes(situacaoOf(item))
+  ).length;
+
+  const inactiveCount = items.filter((item: any) =>
+    ["ENCERRADA", "ENCERRADO"].includes(situacaoOf(item))
+  ).length;
 
   return (
     <div style={compact ? { ...statsGridStyle, gap: 12 } : statsGridStyle}>
