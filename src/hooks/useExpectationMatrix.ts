@@ -29,6 +29,8 @@ export function useExpectationMatrix() {
   const [offset, setOffset] = useState(0);
   const total = data?.total ?? 0;
   const items = data?.items ?? [];
+  // Totais por situação vindos do servidor (todo o filtro, não só a página).
+  const situacaoCounts = data?.situacaoCounts ?? null;
 
   const page = Math.floor(offset / limit) + 1;
   const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -282,6 +284,7 @@ return {
     changeLimit,
     page,
     totalPages,
+    situacaoCounts,
     items,
     total
   };

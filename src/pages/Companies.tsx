@@ -185,7 +185,8 @@ useEffect(() => {
     goToPage,
     changeLimit,
     sections,
-    sectorColumns
+    sectorColumns,
+    situacaoCounts,
   } = useExpectationMatrix();
 
 
@@ -531,6 +532,7 @@ const filtered = useMemo(() => {
           items={items}
           total={total}
           visibleColumnsCount={visibleColumns.length}
+          situacaoCounts={situacaoCounts}
           compact
         />
       </div>

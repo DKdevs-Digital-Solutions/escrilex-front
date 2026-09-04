@@ -13,21 +13,31 @@ type Props = {
   total: number;
   visibleColumnsCount: number;
   compact?: boolean;
+  /** Totais por situação de TODO o filtro, vindos do servidor. */
+  situacaoCounts?: Record<string, number> | null;
 };
 
-export function MatrixStats({ items, total, visibleColumnsCount, compact = false }: Props) {
+export function MatrixStats({
+  items,
+  total,
+  visibleColumnsCount,
+  compact = false,
+  situacaoCounts = null,
+}: Props) {
   // "situacao" da empresa (ATIVA/ENCERRADA/...), não o flag "active" do sistema:
   // uma empresa pode estar ENCERRADA e continuar ativa no cadastro.
   const situacaoOf = (item: any) =>
     String(item?.status ?? item?.situacao ?? "").trim().toUpperCase();
 
-  const activeCount = items.filter((item: any) =>
-    ["ATIVA", "ATIVO"].includes(situacaoOf(item))
-  ).length;
+  // Com o agregado do servidor os cards refletem o filtro inteiro; sem ele,
+  // cai no fallback da página atual.
+  const countBySituacao = (keys: string[]) =>
+    situacaoCounts
+      ? keys.reduce((acc, key) => acc + (situacaoCounts[key] ?? 0), 0)
+      : items.filter((item: any) => keys.includes(situacaoOf(item))).length;
 
-  const inactiveCount = items.filter((item: any) =>
-    ["ENCERRADA", "ENCERRADO"].includes(situacaoOf(item))
-  ).length;
+  const activeCount   = countBySituacao(["ATIVA", "ATIVO"]);
+  const inactiveCount = countBySituacao(["ENCERRADA", "ENCERRADO"]);
 
   return (
     <div style={compact ? { ...statsGridStyle, gap: 12 } : statsGridStyle}>
