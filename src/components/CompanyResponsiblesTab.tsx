@@ -260,6 +260,26 @@ function RowCard({
 }) {
   const sectorVisual = getSectorVisual(sectorName);
   const [openUsers, setOpenUsers] = useState(false);
+  const [query, setQuery] = useState("");
+
+  // limpa a busca sempre que a lista fecha
+  React.useEffect(() => {
+    if (!open) setQuery("");
+  }, [open]);
+
+  const normalize = (value?: string | null) =>
+    String(value || "")
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toLowerCase()
+      .trim();
+
+  const term = normalize(query);
+  const filteredUsers = term
+    ? users.filter(
+        (u) => normalize(u.name).includes(term) || normalize(u.email).includes(term)
+      )
+    : users;
 
   return (
     <div
@@ -402,16 +422,66 @@ function RowCard({
         zIndex: 50,
         display: "grid",
         gap: 6,
-        maxHeight: 240,
+        maxHeight: 300,
         overflowY: "auto",
         padding: 8,
+        paddingTop: 0,
         border: `1px solid ${UI.border}`,
         borderRadius: 14,
         background: "#fff",
         boxShadow: "0 20px 40px rgba(15,23,42,.12)",
       }}
     >
-      {users.map((u) => {
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 1,
+          background: "#fff",
+          padding: "8px 0 4px",
+        }}
+      >
+        <input
+          type="text"
+          autoFocus
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") onClose();
+          }}
+          placeholder="Buscar por nome ou e-mail..."
+          aria-label="Buscar responsável"
+          autoComplete="off"
+          style={{
+            width: "100%",
+            height: 38,
+            padding: "0 12px",
+            borderRadius: 10,
+            border: `1px solid ${UI.border}`,
+            background: UI.surfaceSoft,
+            fontSize: 13,
+            color: UI.text,
+            outline: "none",
+            boxSizing: "border-box",
+            fontFamily: "inherit",
+          }}
+        />
+      </div>
+
+      {filteredUsers.length === 0 && (
+        <div
+          style={{
+            padding: "14px 12px",
+            fontSize: 12.5,
+            color: UI.textSoft,
+            textAlign: "center",
+          }}
+        >
+          Nenhum usuário encontrado para "{query}"
+        </div>
+      )}
+
+      {filteredUsers.map((u) => {
   const currentIds = Array.isArray(selectedUserIds)
     ? selectedUserIds
     : selectedUserIds
