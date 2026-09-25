@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { CheckCircle2, XCircle, AlertTriangle, Info } from "lucide-react";
+import { CheckCircle2, XCircle, AlertTriangle, Info, X } from "lucide-react";
 
 export type ToastType = "success" | "error" | "info" | "warning";
 export interface Toast { id: string; message: string; type: ToastType; }
@@ -8,29 +8,25 @@ interface ToastCtx { toast: (message: string, type?: ToastType) => void; }
 const ToastContext = createContext<ToastCtx>({ toast: () => {} });
 export function useToast() { return useContext(ToastContext); }
 
-const CONFIG: Record<ToastType, {
-  bg: string; border: string; iconColor: string;
-  titleColor: string; msgColor: string; icon: JSX.Element;
-}> = {
+// Mesma identidade do restante do sistema: azul institucional com acento por tipo.
+const SURFACE = "linear-gradient(135deg, #012942 0%, #063b5c 100%)";
+
+const CONFIG: Record<ToastType, { accent: string; soft: string; icon: JSX.Element }> = {
   success: {
-    bg: "#f0fdf4", border: "#bbf7d0", iconColor: "#16a34a",
-    titleColor: "#15803d", msgColor: "#4ade80",
-    icon: <CheckCircle2 size={18} strokeWidth={2.4} />,
+    accent: "#34d399", soft: "rgba(52,211,153,0.16)",
+    icon: <CheckCircle2 size={17} strokeWidth={2.6} />,
   },
   error: {
-    bg: "#fef2f2", border: "#fecaca", iconColor: "#dc2626",
-    titleColor: "#b91c1c", msgColor: "#f87171",
-    icon: <XCircle size={18} strokeWidth={2.4} />,
+    accent: "#fb7185", soft: "rgba(251,113,133,0.16)",
+    icon: <XCircle size={17} strokeWidth={2.6} />,
   },
   warning: {
-    bg: "#fffbeb", border: "#fde68a", iconColor: "#d97706",
-    titleColor: "#b45309", msgColor: "#fcd34d",
-    icon: <AlertTriangle size={18} strokeWidth={2.4} />,
+    accent: "#BB9F58", soft: "rgba(187,159,88,0.20)",
+    icon: <AlertTriangle size={17} strokeWidth={2.6} />,
   },
   info: {
-    bg: "#f0f9ff", border: "#bae6fd", iconColor: "#0284c7",
-    titleColor: "#0369a1", msgColor: "#7dd3fc",
-    icon: <Info size={18} strokeWidth={2.4} />,
+    accent: "#38BDF8", soft: "rgba(56,189,248,0.16)",
+    icon: <Info size={17} strokeWidth={2.6} />,
   },
 };
 
@@ -38,60 +34,118 @@ const LABELS: Record<ToastType, string> = {
   success: "Sucesso", error: "Erro", warning: "Atenção", info: "Info",
 };
 
+// Erro fica mais tempo na tela: costuma exigir leitura e ação.
+const DURATION: Record<ToastType, number> = {
+  success: 4200, info: 4200, warning: 5200, error: 6000,
+};
+
 function ToastItem({ t, onRemove }: { t: Toast; onRemove: () => void }) {
   const c = CONFIG[t.type];
+  const total = DURATION[t.type];
+
   const [visible, setVisible] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  // A barra é animada por ref (sem re-render a cada frame) e compartilha o mesmo
+  // contador do fechamento — o que se vê encolhendo é o tempo real restante.
+  const barRef = useRef<HTMLDivElement>(null);
+  const remainingRef = useRef(total);
+  const pausedRef = useRef(false);
+  const closedRef = useRef(false);
+
+  const close = useCallback(() => {
+    if (closedRef.current) return;
+    closedRef.current = true;
+    setVisible(false);
+    setTimeout(onRemove, 260);
+  }, [onRemove]);
 
   useEffect(() => {
-    requestAnimationFrame(() => setVisible(true));
+    const entrance = requestAnimationFrame(() => setVisible(true));
 
-    const timer = setTimeout(() => {
-      setVisible(false);
-      setTimeout(onRemove, 280);
-    }, 4200);
+    let frame = 0;
+    let last = performance.now();
 
-    return () => clearTimeout(timer);
-  }, []);
+    const tick = (now: number) => {
+      const delta = now - last;
+      last = now;
+
+      if (!pausedRef.current) {
+        remainingRef.current -= delta;
+
+        if (barRef.current) {
+          const percent = Math.max(0, remainingRef.current / total) * 100;
+          barRef.current.style.width = `${percent}%`;
+        }
+
+        if (remainingRef.current <= 0) {
+          close();
+          return;
+        }
+      }
+
+      frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(entrance);
+      cancelAnimationFrame(frame);
+    };
+  }, [close, total]);
+
+  function setPaused(value: boolean) {
+    pausedRef.current = value;
+    setHovered(value);
+  }
 
   return (
     <div
-      onClick={() => {
-        setVisible(false);
-        setTimeout(onRemove, 280);
-      }}
+      role="status"
+      aria-live={t.type === "error" ? "assertive" : "polite"}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
       style={{
+        position: "relative",
+        overflow: "hidden",
+
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         gap: 12,
 
-        width: "calc(100vw - 40px)", // 👈 chave
-        maxWidth: 420,
+        width: "calc(100vw - 40px)",
+        maxWidth: 400,
 
-        padding: "14px 16px",
-        borderRadius: 16,
+        padding: "13px 14px 15px",
+        borderRadius: 14,
 
-        background: "rgba(255,255,255,0.92)",
-        backdropFilter: "blur(14px)",
+        background: SURFACE,
+        border: "1px solid rgba(255,255,255,0.10)",
+        borderLeft: `3px solid ${c.accent}`,
 
-        border: "1px solid rgba(226,232,240,0.9)",
-        borderLeft: `4px solid ${c.iconColor}`,
+        boxShadow: hovered
+          ? "0 24px 55px rgba(1,41,66,0.42), 0 6px 16px rgba(15,23,42,0.22)"
+          : "0 18px 45px rgba(1,41,66,0.34), 0 4px 12px rgba(15,23,42,0.18)",
 
-        boxShadow:
-          "0 18px 45px rgba(15,23,42,0.16), 0 4px 12px rgba(15,23,42,0.08)",
-
-        cursor: "pointer",
+        opacity: visible ? 1 : 0,
+        transform: visible
+          ? `translateX(0) scale(${hovered ? 1.015 : 1})`
+          : "translateX(24px) scale(0.97)",
+        transition: "opacity .26s ease, transform .26s cubic-bezier(.22,1,.36,1), box-shadow .2s ease",
       }}
-          >
+    >
       <span
         style={{
-          width: 34,
-          height: 34,
-          borderRadius: 12,
+          width: 32,
+          height: 32,
+          borderRadius: 10,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: c.bg,
-          color: c.iconColor,
+          background: c.soft,
+          color: c.accent,
+          border: `1px solid ${c.accent}33`,
           flexShrink: 0,
         }}
       >
@@ -101,11 +155,12 @@ function ToastItem({ t, onRemove }: { t: Toast; onRemove: () => void }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontSize: 13,
-            fontWeight: 800,
-            color: "#0f172a",
-            marginBottom: 2,
-            letterSpacing: "-0.01em",
+            fontSize: 11,
+            fontWeight: 900,
+            color: c.accent,
+            textTransform: "uppercase",
+            letterSpacing: ".08em",
+            marginBottom: 3,
           }}
         >
           {LABELS[t.type]}
@@ -114,7 +169,8 @@ function ToastItem({ t, onRemove }: { t: Toast; onRemove: () => void }) {
         <div
           style={{
             fontSize: 13,
-            color: "#475569",
+            fontWeight: 600,
+            color: "rgba(255,255,255,0.88)",
             lineHeight: 1.45,
             wordBreak: "break-word",
           }}
@@ -122,10 +178,64 @@ function ToastItem({ t, onRemove }: { t: Toast; onRemove: () => void }) {
           {t.message}
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={close}
+        title="Fechar"
+        aria-label="Fechar"
+        style={{
+          width: 24,
+          height: 24,
+          flexShrink: 0,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 7,
+          border: "none",
+          background: "transparent",
+          color: "rgba(255,255,255,0.45)",
+          cursor: "pointer",
+          transition: "background .15s ease, color .15s ease",
+          fontFamily: "inherit",
+        }}
+        onMouseOver={(e) => {
+          e.currentTarget.style.background = "rgba(255,255,255,0.10)";
+          e.currentTarget.style.color = "#fff";
+        }}
+        onMouseOut={(e) => {
+          e.currentTarget.style.background = "transparent";
+          e.currentTarget.style.color = "rgba(255,255,255,0.45)";
+        }}
+      >
+        <X size={14} strokeWidth={2.6} />
+      </button>
+
+      {/* Tempo restante: encolhe até sumir e congela enquanto o mouse estiver em cima. */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 3,
+          background: "rgba(255,255,255,0.08)",
+        }}
+      >
+        <div
+          ref={barRef}
+          style={{
+            width: "100%",
+            height: "100%",
+            background: `linear-gradient(90deg, ${c.accent}, ${c.accent}99)`,
+            opacity: hovered ? 0.5 : 1,
+            transition: "opacity .15s ease",
+          }}
+        />
+      </div>
     </div>
   );
 }
-
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -147,13 +257,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           flexDirection: "column",
           gap: 10,
           zIndex: 999999,
+          pointerEvents: "none",
         }}
       >
         {toasts.map(t => (
-          <ToastItem
-            key={t.id} t={t}
-            onRemove={() => setToasts(p => p.filter(x => x.id !== t.id))}
-          />
+          <div key={t.id} style={{ pointerEvents: "auto" }}>
+            <ToastItem
+              t={t}
+              onRemove={() => setToasts(p => p.filter(x => x.id !== t.id))}
+            />
+          </div>
         ))}
       </div>
     </ToastContext.Provider>
