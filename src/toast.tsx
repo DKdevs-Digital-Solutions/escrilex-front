@@ -8,24 +8,24 @@ interface ToastCtx { toast: (message: string, type?: ToastType) => void; }
 const ToastContext = createContext<ToastCtx>({ toast: () => {} });
 export function useToast() { return useContext(ToastContext); }
 
-// Mesma identidade do restante do sistema: azul institucional com acento por tipo.
-const SURFACE = "linear-gradient(135deg, #012942 0%, #063b5c 100%)";
+// Cartão claro: legível tanto sobre o fundo escuro do login quanto dentro do sistema.
+const SURFACE = "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)";
 
 const CONFIG: Record<ToastType, { accent: string; soft: string; icon: JSX.Element }> = {
   success: {
-    accent: "#34d399", soft: "rgba(52,211,153,0.16)",
+    accent: "#16A34A", soft: "#F0FDF4",
     icon: <CheckCircle2 size={17} strokeWidth={2.6} />,
   },
   error: {
-    accent: "#fb7185", soft: "rgba(251,113,133,0.16)",
+    accent: "#DC2626", soft: "#FEF2F2",
     icon: <XCircle size={17} strokeWidth={2.6} />,
   },
   warning: {
-    accent: "#BB9F58", soft: "rgba(187,159,88,0.20)",
+    accent: "#A17C2F", soft: "rgba(187,159,88,0.14)",
     icon: <AlertTriangle size={17} strokeWidth={2.6} />,
   },
   info: {
-    accent: "#38BDF8", soft: "rgba(56,189,248,0.16)",
+    accent: "#0284C7", soft: "#F0F9FF",
     icon: <Info size={17} strokeWidth={2.6} />,
   },
 };
@@ -121,12 +121,12 @@ function ToastItem({ t, onRemove }: { t: Toast; onRemove: () => void }) {
         borderRadius: 14,
 
         background: SURFACE,
-        border: "1px solid rgba(255,255,255,0.10)",
-        borderLeft: `3px solid ${c.accent}`,
+        border: "1px solid #e2e8f0",
+        borderLeft: `4px solid ${c.accent}`,
 
         boxShadow: hovered
-          ? "0 24px 55px rgba(1,41,66,0.42), 0 6px 16px rgba(15,23,42,0.22)"
-          : "0 18px 45px rgba(1,41,66,0.34), 0 4px 12px rgba(15,23,42,0.18)",
+          ? "0 22px 50px rgba(15,23,42,0.20), 0 6px 16px rgba(15,23,42,0.10)"
+          : "0 16px 40px rgba(15,23,42,0.16), 0 3px 10px rgba(15,23,42,0.07)",
 
         opacity: visible ? 1 : 0,
         transform: visible
@@ -145,7 +145,7 @@ function ToastItem({ t, onRemove }: { t: Toast; onRemove: () => void }) {
           justifyContent: "center",
           background: c.soft,
           color: c.accent,
-          border: `1px solid ${c.accent}33`,
+          border: `1px solid ${c.accent}2e`,
           flexShrink: 0,
         }}
       >
@@ -170,7 +170,7 @@ function ToastItem({ t, onRemove }: { t: Toast; onRemove: () => void }) {
           style={{
             fontSize: 13,
             fontWeight: 600,
-            color: "rgba(255,255,255,0.88)",
+            color: "#334155",
             lineHeight: 1.45,
             wordBreak: "break-word",
           }}
@@ -194,18 +194,18 @@ function ToastItem({ t, onRemove }: { t: Toast; onRemove: () => void }) {
           borderRadius: 7,
           border: "none",
           background: "transparent",
-          color: "rgba(255,255,255,0.45)",
+          color: "#94a3b8",
           cursor: "pointer",
           transition: "background .15s ease, color .15s ease",
           fontFamily: "inherit",
         }}
         onMouseOver={(e) => {
-          e.currentTarget.style.background = "rgba(255,255,255,0.10)";
-          e.currentTarget.style.color = "#fff";
+          e.currentTarget.style.background = "#f1f5f9";
+          e.currentTarget.style.color = "#334155";
         }}
         onMouseOut={(e) => {
           e.currentTarget.style.background = "transparent";
-          e.currentTarget.style.color = "rgba(255,255,255,0.45)";
+          e.currentTarget.style.color = "#94a3b8";
         }}
       >
         <X size={14} strokeWidth={2.6} />
@@ -219,7 +219,7 @@ function ToastItem({ t, onRemove }: { t: Toast; onRemove: () => void }) {
           right: 0,
           bottom: 0,
           height: 3,
-          background: "rgba(255,255,255,0.08)",
+          background: "#eef2f7",
         }}
       >
         <div
@@ -227,8 +227,8 @@ function ToastItem({ t, onRemove }: { t: Toast; onRemove: () => void }) {
           style={{
             width: "100%",
             height: "100%",
-            background: `linear-gradient(90deg, ${c.accent}, ${c.accent}99)`,
-            opacity: hovered ? 0.5 : 1,
+            background: `linear-gradient(90deg, ${c.accent}, ${c.accent}b3)`,
+            opacity: hovered ? 0.45 : 1,
             transition: "opacity .15s ease",
           }}
         />
