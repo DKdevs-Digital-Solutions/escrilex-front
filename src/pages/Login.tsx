@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { LogIn, Eye, EyeOff, Loader2 } from "lucide-react";
 import { LoginForm } from "../components/FormAuth";
 import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../toast";
 import Logo from "../assets/logo.png";
 import { Zap, ShieldCheck, Activity } from "lucide-react";
 
 export function Login({ onLogin }: { onLogin: () => void }) {
+  const { toast } = useToast();
 
 
   const { 
@@ -19,17 +21,19 @@ export function Login({ onLogin }: { onLogin: () => void }) {
     loading, 
     emailError,
     passwordError,
-    error 
   } = useAuth();
 
   
 
   async function handleLogin() {
-    const ok = await login();
+    const { ok, message } = await login();
 
     if (ok) {
-      onLogin(); 
+      onLogin();
+      return;
     }
+
+    if (message) toast(message, "error");
   }
 
   return (
@@ -664,7 +668,6 @@ export function Login({ onLogin }: { onLogin: () => void }) {
           setShowPw={setShowPw}
           onSubmit={handleLogin}
           loading={loading}
-          error={error}
           emailError={emailError}
           passwordError={passwordError}
         />

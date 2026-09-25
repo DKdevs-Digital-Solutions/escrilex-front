@@ -1,4 +1,5 @@
 import { CalendarDays } from "lucide-react";
+import { getActionLabel } from "../../auditLabels";
 import { useEffect, useMemo, useState } from "react";
 
 const tableStyle: React.CSSProperties = {
@@ -102,7 +103,21 @@ export function DashboardModalTable({
             {(data?.charts?.alterations ?? []).map((item: any) => (
               <tr key={item.label}>
                 <td style={tdStyle}>
-                  <strong>{item.label || "--"}</strong>
+                  <strong>{item.label ? getActionLabel(item.label) : "--"}</strong>
+
+                  {item.label && (
+                    <div
+                      style={{
+                        marginTop: 2,
+                        fontSize: 10.5,
+                        fontWeight: 700,
+                        color: "#94a3b8",
+                        letterSpacing: ".04em",
+                      }}
+                    >
+                      {item.label}
+                    </div>
+                  )}
                 </td>
 
                 <td style={tdStyle}>

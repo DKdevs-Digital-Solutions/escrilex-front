@@ -10,7 +10,6 @@ type Props = {
   setShowPw: (v: boolean) => void;
   onSubmit: () => void;
   loading: boolean;
-  error: string | null;
   emailError: string | null;
   passwordError: string | null;
 };
@@ -24,7 +23,6 @@ export function LoginForm({
   setShowPw,
   onSubmit,
   loading,
-  error,
   emailError,
   passwordError,
 }: Props) {
@@ -93,13 +91,6 @@ export function LoginForm({
 
             {passwordError && <span className="input-error-text">{passwordError}</span>}
           </div>
-
-          {error && (
-            <div className="lr-err">
-              <span className="error-dot" />
-              <span>{error}</span>
-            </div>
-          )}
 
           <button type="submit" disabled={loading} className="lr-btn">
             {loading ? (

@@ -2,8 +2,8 @@ import { useState } from "react";
 import { authRepository } from "../repository/auth.repository";
 
 export function useAuth() {
-  const [email, setEmail] = useState("admin@local.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -41,10 +41,33 @@ export function useAuth() {
     return valid;
   }
 
-  async function login() {
+  // Traduz a falha técnica em algo que o usuário entenda.
+  function friendlyError(err: any) {
+    if (err?.response) {
+      const status = err.response.status;
+
+      if (status === 400) return "Confira o e-mail e a senha informados.";
+      if (status === 401) return "E-mail ou senha incorretos.";
+      if (status === 403) return "Seu usuário não tem permissão de acesso.";
+      if (status === 404) return "Serviço de login não encontrado. Avise o suporte.";
+      if (status === 429) return "Muitas tentativas seguidas. Aguarde um instante e tente de novo.";
+      if (status >= 500) return "O servidor não respondeu como esperado. Tente novamente em instantes.";
+
+      return "Não foi possível entrar. Tente novamente.";
+    }
+
+    // Sem response: rede fora, servidor inacessível ou tempo esgotado.
+    if (err?.code === "ECONNABORTED") return "O servidor demorou para responder. Tente novamente.";
+
+    return "Não foi possível conectar ao servidor. Verifique sua conexão.";
+  }
+
+  async function login(): Promise<{ ok: boolean; message?: string }> {
     setError(null);
 
-    if (!validate()) return false;
+    if (!validate()) {
+      return { ok: false, message: "Preencha o e-mail e a senha para continuar." };
+    }
 
     setLoading(true);
 
@@ -54,10 +77,11 @@ export function useAuth() {
       setTimeout(() => {
         setLoading(false);
       }, 500); // simula um carregamento mais suave
-      return true;
+      return { ok: true };
     } catch (err: any) {
-      setError(err.response?.data?.message || "Erro ao logar");
-      return false;
+      const message = friendlyError(err);
+      setError(message);
+      return { ok: false, message };
     } finally {
       setLoading(false);
     }

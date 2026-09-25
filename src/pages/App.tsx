@@ -371,7 +371,13 @@ export function App() {
 </div>
   );
 
-  if (!me) return <Login onLogin={reload} />;
+  // Envolve no provider: a tela de login precisa dele para exibir toasts.
+  if (!me)
+    return (
+      <ToastProvider>
+        <Login onLogin={reload} />
+      </ToastProvider>
+    );
 
   const roles: string[] = me.roles || [];
   const isAdmin = roles.includes("ADMIN");

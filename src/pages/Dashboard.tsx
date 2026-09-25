@@ -675,6 +675,13 @@ export function DashboardPage() {
 
 const RADIAN = Math.PI / 180;
 
+// Evita exibir "0%" para fatias que existem: abaixo de 0,5% mostra "<1".
+function formatPercent(value: number, total: number) {
+  if (!total || !value) return "0";
+  const percent = (value / total) * 100;
+  return percent < 0.5 ? "<1" : String(Math.round(percent));
+}
+
 const renderCustomizedLabel = ({
   cx,
   cy,
@@ -717,8 +724,8 @@ const MyCustomPie = (props: PieSectorShapeProps) => {
       {...props}
       fill={TAX_COLORS[(props.index ?? 0) % TAX_COLORS.length]}
       stroke="#fff"
-      strokeWidth={4}
-      cornerRadius={10}
+      strokeWidth={2}
+      cornerRadius={6}
     />
   );
 };
@@ -743,9 +750,11 @@ function TaxationDistributionChart({
   // então nada pode ficar à frente ou atrás do valor central.
   const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
   const active = activeIndex != null ? chartData[activeIndex] : null;
-  const activePercent = active && total
-    ? Math.round((Number(active.value || 0) / total) * 100)
-    : 0;
+  const activePercent = active ? formatPercent(Number(active.value || 0), total) : "0";
+
+  // Nomes longos ("Lucro Real Trimestral") precisam de fonte menor para caber.
+  const activeNameLength = active ? String(active.name || "").length : 0;
+  const activeNameSize = activeNameLength > 22 ? 8.5 : activeNameLength > 14 ? 9.5 : 10;
 
   return (
     <div style={premiumChartCardStyle}>
@@ -782,7 +791,9 @@ function TaxationDistributionChart({
             cy="50%"
             innerRadius="48%"
             outerRadius="82%"
-            paddingAngle={4}
+            paddingAngle={2}
+            // fatias pequenas ainda precisam de faixa visível e clicável
+            minAngle={8}
             labelLine={false}
             label={renderCustomizedLabel}
             shape={MyCustomPie}
@@ -804,18 +815,27 @@ function TaxationDistributionChart({
             pointerEvents: "none",
           }}
         >
-          <div style={{ textAlign: "center", maxWidth: "70%" }}>
+          <div
+            style={{
+              textAlign: "center",
+              // o texto tem que caber no vazio do donut, sem invadir o anel
+              width: "34%",
+              maxWidth: 150,
+            }}
+          >
             <span
               style={{
-                display: "block",
-                fontSize: 10,
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                fontSize: activeNameSize,
                 fontWeight: 900,
+                lineHeight: 1.15,
                 color: active ? active.fill : "#94a3b8",
                 textTransform: "uppercase",
-                letterSpacing: ".08em",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                letterSpacing: ".04em",
+                wordBreak: "break-word",
               }}
             >
               {active ? active.name : "Total"}
@@ -824,7 +844,8 @@ function TaxationDistributionChart({
             <strong
               style={{
                 display: "block",
-                fontSize: 28,
+                marginTop: 2,
+                fontSize: 26,
                 fontWeight: 950,
                 color: "#012942",
                 lineHeight: 1,
@@ -838,8 +859,8 @@ function TaxationDistributionChart({
             <span
               style={{
                 display: "block",
-                marginTop: 4,
-                fontSize: 12,
+                marginTop: 3,
+                fontSize: 11,
                 fontWeight: 800,
                 color: active ? active.fill : "#94a3b8",
               }}
@@ -1110,7 +1131,7 @@ function ProfileRadarChart({
   const chartData = data.map((item, index) => ({
     ...item,
     value: Number(item.value || 0),
-    percent: total ? Math.round((Number(item.value || 0) / total) * 100) : 0,
+    percent: formatPercent(Number(item.value || 0), total),
     fill: PROFILE_COLORS[index % PROFILE_COLORS.length],
   }));
 
@@ -1150,7 +1171,8 @@ function ProfileRadarChart({
             cy="100%"
             innerRadius="48%"
             outerRadius="118%"
-            paddingAngle={3}
+            paddingAngle={2}
+            minAngle={6}
             labelLine={false}
             label={({ percent }) => {
               return percent ? `${percent}%` : "";
@@ -1164,7 +1186,7 @@ function ProfileRadarChart({
                 key={item.name}
                 fill={item.fill}
                 stroke="#fff"
-                strokeWidth={4}
+                strokeWidth={2}
               />
             ))}
           </Pie>
