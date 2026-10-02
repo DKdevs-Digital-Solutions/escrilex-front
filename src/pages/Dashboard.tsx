@@ -138,8 +138,16 @@ export function DashboardPage() {
     responsibleByDepartment: "Responsáveis por departamento",
   };
 
+  // Mesma normalização do agrupamento no servidor (maiúsculas, espaço colapsado),
+  // senão a fatia conta por um critério e a lista filtra por outro.
   function normalizeValue(value: any) {
-    return String(value || "").trim().toLowerCase();
+    return String(value ?? "").replace(/s+/g, " ").trim().toUpperCase();
+  }
+
+  // Empresas sem o campo preenchido entram na fatia "Não informado" — esse rótulo
+  // é criado pelo servidor, não existe gravado na empresa.
+  function companyChartLabel(value: any) {
+    return normalizeValue(value) || "NÃO INFORMADO";
   }
 
   function isChartFilterModal() {
@@ -155,15 +163,15 @@ export function DashboardPage() {
 
     return companies.filter((company: any) => {
       if (selectedDrilldownType === "tributacao") {
-        return normalizeValue(company.tributacao) === normalizeValue(selectedDrilldownKey);
+        return companyChartLabel(company.tributacao) === normalizeValue(selectedDrilldownKey);
       }
 
       if (selectedDrilldownType === "ramo") {
-        return normalizeValue(company.ramo) === normalizeValue(selectedDrilldownKey);
+        return companyChartLabel(company.ramo) === normalizeValue(selectedDrilldownKey);
       }
 
       if (selectedDrilldownType === "perfil") {
-        return normalizeValue(company.perfil) === normalizeValue(selectedDrilldownKey);
+        return companyChartLabel(company.perfil) === normalizeValue(selectedDrilldownKey);
       }
 
       return false;
