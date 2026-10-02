@@ -10,6 +10,18 @@ const UF_OPTIONS = [
   "RS", "RO", "RR", "SC", "SP", "SE", "TO",
 ];
 
+// Obrigatórios da seção de identificação. IE fica de fora de propósito:
+// nem toda empresa tem inscrição estadual.
+const REQUIRED_FIELDS: { field: string; label: string }[] = [
+  { field: "razaoSocial", label: "Razão social" },
+  { field: "cod",          label: "Código" },
+  { field: "nomeFantasia", label: "Nome fantasia" },
+  { field: "grupo",        label: "Grupo" },
+  { field: "municipio",    label: "Município" },
+  { field: "uf",           label: "UF" },
+  { field: "filial",       label: "Filial" },
+];
+
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -40,6 +52,18 @@ export function CompanyFormModal({
   }
 
 async function handleSubmit() {
+  const missing = REQUIRED_FIELDS.filter(
+    ({ field }) => !String(form[field] ?? "").trim()
+  );
+
+  if (missing.length) {
+    toast(
+      `Preencha: ${missing.map((item) => item.label).join(", ")}.`,
+      "warning"
+    );
+    return;
+  }
+
   try {
     const payload = {
       ...form,
@@ -140,19 +164,19 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
         {/* 🔷 IDENTIFICAÇÃO */}
         <Section title="Dados da empresa">
           <FormGrid cols={3}>
-            <Input label="Razão social" style={{ height: 48 }} value={form.razaoSocial} onChange={set("razaoSocial")} />
-            <Input label="Código" style={{ height: 48 }} value={form.cod} onChange={set("cod")} />
+            <Input label="Razão social *" style={{ height: 48 }} value={form.razaoSocial} onChange={set("razaoSocial")} />
+            <Input label="Código *" style={{ height: 48 }} value={form.cod} onChange={set("cod")} />
           </FormGrid>
 
           <FormGrid>
-            <Input label="Nome fantasia" style={{ height: 48 }} value={form.nomeFantasia} onChange={set("nomeFantasia")} />
-            <Input label="Grupo" style={{ height: 48 }} value={form.grupo} onChange={set("grupo")} />
+            <Input label="Nome fantasia *" style={{ height: 48 }} value={form.nomeFantasia} onChange={set("nomeFantasia")} />
+            <Input label="Grupo *" style={{ height: 48 }} value={form.grupo} onChange={set("grupo")} />
           </FormGrid>
 
           <FormGrid>
-            <Input label="Município" style={{ height: 48 }} value={form.municipio} onChange={set("municipio")} />
+            <Input label="Município *" style={{ height: 48 }} value={form.municipio} onChange={set("municipio")} />
 
-            <Select label="UF" value={form.uf} style={{ height: 48 }} onChange={set("uf")}>
+            <Select label="UF *" value={form.uf} style={{ height: 48 }} onChange={set("uf")}>
               <option value="">Selecione...</option>
               {UF_OPTIONS.map((uf) => (
                 <option key={uf} value={uf}>{uf}</option>
@@ -161,7 +185,7 @@ const isCnpjValid = cnpjOnlyNumbers.length === 14;
           </FormGrid>
 
           <FormGrid>
-            <Select label="Filial" value={form.filial} style={{height:48}} onChange={set("filial")}>
+            <Select label="Filial *" value={form.filial} style={{height:48}} onChange={set("filial")}>
               <option value="">Selecione...</option>
               <option value="Matriz">Matriz</option>
               <option value="Filial">Filial</option>

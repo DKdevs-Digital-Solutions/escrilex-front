@@ -104,8 +104,17 @@ export function DashboardPage() {
   const motivosSaida = dataAnalytics?.motivosSaida ?? [];
   const cancelamentos = dataAnalytics?.cancelamentos;
 
-  const activeCompanies = companies.filter((item: any) => item.active);
-  const inactiveCompanies = companies.filter((item: any) => !item.active);
+  // Mesma régua dos cards e da tela de Empresas: vale a SITUAÇÃO, não o flag "active".
+  const situacaoOf = (item: any) =>
+    String(item?.situacao ?? item?.status ?? "").trim().toUpperCase();
+
+  const activeCompanies = companies.filter((item: any) =>
+    ["ATIVA", "ATIVO"].includes(situacaoOf(item))
+  );
+
+  const inactiveCompanies = companies.filter((item: any) =>
+    ["ENCERRADA", "ENCERRADO"].includes(situacaoOf(item))
+  );
 
   const drilldownRows = drilldownData?.items || drilldownData?.data || [];
 

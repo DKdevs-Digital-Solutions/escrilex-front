@@ -816,14 +816,32 @@ async function setStatus(
     return (v: string) => setEditForm((p: any) => ({ ...p, [field]: v }));
   }
 
+  const socioFormValid =
+    !!socioForm.nomeCompleto.trim() &&
+    !!socioForm.whatsapp.trim() &&
+    !!socioForm.telefoneEmpresa.trim();
+
   async function handleSaveSocio() {
+    // WhatsApp e telefone da empresa são obrigatórios; valores repetidos entre
+    // sócios são permitidos de propósito (é comum compartilharem o mesmo número).
+    const missing = [
+      !socioForm.nomeCompleto.trim() && "Nome completo",
+      !socioForm.whatsapp.trim() && "WhatsApp",
+      !socioForm.telefoneEmpresa.trim() && "Telefone empresa",
+    ].filter(Boolean);
+
+    if (missing.length) {
+      toast(`Preencha: ${missing.join(", ")}.`, "warning");
+      return;
+    }
+
     setSavingSocio(true);
 
     const payload = {
       nomeCompleto: socioForm.nomeCompleto.trim(),
-      whatsapp: socioForm.whatsapp.trim() || null,
+      whatsapp: socioForm.whatsapp.trim(),
       email: socioForm.email.trim() || null,
-      telefoneEmpresa: socioForm.telefoneEmpresa.trim() || null,
+      telefoneEmpresa: socioForm.telefoneEmpresa.trim(),
       dataNascimento: socioForm.dataNascimento || null,
       instagram: socioForm.instagram.trim() || null,
       facebook: socioForm.facebook.trim() || null,
@@ -1227,8 +1245,8 @@ async function handleSaveResponsibles() {
             <button
               className="btn"
               onClick={handleSaveSocio}
-              disabled={!socioForm.nomeCompleto.trim() || savingSocio}
-              style={primaryButtonStyle(!socioForm.nomeCompleto.trim() || savingSocio)}
+              disabled={!socioFormValid || savingSocio}
+              style={primaryButtonStyle(!socioFormValid || savingSocio)}
             >
               <Users size={14} strokeWidth={2} />
               {savingSocio ? "Salvando..." : editSocio ? "Salvar" : "Adicionar"}
@@ -1248,7 +1266,7 @@ async function handleSaveResponsibles() {
 
           <FormGrid>
             <Input
-              label="WhatsApp"
+              label="WhatsApp *"
               placeholder="(00) 00000-0000"
               value={socioForm.whatsapp}
               onChange={(e) =>
@@ -1256,7 +1274,7 @@ async function handleSaveResponsibles() {
               }
             />
             <Input
-              label="Telefone empresa"
+              label="Telefone empresa *"
               placeholder="(00) 0000-0000"
               value={socioForm.telefoneEmpresa}
               onChange={(e) =>
